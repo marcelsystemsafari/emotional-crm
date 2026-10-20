@@ -1,0 +1,45 @@
+<!--
+  Phase-0-Test für Flenski Custom Pages
+  Einfach komplett in den Custom-Code-Bereich einer TEST-Custom-Page in Flenski einfügen
+  und die Seite auf Handy (Flenski-App) und Desktop öffnen. Screenshot vom Ergebnis machen.
+  Enthält keine Daten und keine Schlüssel.
+-->
+<div id="ecrm-test" style="font-family:system-ui,sans-serif;max-width:480px;margin:16px auto;padding:16px;border:2px solid #4a7c59;border-radius:12px;background:#fff;color:#222">
+  <strong style="font-size:18px">CRM-Test</strong>
+  <ul id="ecrm-test-list" style="padding-left:18px;line-height:1.7;margin:8px 0 0">
+    <li>JavaScript läuft: <b style="color:#b00">NEIN</b> (wenn das so bleibt, führt Flenski kein Skript aus)</li>
+  </ul>
+</div>
+<script>
+(function () {
+  var list = document.getElementById('ecrm-test-list');
+  function row(label, ok, detail) {
+    var li = document.createElement('li');
+    li.innerHTML = label + ': <b style="color:' + (ok ? '#2a7a2a' : '#b00') + '">' + (ok ? 'JA' : 'NEIN') + '</b>' + (detail ? ' <small>(' + detail + ')</small>' : '');
+    list.appendChild(li);
+  }
+  list.innerHTML = '';
+  row('JavaScript läuft', true);
+
+  var inFrame;
+  try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+  row('Läuft direkt in der Seite (kein iframe)', !inFrame, inFrame ? 'steckt in einem iframe' : location.hostname);
+
+  var storageOk = false;
+  try { localStorage.setItem('ecrm_test', '1'); storageOk = localStorage.getItem('ecrm_test') === '1'; localStorage.removeItem('ecrm_test'); } catch (e) {}
+  row('Speicher (localStorage) verfügbar', storageOk, storageOk ? '' : 'Login würde nach Neuladen verloren gehen');
+
+  row('Gerät', true, navigator.userAgent.indexOf('iPhone') > -1 ? 'iPhone' : (navigator.userAgent.indexOf('Android') > -1 ? 'Android' : 'Desktop/sonstiges'));
+
+  // Anfrage nach außen (an Supabase selbst, ohne Projekt – erwartet wird irgendeine Antwort, kein Netzwerkfehler)
+  var li = document.createElement('li'); li.textContent = 'Anfrage nach außen: wird geprüft …'; list.appendChild(li);
+  fetch('https://api.supabase.com/', { method: 'GET', mode: 'cors' })
+    .then(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#2a7a2a">JA</b>'; })
+    .catch(function (e) {
+      // Zweiter Versuch ohne CORS-Prüfung: unterscheidet "blockiert" von "nur CORS"
+      fetch('https://api.supabase.com/', { mode: 'no-cors' })
+        .then(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#2a7a2a">JA</b> <small>(Netz frei, Supabase-Projekt später prüfen)</small>'; })
+        .catch(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#b00">NEIN</b> <small>(von der Seite blockiert)</small>'; });
+    });
+})();
+</script>

@@ -1,0 +1,65 @@
+# CLAUDE.md – Emotional CRM
+
+Du baust ein eigenständiges, mandantenfähiges CRM für Yogalehrerinnen und kleine Studios, die ihre App auf **Flenski** betreiben. Es zeigt Guthaben (Besuche), Kundinnen aus der App und von extern, Produkte und Signale, um wen sich die Lehrerin kümmern sollte. Die Oberfläche läuft direkt in einer Flenski-Custom-Page, alle Daten und Regeln liegen in Supabase.
+
+**Oberstes Ziel neben Funktion: Einfachheit.** Marcel ist kein Entwickler und muss den Aufbau verstehen. Zwei Bausteine (Supabase + eine HTML-Datei), keine zusätzlichen Dienste, Frameworks oder Build-Schritte ohne ausdrückliche Rückfrage.
+
+Auftraggeber: Marcel (Systemsafari). Erste Mandantin: Yoga by Lana. **Das Produkt ist nicht für eine Kundin gebaut, sondern für jede Flenski-App.**
+
+## Pflichtlektüre vor jeder Arbeit
+
+1. `docs/01-konzept.md` – Was und warum
+2. `docs/02-architektur.md` – Stack, Prinzipien, Einbettung
+3. `docs/03-datenmodell.md` – Tabellen, Regeln, RLS
+4. `docs/04-flenski-integration.md` – was über Flenski gesichert / angenommen / unbekannt ist
+5. `docs/05-phasen.md` – Reihenfolge und Abnahmekriterien
+6. `docs/07-datenschutz.md` – Leitplanken
+7. `inbox/` – echte Payloads und Mandanten-Konfiguration von Marcel
+
+Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
+
+## Arbeitsweise
+
+- Arbeite **phasenweise** nach `docs/05-phasen.md`. Starte nie eine neue Phase, bevor Marcel die vorherige abgenommen hat. Am Ende jeder Phase: kurze Zusammenfassung, was fertig ist, was offen ist, wie man es testet.
+- Vor größeren Schritten (neue Tabelle, neue Abhängigkeit, Architekturänderung): Plan zeigen, dann bauen.
+- Entscheidungen mit Tragweite als kurze Notiz in `docs/entscheidungen/NNNN-titel.md` (Kontext, Entscheidung, Folgen).
+- Marcel ist kein Entwickler. Erkläre Ergebnisse in einfachem Deutsch, gib konkrete Klickschritte für alles, was er selbst tun muss (Supabase, Flenski).
+
+## Stack (nicht ändern ohne Rückfrage)
+
+- **Supabase**, Region Frankfurt: Postgres, Auth (Email-OTP-Code, kein Magic Link), Row Level Security, Edge Function `flenski-webhook` (TypeScript/Deno).
+- **Oberfläche:** eine Datei `ui/crm.html`, reines HTML/CSS/JavaScript, Bibliotheken nur per CDN (`@supabase/supabase-js`, optional Alpine.js). Kein Build-Schritt, kein npm für die Oberfläche.
+- **Fachlogik als SQL-Funktionen** in Supabase (`checkin`, `sell`, `correct`, `cancel_attendance` …), getestet mit Datenbank-Tests.
+- **Git lokal:** Nach jedem abgeschlossenen Arbeitsschritt einen Commit mit verständlicher deutscher Nachricht anlegen, damit Marcel jederzeit zurück kann. Marcel bedient Git nicht selbst.
+- Kein Next.js, kein Vercel, kein eigener Server.
+
+## Harte Regeln
+
+1. **Guthaben = Summe von `ledger_entries`.** Nie einen Zählerstand speichern oder überschreiben. Buchungen sind append-only, Korrekturen nur als Gegenbuchung mit Kommentar.
+2. **Jede Tabelle hat `tenant_id` und RLS.** Für jede neue Tabelle gibt es einen Test, der beweist, dass Mandant A Mandant B nicht sieht.
+3. **Kein Secret im Browser.** In `ui/crm.html` stehen nur Supabase-URL und anon key. Service-Role-Key, Webhook-Secrets und Flenski-Zugänge nur als Supabase-Secrets bzw. in `.env.local`. `.env*` nie committen; `.env.example` pflegen.
+4. **Webhooks: erst roh speichern, dann verarbeiten.** Immer sofort `200` antworten. Verarbeitung idempotent.
+5. **Keine Annahmen über Flenski-Payloads.** Prüfschemas für Payloads nur aus echten Beispielen in `inbox/webhooks/` ableiten. Fehlt ein Beispiel: Schema als `TODO` markieren und Marcel fragen.
+6. **Fachlogik nur in SQL-Funktionen**, nie doppelt in der Oberfläche. Oberfläche und Webhook rufen dieselben Funktionen auf. Jede Regel (Guthaben, FEFO-Abbuchung, Storno, Ablauf, Signale) hat einen Datenbank-Test.
+7. **Mobil zuerst.** Jede Ansicht muss auf 375 px Breite einhändig bedienbar sein. Der Check-in ist der wichtigste Screen. Die Oberfläche muss im Flenski-Layout leben: Präfix `ecrm-` für alle Klassen, alles in `#ecrm-root`, keine globalen Styles.
+8. **Keine Gesundheitsdaten**, keine zusätzlichen personenbezogenen Felder ohne Rückfrage.
+9. **Keine Löschung von Buchungen**, auch nicht beim Löschen einer Kundin (dann anonymisieren).
+
+## Sprache und Ton der Oberfläche
+
+- Deutsch, Du-Form, kurz und warm. Begriffe: „Kundin" (inklusiv gemeint), „Guthaben", „Besuch", „Karte", „Stunde", „Check-in".
+- Zahlen immer mit Kontext: „noch 2 von 4 · gültig bis 12.12."
+- Leere Zustände erklären den nächsten Schritt („Noch keine Kundinnen – importiere deine Liste oder lege die erste an").
+
+## Befehle (sobald eingerichtet)
+
+```
+supabase db push                         # Migrationen ins Supabase-Projekt
+supabase functions deploy flenski-webhook
+supabase test db                         # Datenbank-Tests
+```
+Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfiguration).
+
+## Aktueller Stand
+
+Phase 0 noch nicht begonnen. Offene Entscheidungen: siehe `docs/06-offene-punkte.md`, Abschnitt A.

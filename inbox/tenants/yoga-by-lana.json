@@ -1,0 +1,47 @@
+{
+  "_hinweis": "Werte mit ??? sind von Lana/Marcel auszufüllen. Plan-IDs stammen aus Lanas Flenski-App (Stand 20.10.2026).",
+  "name": "Yoga by Lana",
+  "slug": "yoga-by-lana",
+  "timezone": "Europe/Berlin",
+  "flenski_app_url": "https://appdemo.systemsafari.de/yoga-by-lana",
+  "settings": {
+    "storno_frist_stunden": "???",
+    "abzug_bei_spaeter_absage": true,
+    "abzug_bei_no_show": true,
+    "signal_inaktiv_tage": 21,
+    "signal_ablauf_tage": 14,
+    "signal_fast_leer_ab": 1
+  },
+  "products": [
+    {
+      "name": "Kinderyoga 4er-Paket",
+      "type": "credits",
+      "credits": 4,
+      "validity_days": "???",
+      "price_cents": "???",
+      "category": "Kinderyoga",
+      "flenski_plan_id": "db7d78a0-6a70-4573-acda-326ed0977cdd"
+    },
+    {
+      "name": "Kursblock Erwachsene (10 Wochen)",
+      "type": "period",
+      "credits": null,
+      "validity_days": 70,
+      "price_cents": "???",
+      "category": "Erwachsene",
+      "flenski_plan_id": "733485d9-73d5-47b2-87f9-9a58b60df870",
+      "_frage": "Fester Kursblock (alle 10 Termine gebucht, Fehlen verfällt) oder 10 Einheiten flexibel einlösbar? Im zweiten Fall type = credits, credits = 10."
+    }
+  ],
+  "externe_produkte_ohne_flenski_plan": [
+    {
+      "_beispiel": "Falls Lana z. B. eine 10er-Karte bar verkauft, die es in der App nicht gibt",
+      "name": "???",
+      "type": "credits",
+      "credits": 10,
+      "validity_days": "???",
+      "price_cents": "???",
+      "category": "Erwachsene"
+    }
+  ]
+}
