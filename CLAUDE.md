@@ -66,6 +66,6 @@ Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfigu
 
 ## Aktueller Stand
 
-Phase 0 noch nicht begonnen. Offene Entscheidungen: siehe `docs/06-offene-punkte.md`, Abschnitt A.
+Phase 0 läuft (seit 21.10.2026). Fertig: Tabellen `tenants` + `webhook_events`, Edge Function `flenski-webhook` (speichert roh, dedupliziert), erweiterte `ui/phase0-test.html`. Offen: Marcels Schritte in `docs/phase0-anleitung.md` (Automationen, eigenes SMTP für den Code-Login, Test in Flenski). Datenbank-Tests: `node scripts/test-db.mjs` (Ersatz für `supabase test db`, weil Docker fehlt). Offene Entscheidungen: `docs/06-offene-punkte.md`, Abschnitt A.
 
 Neu seit 21.10.2026: Modul Aktivität (`docs/08-aktivitaet.md`, Entscheidung `docs/entscheidungen/0002-aktivitaets-modul.md`). Wichtig für Phase 0: Die Aktivitäts-Trigger müssen von Anfang an mitgeschnitten werden, weil sich Historie nicht nachholen lässt.

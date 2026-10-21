@@ -2,21 +2,52 @@
   Phase-0-Test für Flenski Custom Pages
   Einfach komplett in den Custom-Code-Bereich einer TEST-Custom-Page in Flenski einfügen
   und die Seite auf Handy (Flenski-App) und Desktop öffnen. Screenshot vom Ergebnis machen.
-  Enthält keine Daten und keine Schlüssel.
+  Enthält keine Daten. Einzige Schlüssel: Supabase-Adresse und "anon key" – beide sind öffentlich
+  und dürfen im Browser stehen (siehe docs/02-architektur.md, "Warum das sicher ist").
 -->
 <div id="ecrm-test" style="font-family:system-ui,sans-serif;max-width:480px;margin:16px auto;padding:16px;border:2px solid #4a7c59;border-radius:12px;background:#fff;color:#222">
   <strong style="font-size:18px">CRM-Test</strong>
   <ul id="ecrm-test-list" style="padding-left:18px;line-height:1.7;margin:8px 0 0">
     <li>JavaScript läuft: <b style="color:#b00">NEIN</b> (wenn das so bleibt, führt Flenski kein Skript aus)</li>
   </ul>
+
+  <div id="ecrm-test-login" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid #ddd">
+    <strong style="font-size:16px">Login per E-Mail-Code</strong>
+    <p id="ecrm-test-login-status" style="margin:6px 0 10px;font-size:14px"></p>
+    <div id="ecrm-test-step-email">
+      <input id="ecrm-test-email" type="email" inputmode="email" autocomplete="email" placeholder="deine E-Mail-Adresse"
+        style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;border:1px solid #bbb;border-radius:8px">
+      <button id="ecrm-test-send" type="button"
+        style="width:100%;margin-top:8px;padding:12px;font-size:16px;border:0;border-radius:8px;background:#38725b;color:#fff">Code senden</button>
+    </div>
+    <div id="ecrm-test-step-code" style="display:none">
+      <input id="ecrm-test-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-stelliger Code"
+        style="width:100%;box-sizing:border-box;padding:12px;font-size:20px;letter-spacing:4px;border:1px solid #bbb;border-radius:8px">
+      <button id="ecrm-test-verify" type="button"
+        style="width:100%;margin-top:8px;padding:12px;font-size:16px;border:0;border-radius:8px;background:#38725b;color:#fff">Anmelden</button>
+    </div>
+    <button id="ecrm-test-logout" type="button"
+      style="display:none;width:100%;margin-top:8px;padding:12px;font-size:16px;border:1px solid #38725b;border-radius:8px;background:#fff;color:#38725b">Abmelden</button>
+  </div>
 </div>
 <script>
 (function () {
+  var SUPABASE_URL = 'https://aipnvftsuhnffkvnrygt.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpcG52ZnRzdWhuZmZrdm5yeWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2MDAyMjYsImV4cCI6MjEwODE3NjIyNn0.-YNLPdWsbedoXKGYJiDmwq64SjqbOJ6LP7F4BcZHwuc';
+  var SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+
   var list = document.getElementById('ecrm-test-list');
   function row(label, ok, detail) {
     var li = document.createElement('li');
     li.innerHTML = label + ': <b style="color:' + (ok ? '#2a7a2a' : '#b00') + '">' + (ok ? 'JA' : 'NEIN') + '</b>' + (detail ? ' <small>(' + detail + ')</small>' : '');
     list.appendChild(li);
+    return li;
+  }
+  function pending(label) {
+    var li = document.createElement('li'); li.textContent = label + ': wird geprüft …'; list.appendChild(li);
+    return function (ok, detail) {
+      li.innerHTML = label + ': <b style="color:' + (ok ? '#2a7a2a' : '#b00') + '">' + (ok ? 'JA' : 'NEIN') + '</b>' + (detail ? ' <small>(' + detail + ')</small>' : '');
+    };
   }
   list.innerHTML = '';
   row('JavaScript läuft', true);
@@ -31,15 +62,78 @@
 
   row('Gerät', true, navigator.userAgent.indexOf('iPhone') > -1 ? 'iPhone' : (navigator.userAgent.indexOf('Android') > -1 ? 'Android' : 'Desktop/sonstiges'));
 
-  // Anfrage nach außen (an Supabase selbst, ohne Projekt – erwartet wird irgendeine Antwort, kein Netzwerkfehler)
-  var li = document.createElement('li'); li.textContent = 'Anfrage nach außen: wird geprüft …'; list.appendChild(li);
-  fetch('https://api.supabase.com/', { method: 'GET', mode: 'cors' })
-    .then(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#2a7a2a">JA</b>'; })
-    .catch(function (e) {
-      // Zweiter Versuch ohne CORS-Prüfung: unterscheidet "blockiert" von "nur CORS"
-      fetch('https://api.supabase.com/', { mode: 'no-cors' })
-        .then(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#2a7a2a">JA</b> <small>(Netz frei, Supabase-Projekt später prüfen)</small>'; })
-        .catch(function () { li.innerHTML = 'Anfrage nach außen: <b style="color:#b00">NEIN</b> <small>(von der Seite blockiert)</small>'; });
+  // Verbindung zu unserem Supabase-Projekt
+  var conn = pending('Verbindung zu Supabase');
+  fetch(SUPABASE_URL + '/auth/v1/health', { headers: { apikey: SUPABASE_ANON_KEY } })
+    .then(function (r) { conn(r.ok, r.ok ? '' : 'Antwort ' + r.status); })
+    .catch(function () { conn(false, 'von der Seite blockiert'); });
+
+  // Bibliothek von jsDelivr laden (prüft, ob Flenski fremde Skripte zulässt)
+  var lib = pending('Supabase-Bibliothek geladen');
+  var s = document.createElement('script');
+  s.src = SUPABASE_JS;
+  s.onload = function () { lib(true); startLogin(); };
+  s.onerror = function () { lib(false, 'Skript von cdn.jsdelivr.net blockiert'); };
+  document.head.appendChild(s);
+
+  function startLogin() {
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storageKey: 'ecrm-auth', persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
+    var $ = function (id) { return document.getElementById(id); };
+    var status = $('ecrm-test-login-status');
+    var email = '';
+    $('ecrm-test-login').style.display = 'block';
+
+    function show(step) {
+      $('ecrm-test-step-email').style.display = step === 'email' ? 'block' : 'none';
+      $('ecrm-test-step-code').style.display = step === 'code' ? 'block' : 'none';
+      $('ecrm-test-logout').style.display = step === 'done' ? 'block' : 'none';
+    }
+    function say(text, ok) {
+      status.innerHTML = text;
+      status.style.color = ok === false ? '#b00' : (ok ? '#2a7a2a' : '#222');
+    }
+
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (session) {
+        say('Angemeldet als <b>' + session.user.email + '</b>. Die Anmeldung hat das Neuladen überstanden.', true);
+        show('done');
+      } else {
+        say('Gib deine E-Mail-Adresse ein. Du bekommst einen 6-stelligen Code.');
+        show('email');
+      }
+    });
+
+    $('ecrm-test-send').onclick = function () {
+      email = $('ecrm-test-email').value.trim();
+      if (!email) { say('Bitte gib zuerst deine E-Mail-Adresse ein.', false); return; }
+      say('Code wird gesendet …');
+      sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
+        if (res.error) { say('Senden hat nicht geklappt: ' + res.error.message, false); return; }
+        say('Code ist unterwegs an ' + email + '. Schau in dein Postfach (auch im Spam-Ordner). Steht in der Mail nur ein Link und kein Code, mach hier einen Screenshot.');
+        show('code');
+      });
+    };
+
+    $('ecrm-test-verify').onclick = function () {
+      var code = $('ecrm-test-code').value.replace(/\s/g, '');
+      say('Code wird geprüft …');
+      sb.auth.verifyOtp({ email: email, token: code, type: 'email' }).then(function (res) {
+        if (res.error) { say('Code passt nicht: ' + res.error.message, false); return; }
+        // Anfrage mit Login an Supabase: beweist, dass die Sitzung vom Server akzeptiert wird
+        sb.auth.getUser().then(function (u) {
+          if (u.error) { say('Angemeldet, aber Server-Prüfung fehlgeschlagen: ' + u.error.message, false); return; }
+          say('Angemeldet als <b>' + u.data.user.email + '</b>. Lade die Seite jetzt neu: Bleibst du angemeldet?', true);
+          show('done');
+        });
+      });
+    };
+
+    $('ecrm-test-logout').onclick = function () {
+      sb.auth.signOut().then(function () { say('Abgemeldet.'); show('email'); });
+    };
+  }
 })();
 </script>
