@@ -28,8 +28,8 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 
 ## D. Konten und Zugänge (Marcel)
 
-- [x] **Supabase-Konto** vorhanden (Marcel, 21.10.2026). Offen: Claude Code per `supabase login` verbinden und Projekt verknüpfen.
-- [ ] `.env.local` lokal anlegen (Vorlage `.env.example`, Werte aus Supabase → Project Settings → API), **nie weitergeben**
+- [x] **Supabase-Konto** vorhanden (Marcel, 21.10.2026). Projekt `emotional-crm` (Irland) ist verknüpft; die CLI arbeitet mit Zugangsschlüssel aus `.env.local`, weil `supabase login` an Norton scheitert.
+- [x] `.env.local` lokal anlegen (Vorlage `.env.example`, Werte aus Supabase → Project Settings → API), **nie weitergeben**
 - [x] **GitHub-Konto** vorhanden (`marcelsystemsafari`), mit Claude verbunden. Dient als Sicherungskopie; Claude Code lädt nach jedem Arbeitstag hoch.
 - [x] Repo `marcelsystemsafari/emotional-crm` angelegt und befüllt. Lokaler Ordner ist seit 21.10.2026 mit dem Repo verbunden. Auf dem eigenen Rechner: einmal bei GitHub anmelden (Browser-Login beim ersten Push).
 - ~~Vercel~~ entfällt (schlanke Variante, siehe 02)

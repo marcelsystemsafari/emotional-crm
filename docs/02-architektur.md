@@ -11,7 +11,7 @@ Kein Next.js, kein Vercel, kein eigener Server.
 
 ```
 ┌───────────────────────────────┐      Webhooks (POST, signiert)      ┌──────────────────────────────┐
-│  Flenski-App (je Kundin)      │ ───────────────────────────────────▶ │  Supabase (EU, Frankfurt)    │
+│  Flenski-App (je Kundin)      │ ───────────────────────────────────▶ │  Supabase (EU, Irland)       │
 │                               │                                      │                              │
 │  Custom Page "Kundinnen"      │                                      │  Edge Function               │
 │   └─ CRM-Oberfläche (JS) ─────┼──── Login + Daten (über RLS) ──────▶ │    flenski-webhook           │

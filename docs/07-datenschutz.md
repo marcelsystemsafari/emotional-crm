@@ -20,6 +20,6 @@ Keine Rechtsberatung, sondern technische Leitplanken. Vor dem ersten zahlenden M
    - Mandant gekündigt → nach 30 Tagen automatische Löschung aller personenbezogenen Daten (geplanter Job), Protokolleintrag.
    - Ausnahme Ruhemodus: nur wenn die Lehrerin bei Kündigung ausdrücklich zustimmt (dokumentiert, mit Datum), Aufbewahrung bis max. 12 Monate, danach Löschung. Erinnerung 30 Tage vor Löschung.
 4. **Zugriff protokollieren:** `audit_log` für Änderungen; Exporte ebenfalls protokollieren.
-5. **Hosting:** Supabase `eu-central-1` (Datenbank, Login, Edge Functions). Keine US-Analytics, keine Tracking-Skripte im CRM. CDN-Bibliotheken nur von etablierten Quellen (jsDelivr) mit fester Versionsnummer.
+5. **Hosting:** Supabase `eu-west-1` Irland (Datenbank, Login, Edge Functions). Keine US-Analytics, keine Tracking-Skripte im CRM. CDN-Bibliotheken nur von etablierten Quellen (jsDelivr) mit fester Versionsnummer.
 6. **Secrets:** Service-Role-Key und Webhook-Secrets nur serverseitig, nie im Browser, nie im Repo.
 7. **Aktivitätsdaten (Modul 08):** Nur Ereignisart, Zeitpunkt, Titel; nie Inhalte. Rollierend 12 Monate. Verhaltensauswertung muss in der Datenschutzerklärung der Lehrerin genannt sein. Anzeige nur für `owner`/`staff`; bei Löschung einer Kundin werden ihre Aktivitätsdaten mit entfernt.

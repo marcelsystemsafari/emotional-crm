@@ -28,7 +28,7 @@ Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 
 ## Stack (nicht ändern ohne Rückfrage)
 
-- **Supabase**, Region Frankfurt: Postgres, Auth (Email-OTP-Code, kein Magic Link), Row Level Security, Edge Function `flenski-webhook` (TypeScript/Deno).
+- **Supabase**, Region Irland (`eu-west-1`, Projekt `emotional-crm`, siehe Entscheidung 0003): Postgres, Auth (Email-OTP-Code, kein Magic Link), Row Level Security, Edge Function `flenski-webhook` (TypeScript/Deno).
 - **Oberfläche:** eine Datei `ui/crm.html`, reines HTML/CSS/JavaScript, Bibliotheken nur per CDN (`@supabase/supabase-js`, optional Alpine.js). Kein Build-Schritt, kein npm für die Oberfläche.
 - **Fachlogik als SQL-Funktionen** in Supabase (`checkin`, `sell`, `correct`, `cancel_attendance` …), getestet mit Datenbank-Tests.
 - **Git lokal:** Nach jedem abgeschlossenen Arbeitsschritt einen Commit mit verständlicher deutscher Nachricht anlegen, damit Marcel jederzeit zurück kann. Marcel bedient Git nicht selbst.
@@ -60,6 +60,8 @@ supabase db push                         # Migrationen ins Supabase-Projekt
 supabase functions deploy flenski-webhook
 supabase test db                         # Datenbank-Tests
 ```
+Auf Marcels Rechner heißt `supabase` konkret `./.tools/supabase.exe`, mit `SUPABASE_ACCESS_TOKEN` und `SUPABASE_DB_PASSWORD` aus `.env.local` als Umgebungsvariablen (kein `supabase login`, siehe Entscheidung 0003). Diese Werte nie ausgeben.
+
 Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfiguration).
 
 ## Aktueller Stand
