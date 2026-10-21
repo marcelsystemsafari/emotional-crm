@@ -22,5 +22,6 @@ Guthaben-, Kundinnen- und Bindungsübersicht für Flenski-Apps von Yogalehrerinn
 | `docs/05-phasen.md` | Bauphasen mit Abnahmekriterien |
 | `docs/06-offene-punkte.md` | Checkliste, was noch fehlt |
 | `docs/07-datenschutz.md` | DSGVO-Leitplanken |
+| `docs/08-aktivitaet.md` | Modul Aktivität: wer ist dabei, wer kühlt ab (Phase 4b, Datensammlung ab Phase 0) |
 | `inbox/` | Rohmaterial (Payloads, Mandanten-Konfiguration) |
 | `ui/phase0-test.html` | 2-Minuten-Test für Flenski: läuft eigenes JavaScript in der Custom Page? |

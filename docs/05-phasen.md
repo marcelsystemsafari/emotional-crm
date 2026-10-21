@@ -12,7 +12,9 @@ Ziel: die zwei Risiken beseitigen, die das ganze Konzept kippen könnten.
 2. **Webhook-Mitschnitt:** Supabase Edge Function, die jeden Request unverändert in `webhook_events` speichert (alternativ vorab webhook.site, siehe `inbox/README.md`). In Flenski je relevanten Trigger eine Automation darauf zeigen lassen und echte Ereignisse auslösen.
    Ergebnis: echte Beispiel-Payloads in `inbox/webhooks/`, Signaturverfahren dokumentiert.
 
-**Abnahme:** Entscheidung Einbettung dokumentiert; für jeden Trigger aus 04 liegt mindestens ein echtes Payload vor; Signatur lässt sich verifizieren (oder bekannt, dass nicht).
+3. **Aktivitäts-Mitschnitt starten (Modul 08):** Die Aktivitäts-Trigger aus `08-aktivitaet.md`, Abschnitt 6, zusätzlich auf denselben Empfänger zeigen lassen. Grund: Aktivitätshistorie lässt sich nicht nachträglich holen, jeder Tag ohne Mitschnitt ist verloren. Zusätzlich ein kurzer Spike (30 Minuten): Im Flenski-Admin Profil → Aktivität öffnen, im Browser mit F12 → Netzwerk die geladene Anfrage ansehen und Name/Adresse als Screenshot in `inbox/screenshots/` legen. **Nur Erkenntnis, kein Fundament.**
+
+**Abnahme:** Entscheidung Einbettung dokumentiert; für jeden Trigger aus 04 liegt mindestens ein echtes Payload vor; Signatur lässt sich verifizieren (oder bekannt, dass nicht); die Aktivitäts-Trigger laufen und erzeugen Rohdaten in `webhook_events`.
 
 ## Phase 1 – Fundament
 
@@ -54,6 +56,16 @@ Ziel: die zwei Risiken beseitigen, die das ganze Konzept kippen könnten.
 
 **Abnahme:** Lanas echte Excel-Liste importiert ohne manuelle Nacharbeit außer Dubletten-Entscheidungen; Export lässt sich in Excel öffnen und vollständig wieder importieren.
 
+## Phase 4b – Aktivität (Modul 08)
+
+Voraussetzung: Phase 3 abgenommen und mindestens 4 Wochen echte Aktivitätsdaten aus dem Mitschnitt.
+
+- Tabelle `activity_events`, View `v_customer_engagement`, Verarbeitung in der Edge Function (Prüfschemas aus echten Payloads).
+- Reiter „Aktivität": Zählkacheln, Liste mit Mini-Verlauf, Detailverlauf je Kundin, Ein-Tap-Nachricht bei „Kühlt ab".
+- Rollierende Löschung nach 12 Monaten (geplanter Job).
+
+**Abnahme:** siehe `08-aktivitaet.md`, Abschnitt 8 (inkl. RLS-Test und Test, dass Studio-Besuche allein als „Aktiv" zählen).
+
 ## Phase 5 – später (nicht jetzt bauen)
 
 - Endkundinnen-Ansicht „Mein Guthaben" in der Flenski-App (abhängig von Flenski-Identität in Custom Pages).
@@ -61,3 +73,4 @@ Ziel: die zwei Risiken beseitigen, die das ganze Konzept kippen könnten.
 - Onboarding-Assistent für neue Mandanten, Mandanten-Abrechnung, Branding pro Mandant.
 - Zentrale Auslieferung der Oberfläche (eine Ladezeile pro Custom Page statt Kopie), sobald es ca. 5 Mandantinnen gibt.
 - Meilensteine, Geburtstage, Notizen-Erweiterungen.
+- Aktivität: automatische Nachricht bei „Kühlt ab" (nur nach Freigabe), Verlaufsgrafik, Auswertung „welche Angebote halten Menschen aktiv".

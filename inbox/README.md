@@ -15,6 +15,13 @@ webhooks/am-event-teilgenommen.json
 webhooks/mitglied-geloescht.json
 webhooks/abonnement-gekuendigt.json
 webhooks/zahlung-fehlgeschlagen.json
+webhooks/zum-kurs-angemeldet.json          (Aktivität, siehe docs/08)
+webhooks/kurs-abgeschlossen.json
+webhooks/beitrag-erstellt.json
+webhooks/kommentar-erstellt.json
+webhooks/frage-gestellt.json
+webhooks/datei-heruntergeladen.json
+webhooks/artikel-gelesen.json
 ```
 
 So kommst du an die Payloads (bevor Phase 0 einen eigenen Empfänger hat):

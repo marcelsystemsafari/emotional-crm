@@ -10,7 +10,10 @@
     "abzug_bei_no_show": true,
     "signal_inaktiv_tage": 21,
     "signal_ablauf_tage": 14,
-    "signal_fast_leer_ab": 1
+    "signal_fast_leer_ab": 1,
+    "engagement_neu_tage": 14,
+    "engagement_aktiv_tage": 14,
+    "engagement_abkuehlt_tage": 30
   },
   "products": [
     {

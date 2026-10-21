@@ -9,6 +9,7 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 - [ ] **Stornoregel Default:** Bis wie viele Stunden vorher kostenlos absagen? Was passiert bei No-Show?
 - [ ] **Ruhemodus bei Kündigung:** Daten bis zu 12 Monate aufbewahren, wenn die Kundin das bei Kündigung ausdrücklich wählt (siehe 01, Abschnitt 6)?
 - [ ] **Produktname** (Arbeitstitel „Emotional CRM").
+- [ ] **Schwellen vereinheitlichen:** Signal „Droht abzuspringen" (21 Tage + Guthaben) und Aktivitätsstatus „Kühlt ab" (Standard 15–30 Tage) dürfen sich nicht widersprechen. Vorschlag: Status 14/30 Tage, Signal bleibt zusätzlich an Guthaben > 0 gekoppelt. Lana soll im Gespräch sagen, ab wann sie bei einer Kundin sagt „die habe ich lange nicht gesehen".
 
 ## B. Von Flenski / aus der Flenski-Oberfläche
 
@@ -16,6 +17,8 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 - [ ] Wie das Signatur-Secret gesetzt/angezeigt wird (Screenshot)
 - [ ] Support-Anfrage: REST-API für eigene Server? Plan per API entziehen? Mitgliedsdaten in Custom Pages? Wiederholte Zustellung bei Fehler? (Textvorschlag unten)
 - [ ] Test: `ui/phase0-test.html` in eine Test-Custom-Page einfügen und Ergebnis auf Handy + Desktop als Screenshot in `inbox/screenshots/` legen
+- [ ] **Aktivität:** Als Admin ein Mitglied → Profil ansehen → Aktivität öffnen, F12 → Reiter „Netzwerk" → Seite neu laden und Screenshot der geladenen Anfrage (nur Name und Adresse) in `inbox/screenshots/` legen. Ergebnis entscheidet, ob es eine Historie gibt oder ob sie erst mit dem Mitschnitt beginnt.
+- [ ] **Aktivität:** Automationen für die Aktivitäts-Trigger (Liste in `08-aktivitaet.md`, Abschnitt 6) anlegen und auf den Empfänger zeigen lassen, so früh wie möglich.
 
 ## C. Von Lana (erste Mandantin)
 
@@ -28,14 +31,14 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 - [x] **Supabase-Konto** vorhanden (Marcel, 21.10.2026). Offen: Claude Code per `supabase login` verbinden und Projekt verknüpfen.
 - [ ] `.env.local` lokal anlegen (Vorlage `.env.example`, Werte aus Supabase → Project Settings → API), **nie weitergeben**
 - [x] **GitHub-Konto** vorhanden (`marcelsystemsafari`), mit Claude verbunden. Dient als Sicherungskopie; Claude Code lädt nach jedem Arbeitstag hoch.
-- [x] Repo `marcelsystemsafari/emotional-crm` angelegt und befüllt. Auf dem eigenen Rechner: einmal bei GitHub anmelden (Browser-Login beim ersten Push oder `gh auth login`).
+- [x] Repo `marcelsystemsafari/emotional-crm` angelegt und befüllt. Lokaler Ordner ist seit 21.10.2026 mit dem Repo verbunden. Auf dem eigenen Rechner: einmal bei GitHub anmelden (Browser-Login beim ersten Push).
 - ~~Vercel~~ entfällt (schlanke Variante, siehe 02)
 
 ## E. Rechtliches (vor dem ersten echten Mandanten)
 
 - [ ] AVV-Vorlage (Systemsafari als Auftragsverarbeiter der Lehrerin)
 - [ ] Unterauftragsverarbeiter-Liste: Supabase
-- [ ] Datenschutzhinweis-Baustein, den die Lehrerin in ihre Datenschutzerklärung übernimmt
+- [ ] Datenschutzhinweis-Baustein, den die Lehrerin in ihre Datenschutzerklärung übernimmt (inkl. Satz zur Auswertung der Aktivität von Mitgliedern, siehe 08, Abschnitt 7)
 
 ---
 
@@ -47,4 +50,5 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 > 2. Kann man über diese API einem Mitglied einen Plan zuweisen oder entziehen?
 > 3. Stehen in einer Custom Page Informationen zum eingeloggten Mitglied zur Verfügung (z. B. Profil-ID als Variable)?
 > 4. Wie wird X-Flenski-Signature berechnet, und werden Webhooks bei einer Fehlerantwort erneut zugestellt?
+> 5. Gibt es einen Trigger oder eine Schnittstelle für den Aktivitätsverlauf eines Mitglieds (so wie ihn Admins im Profil unter „Aktivität" sehen, z. B. „Kurs gestartet")?
 > Danke und viele Grüße, Marcel (Systemsafari)

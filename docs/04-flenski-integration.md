@@ -21,6 +21,8 @@ Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gel�
 
 **Custom Pages** haben ein Feld für eigenen Code (`isCustomCodeEnabled`, `header`/`footer` als HTML).
 
+**Aktivität (Stand 21.10.2026):** Im Flenski-Admin zeigt „Mitglied → Profil ansehen → Aktivität" einen Verlauf je Mitglied (z. B. „Mai: Kurs gestartet · geführte Audioentspannung · Event registriert"). Dieser Verlauf ist über die abgefragte Schnittstelle **nicht** abrufbar; sie liefert pro Mitglied nur `lastLoginAt`. Weitere für Aktivität relevante Trigger laut Dropdown: Zum Kurs angemeldet, Kurs abgeschlossen, Beitrag in Community/Gruppe erstellt, Kommentar erstellt, Frage in der Fragebox gestellt, Artikel gelesen, Datei heruntergeladen, Punkte vergeben.
+
 ## Angenommen (muss in Phase 0 bestätigt werden)
 
 - Signatur ist HMAC-SHA256 über den Rohbody mit einem Secret, das Flenski anzeigt oder das wir setzen.
@@ -37,6 +39,9 @@ Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gel�
 | Kann ein Plan per API entzogen werden? | Zugang bei 0 Guthaben automatisch sperren | Hinweis an die Lehrerin, manuell entziehen |
 | Stellt die Custom Page Infos zum eingeloggten Mitglied bereit (Variablen)? | Endkundinnen-Ansicht (Phase 5) | Phase 5 zurückgestellt |
 | Wird bei Webhooks wiederholt zugestellt, wenn wir nicht mit 200 antworten? | Robustheit | wir antworten immer sofort 200 und verarbeiten danach |
+| Welcher Trigger deckt „Kurs gestartet", Lektion/Audio abgespielt ab? (kommt im Admin-Verlauf vor, im Trigger-Dropdown nicht erkennbar) | vollständige App-Aktivität | nur die vorhandenen Trigger zählen; Lücke in der Oberfläche nicht verschweigen |
+| Enthalten die Aktivitäts-Webhooks Profil-ID **und** Titel (Kurs/Artikel/Event)? | Zuordnung zur Kundin, Anzeige im Verlauf | Ereignis ohne Titel speichern, Zuordnung nur über Profil-ID |
+| Liefert die Admin-Profilansicht ihren Verlauf über eine Anfrage, die ein eigener Server (mit Schlüssel) aufrufen dürfte? | Historie rückwirkend | Historie beginnt erst mit dem Mitschnitt; Spike in Phase 0, kein Fundament |
 
 ## Mapping Trigger → Domain-Ereignis
 
@@ -48,7 +53,8 @@ Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gel�
 | Plan entzogen | Berechtigung **nicht** löschen, nur Hinweis. Guthaben bleibt sichtbar (Plan entzogen ≠ Guthaben verbraucht) |
 | Abonnement gekündigt / Zahlung fehlgeschlagen | Signal am Board („Zahlung fehlgeschlagen", „gekündigt") |
 | Mitglied gelöscht | Kundin archivieren (nicht löschen, wegen Buchungsnachweis), Flenski-Verknüpfung entfernen |
-| Am Event teilgenommen | Stunde anlegen/finden, Anwesenheit `registered` (Abzug erst nach Phase-0-Klärung automatisch) |
+| Am Event teilgenommen | Stunde anlegen/finden, Anwesenheit `registered` (Abzug erst nach Phase-0-Klärung automatisch); zusätzlich `activity_events` (`event_attended`) |
+| Zum Kurs angemeldet / Kurs abgeschlossen / Beitrag erstellt / Kommentar erstellt / Frage gestellt / Datei heruntergeladen / Artikel gelesen | nur `activity_events` (Ereignisart, Zeitpunkt, Titel), Zuordnung über Profil-ID; Doppelzustellung über `dedupe_key` unschädlich |
 
 ## Einrichtung pro neuer Flenski-App (Ziel: < 30 Min.)
 

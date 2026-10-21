@@ -1,6 +1,6 @@
 # CLAUDE.md – Emotional CRM
 
-Du baust ein eigenständiges, mandantenfähiges CRM für Yogalehrerinnen und kleine Studios, die ihre App auf **Flenski** betreiben. Es zeigt Guthaben (Besuche), Kundinnen aus der App und von extern, Produkte und Signale, um wen sich die Lehrerin kümmern sollte. Die Oberfläche läuft direkt in einer Flenski-Custom-Page, alle Daten und Regeln liegen in Supabase.
+Du baust ein eigenständiges, mandantenfähiges CRM für Yogalehrerinnen und kleine Studios, die ihre App auf **Flenski** betreiben. Es zeigt Guthaben (Besuche), Kundinnen aus der App und von extern, Produkte, Aktivität (wer ist dabei, wer kühlt ab) und Signale, um wen sich die Lehrerin kümmern sollte. Die Oberfläche läuft direkt in einer Flenski-Custom-Page, alle Daten und Regeln liegen in Supabase.
 
 **Oberstes Ziel neben Funktion: Einfachheit.** Marcel ist kein Entwickler und muss den Aufbau verstehen. Zwei Bausteine (Supabase + eine HTML-Datei), keine zusätzlichen Dienste, Frameworks oder Build-Schritte ohne ausdrückliche Rückfrage.
 
@@ -14,7 +14,8 @@ Auftraggeber: Marcel (Systemsafari). Erste Mandantin: Yoga by Lana. **Das Produk
 4. `docs/04-flenski-integration.md` – was über Flenski gesichert / angenommen / unbekannt ist
 5. `docs/05-phasen.md` – Reihenfolge und Abnahmekriterien
 6. `docs/07-datenschutz.md` – Leitplanken
-7. `inbox/` – echte Payloads und Mandanten-Konfiguration von Marcel
+7. `docs/08-aktivitaet.md` – Modul Aktivität (Datensammlung ab Phase 0, Oberfläche in Phase 4b)
+8. `inbox/` – echte Payloads und Mandanten-Konfiguration von Marcel
 
 Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 
@@ -44,6 +45,7 @@ Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 7. **Mobil zuerst.** Jede Ansicht muss auf 375 px Breite einhändig bedienbar sein. Der Check-in ist der wichtigste Screen. Die Oberfläche muss im Flenski-Layout leben: Präfix `ecrm-` für alle Klassen, alles in `#ecrm-root`, keine globalen Styles.
 8. **Keine Gesundheitsdaten**, keine zusätzlichen personenbezogenen Felder ohne Rückfrage.
 9. **Keine Löschung von Buchungen**, auch nicht beim Löschen einer Kundin (dann anonymisieren).
+10. **Aktivitätsdaten sparsam:** nur Ereignisart, Zeitpunkt und Titel (Kurs/Event/Artikel), nie Inhalte von Beiträgen, Kommentaren oder Fragen. Rollierend 12 Monate, danach löschen. Der Aktivitätsstatus (Neu/Aktiv/Kühlt ab/Eingeschlafen) wird in der Datenbank berechnet, nicht in der Oberfläche.
 
 ## Sprache und Ton der Oberfläche
 
@@ -63,3 +65,5 @@ Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfigu
 ## Aktueller Stand
 
 Phase 0 noch nicht begonnen. Offene Entscheidungen: siehe `docs/06-offene-punkte.md`, Abschnitt A.
+
+Neu seit 21.10.2026: Modul Aktivität (`docs/08-aktivitaet.md`, Entscheidung `docs/entscheidungen/0002-aktivitaets-modul.md`). Wichtig für Phase 0: Die Aktivitäts-Trigger müssen von Anfang an mitgeschnitten werden, weil sich Historie nicht nachholen lässt.

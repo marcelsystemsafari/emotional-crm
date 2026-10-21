@@ -29,6 +29,7 @@ Alle Tabellen haben `id uuid pk default gen_random_uuid()`, `tenant_id uuid not 
 - `note text` – **nur organisatorisch** (UI-Hinweis: keine Gesundheitsangaben)
 - `archived_at` nullable
 - `last_visit_at` (denormalisiert, per Trigger aus `attendances` gepflegt, für schnelle Filter)
+- `last_app_activity_at` (denormalisiert, per Trigger aus `activity_events` gepflegt; nur bei `source = flenski`)
 
 Dubletten-Regel: Kommt ein Flenski-Mitglied mit einer E-Mail, die schon bei einer externen Kundin steht, wird **nicht automatisch zusammengeführt**, sondern ein Hinweis „Mögliche Dublette" erzeugt. Die Lehrerin entscheidet.
 
@@ -87,6 +88,20 @@ Regeln (als SQL-Funktionen in Supabase, mit Datenbank-Tests):
 - `cancelled_late` / `no_show` → Abzug gemäß Mandanten-Einstellung (Default: Abzug).
 - Keine passende Berechtigung → Check-in trotzdem möglich, Kundin wird als „offen / ohne Guthaben" markiert.
 
+## Aktivität (Modul, siehe 08)
+
+**activity_events** (nur Anfügen, wird nur durch die rollierende Löschung nach 12 Monaten und durch Kundinnen-Löschung entfernt)
+- `customer_id` nullable (wird über `flenski_profile_id` zugeordnet; ohne Zuordnung bleibt der Eintrag liegen und wird beim Anlegen der Kundin nachgezogen)
+- `flenski_profile_id` uuid
+- `type` enum: `course_enrolled | course_completed | post_created | comment_created | question_asked | event_attended | file_downloaded | article_read | other` (Erweiterung nur anhand echter Payloads aus `inbox/webhooks/`)
+- `title` text nullable (Kurs-/Event-/Artikelname, **nie Inhalte**)
+- `occurred_at` timestamptz, `webhook_event_id` nullable, `dedupe_key` (unique pro Mandant)
+- Index auf (`tenant_id`, `customer_id`, `occurred_at desc`)
+
+**View `v_customer_engagement`** (pro Kundin): `last_activity_at = greatest(last_visit_at, last_app_activity_at)`, `status` (`neu | aktiv | kuehlt_ab | eingeschlafen`), `score_30d`, `events_8w` (Wochenwerte für den Mini-Verlauf). Die Berechnung liegt als SQL-Funktion in der Datenbank.
+
+**Einstellungen** in `tenants.settings`: `engagement_neu_tage` (14), `engagement_aktiv_tage` (14), `engagement_abkuehlt_tage` (30), Gewichte je Ereignisart und für Besuche.
+
 ## Integration und Protokoll
 
 **webhook_events**
@@ -104,3 +119,4 @@ Regeln (als SQL-Funktionen in Supabase, mit Datenbank-Tests):
 - `webhook_events`, `tenants.webhook_secret`: nur Service-Role (Server).
 - Mandantenstatus `cancelled`: alle Schreibrechte entzogen, Lesen + Export erlaubt.
 - Mandantenstatus `dormant`: kein Zugriff für Mandanten-Nutzer, Webhooks werden angenommen, aber nicht verarbeitet. Nur `platform_admins` können reaktivieren.
+- `activity_events` und `v_customer_engagement`: nur `owner` und `staff` des eigenen Mandanten. Schreiben nur Service-Role (Webhook-Funktion).

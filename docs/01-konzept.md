@@ -29,6 +29,7 @@ Flenski (die App-Plattform) kennt Mitglieder und Zugangspläne, aber **keine Gut
 3. „Jemand hat bar bezahlt – Karte eintragen." (unter 20 Sekunden)
 4. „Wen muss ich diese Woche persönlich ansprechen?" (Abwanderung, leere Karte, Ablauf)
 5. „Alle meine Kundinnen auf einen Blick, filterbar." (App + extern, Produkt, Status)
+6. „Wer ist gerade dabei, wer kühlt ab?" (App-Aktivität und Studio-Besuche zusammen, siehe 08)
 
 ## 4. Was das Produkt *emotional* macht
 
@@ -42,6 +43,10 @@ Ein normales CRM speichert Daten. Dieses CRM sagt der Lehrerin, **um welche Mens
 | Neu dabei | erster Besuch in den letzten 14 Tagen | willkommen heißen, nach 2. Besuch fragen |
 
 Später (Phase 4+): Meilensteine (10. Besuch), Geburtstage, Notizen zur Person.
+
+### Aktivität (Modul, Phase 4b)
+
+Ergänzend zu den Signalen zeigt ein Reiter „Aktivität" alle Kundinnen in vier Stufen: **Neu · Aktiv · Kühlt ab · Eingeschlafen**. Grundlage sind App-Aktivität (Flenski-Webhooks) **und** Studio-Besuche (Check-in), damit Kundinnen, die nur ins Studio kommen, nicht als inaktiv gelten. Ziel ist ein Frühwarnsystem, keine Rangliste. Details: `08-aktivitaet.md`.
 
 ## 5. Abgrenzung (bewusst NICHT im Produkt)
 

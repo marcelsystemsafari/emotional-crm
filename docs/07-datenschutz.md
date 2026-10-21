@@ -22,3 +22,4 @@ Keine Rechtsberatung, sondern technische Leitplanken. Vor dem ersten zahlenden M
 4. **Zugriff protokollieren:** `audit_log` für Änderungen; Exporte ebenfalls protokollieren.
 5. **Hosting:** Supabase `eu-central-1` (Datenbank, Login, Edge Functions). Keine US-Analytics, keine Tracking-Skripte im CRM. CDN-Bibliotheken nur von etablierten Quellen (jsDelivr) mit fester Versionsnummer.
 6. **Secrets:** Service-Role-Key und Webhook-Secrets nur serverseitig, nie im Browser, nie im Repo.
+7. **Aktivitätsdaten (Modul 08):** Nur Ereignisart, Zeitpunkt, Titel; nie Inhalte. Rollierend 12 Monate. Verhaltensauswertung muss in der Datenschutzerklärung der Lehrerin genannt sein. Anzeige nur für `owner`/`staff`; bei Löschung einer Kundin werden ihre Aktivitätsdaten mit entfernt.
