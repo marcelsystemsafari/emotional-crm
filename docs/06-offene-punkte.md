@@ -25,10 +25,10 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 
 ## D. Konten und Zugänge (Marcel)
 
-- [ ] **Supabase-Konto**, Projekt in Region Frankfurt (Free reicht für Phase 0–2). Das ist das einzige Pflichtkonto.
+- [x] **Supabase-Konto** vorhanden (Marcel, 21.10.2026). Offen: Claude Code per `supabase login` verbinden und Projekt verknüpfen.
 - [ ] `.env.local` lokal anlegen (Vorlage `.env.example`, Werte aus Supabase → Project Settings → API), **nie weitergeben**
 - [x] **GitHub-Konto** vorhanden (`marcelsystemsafari`), mit Claude verbunden. Dient als Sicherungskopie; Claude Code lädt nach jedem Arbeitstag hoch.
-- [ ] Leeres privates Repo `emotional-crm` auf github.com anlegen (ohne README), damit der Projektordner hochgeladen werden kann
+- [x] Repo `marcelsystemsafari/emotional-crm` angelegt und befüllt. Auf dem eigenen Rechner: einmal bei GitHub anmelden (Browser-Login beim ersten Push oder `gh auth login`).
 - ~~Vercel~~ entfällt (schlanke Variante, siehe 02)
 
 ## E. Rechtliches (vor dem ersten echten Mandanten)
