@@ -106,7 +106,8 @@
                     <span class="ecrm-text-s" x-text="careText(c)"></span>
                   </span>
                 </button>
-                <a class="ecrm-btn ecrm-btn-soft" x-show="profileUrl(c.customer_id)" :href="profileUrl(c.customer_id)" target="_top"
+                <button class="ecrm-btn ecrm-btn-soft" x-show="c.gruende[0].art === 'teilnahme_unklar'" @click="openCourseId(c.gruende[0].detail.session_id)">Prüfen</button>
+                <a class="ecrm-btn ecrm-btn-soft" x-show="c.gruende[0].art !== 'teilnahme_unklar' && profileUrl(c.customer_id)" :href="profileUrl(c.customer_id)" target="_top"
                    x-text="actionLabel(c.gruende[0].art)"></a>
               </div>
             </template>
@@ -358,7 +359,7 @@
                 <div><b x-text="roster.filter(r => r.status === 'present').length"></b><span>waren da</span></div>
                 <div><b x-text="course.capacity || '–'"></b><span>Plätze</span></div>
               </div>
-              <p class="ecrm-legend">Wer sich in der App anmeldet, steht hier als „angemeldet“. Nach Beginn des Termins zählt das CRM die Person automatisch als „war da“ und bucht – wenn sie eine Karte hat – einen Besuch ab.</p>
+              <p class="ecrm-sync" :class="'ecrm-sync-' + courseSync().art"><b x-text="courseSync().titel"></b> <span x-text="courseSync().text"></span></p>
               <div class="ecrm-card ecrm-section">
                 <template x-for="r in roster" :key="r.customer_id">
                   <div class="ecrm-item ecrm-item-col">
@@ -369,13 +370,16 @@
                         </span>
                         <span class="ecrm-grow"><span class="ecrm-name" x-text="fullName(r)"></span><span class="ecrm-text-s" x-text="rosterText(r)"></span></span>
                       </button>
-                      <button class="ecrm-btn ecrm-btn-soft" @click="r._open = !r._open" x-text="r._open ? 'Schließen' : 'Ändern'"></button>
+                      <button class="ecrm-btn ecrm-btn-soft" x-show="rowAction(r)" @click="r._open = !r._open" x-text="r._open ? 'Schließen' : rowAction(r)"></button>
                     </div>
-                    <div class="ecrm-inline" x-show="r._open">
-                      <p class="ecrm-text-s">Flenski meldet dem CRM nicht, wenn sich jemand wieder abmeldet. Trag es hier ein – sonst zählt die Person nach Kursbeginn als „war da“ und bekommt einen Besuch von der Karte abgezogen.</p>
-                      <button class="ecrm-btn" @click="cancelRow(r, false)">Hat abgesagt</button>
-                      <button class="ecrm-btn" @click="cancelRow(r, true)">Ist nicht gekommen</button>
-                      <p class="ecrm-text-s">Abgesagt bis 12 Stunden vorher: kein Besuch weg. Später abgesagt oder nicht gekommen: Besuch wird abgezogen (wie bei dir üblich).</p>
+                    <div class="ecrm-inline" x-show="r._open && r.status === 'registered'">
+                      <p class="ecrm-text-s">Die App hat nicht eindeutig gemeldet, ob diese Person noch angemeldet war. War sie da?</p>
+                      <button class="ecrm-btn ecrm-btn-primary" @click="setRow(r, 'war_da')">War da</button>
+                      <button class="ecrm-btn" @click="setRow(r, 'nicht_da')">War nicht da</button>
+                    </div>
+                    <div class="ecrm-inline" x-show="r._open && r.status === 'present'">
+                      <p class="ecrm-text-s">Die Person stand zu Kursbeginn auf der Liste der App, deshalb wurde ein Besuch abgezogen. Aus Kulanz kannst du ihn zurückgeben.</p>
+                      <button class="ecrm-btn" @click="setRow(r, 'kulanz')">Besuch zurückgeben</button>
                     </div>
                   </div>
                 </template>
@@ -620,6 +624,10 @@
 #ecrm-root .ecrm-fill span { font-size: 11px; color: var(--muted); }
 #ecrm-root .ecrm-inline { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0 6px 60px; }
 #ecrm-root .ecrm-inline p { flex-basis: 100%; }
+#ecrm-root .ecrm-sync { font-size: 13px; line-height: 1.5; margin: -2px 0 14px; padding: 12px 16px; border-radius: 16px; background: var(--a-soft); color: var(--a-d); }
+#ecrm-root .ecrm-sync b { font-weight: 600; }
+#ecrm-root .ecrm-sync-warn { background: #fcf5e7; color: var(--kuehlt); }
+#ecrm-root .ecrm-sync-aus { background: #f1efe8; color: var(--muted); }
 /* Angebote */
 #ecrm-root .ecrm-q { font-size: 13px; color: var(--muted); margin: 16px 0 8px; }
 #ecrm-root .ecrm-pick { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -779,7 +787,8 @@
     article_read: 'hat gelesen', lockscreen_cta: 'interessiert sich für', other: 'war aktiv' };
   var NOTICE = { zahlung_fehlgeschlagen: 'Zahlung ist fehlgeschlagen', abo_gekuendigt: 'Abo wurde gekündigt', plan_entzogen: 'Plan wurde entzogen',
     moegliche_dublette: 'Gibt es vielleicht doppelt', mitglied_geloescht: 'Hat die App verlassen',
-    plan_entziehen: 'Karte leer – bitte den Plan in der App entziehen' };
+    plan_entziehen: 'Karte leer – bitte den Plan in der App entziehen',
+    teilnahme_unklar: 'Teilnahme unklar – bitte im Kurs kurz bestätigen' };
 
   function message(err) {
     var m = (err && (err.message || err.msg)) || String(err);
@@ -822,6 +831,7 @@
     if (c) root.style.setProperty('--page', c);
   }
 
+  function besuche(n) { return n + (Math.abs(n) === 1 ? ' Besuch' : ' Besuche'); }
   function days(iso) { return Math.floor((Date.now() - new Date(iso)) / 86400000); }
 
   function component() {
@@ -1002,14 +1012,15 @@
           case 'neu_dabei': return 'War zum ersten Mal im Kurs' + spur;
           case 'kuehlt_ab': return 'Seit ' + (d.tage_still != null ? d.tage_still : '?') + ' Tagen nichts mehr' + this.balanceSuffix(id);
           case 'droht_abzuspringen': return 'Lange nicht da, hat aber noch Besuche übrig' + this.balanceSuffix(id);
+          case 'teilnahme_unklar': return 'War sie bei „' + (d.titel || 'Kurs') + '“ am ' + this.dateShort(d.beginn) + '? Kurz bestätigen';
           case 'plan_entziehen': return (d.produkt || 'Karte') + ' ' + (d.grund || 'aufgebraucht') + ' – Plan in der App entziehen';
           case 'karte_fast_leer': return 'Karte fast aufgebraucht – guter Moment für die nächste';
-          case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ', noch ' + d.rest + ' Besuche' : '');
+          case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ', noch ' + besuche(d.rest) : '');
           default: return NOTICE[g.art] || g.art;
         }
       },
       sinceText(iso) { var d = days(iso); return d <= 0 ? 'heute' : d === 1 ? 'gestern' : d + ' Tagen'; },
-      balanceSuffix(id) { var o = this.overview[id]; return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : ''; },
+      balanceSuffix(id) { var o = this.overview[id]; return o && o.credits_balance ? ' · noch ' + besuche(o.credits_balance) : ''; },
       actionLabel(art) { if (art === 'plan_entziehen') return 'Zum Profil'; return art === 'neu_dabei' || art === 'neu_in_app' ? 'Begrüßen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Schreiben'; },
       feedKind(art) {
         if (art === 'besuch') return 'besuch';
@@ -1121,6 +1132,7 @@
       },
       noticeText(n) {
         var d = n.detail || {}, t = NOTICE[n.kind] || n.kind;
+        if (n.kind === 'teilnahme_unklar') return 'Unklar, ob sie bei „' + (d.titel || 'Kurs') + '“ am ' + this.dateShort(d.beginn) + ' war. Bitte im Kurs mit „Prüfen“ bestätigen.';
         if (n.kind === 'plan_entziehen') return '„' + (d.produkt || 'Karte') + '“ ist ' + (d.grund || 'aufgebraucht') +
           '. Entzieh den Plan im Profil der App, sonst hat sie weiter Zugang. Danach hier auf „Erledigt“.';
         if (d.plan) t += ': ' + d.plan;
@@ -1139,7 +1151,7 @@
         await this.run(async () => {
           var rest = await this.rpc('correct', { p_entitlement: e.entitlement_id, p_delta: this.correction.delta, p_comment: this.correction.comment });
           this.correctFor = null;
-          this.notify('Gebucht – jetzt noch ' + rest + ' Besuche.');
+          this.notify('Gebucht – jetzt noch ' + besuche(rest) + '.');
           await Promise.all([this.loadDetail(), this.loadPeople()]);
         });
       },
@@ -1196,23 +1208,53 @@
       async openCourse(s) {
         this.tab = 'kurse'; this.course = s; this.roster = []; this.toTop();
         try {
+          var frisch = await this.sb.from('sessions').select('*').eq('id', s.id).single();
+          if (frisch.data) this.course = Object.assign({}, s, frisch.data);
           var rows = await this.rpc('session_roster', { p_session: s.id });
           this.roster = rows.map(function (r) { r._open = false; return r; });
         } catch (e) { this.notify(message(e), true); }
       },
       rosterText(r) {
-        if (r.status === 'present') return 'War da' + (r.abgebucht && r.rest != null ? ' · noch ' + r.rest + ' Besuche' : '');
-        if (r.status === 'registered') return 'Angemeldet' + (r.credits_balance ? ' · ' + r.credits_balance + ' Besuche auf der Karte' : '');
-        if (r.status === 'cancelled_in_time') return 'Hat rechtzeitig abgesagt';
+        if (r.status === 'present') return 'War da' + (r.abgebucht && r.rest != null ? ' · noch ' + besuche(r.rest) : '');
+        if (r.status === 'registered') return 'Angemeldet' + (r.credits_balance ? ' · ' + besuche(r.credits_balance) + ' auf der Karte' : '');
+        if (r.status === 'cancelled_in_time') return 'Hat sich abgemeldet · kein Besuch abgezogen';
+        if (r.status === 'no_show' && !r.abgebucht) return 'Kulanz · kein Besuch abgezogen';
         if (r.status === 'cancelled_late') return 'Zu spät abgesagt' + (r.abgebucht ? ' · Besuch abgezogen' : '');
         return 'Nicht erschienen' + (r.abgebucht ? ' · Besuch abgezogen' : '');
       },
-      async cancelRow(r, noShow) {
+      started() { return this.course && new Date(this.course.starts_at) <= new Date(); },
+      rowAction(r) {
+        if (!this.started()) return '';
+        if (r.status === 'registered') return 'Prüfen';
+        if (r.status === 'present' && r.abgebucht) return 'Kulanz';
+        return '';
+      },
+      async setRow(r, art) {
+        if (art === 'kulanz' && !confirm('Besuch für ' + this.fullName(r) + ' zurückgeben?')) return;
         await this.run(async () => {
-          await this.rpc('cancel_attendance', { p_session: this.course.id, p_customer: r.customer_id, p_no_show: noShow });
-          this.notify(this.fullName(r) + (noShow ? ': nicht erschienen' : ': abgesagt'));
-          await this.openCourse(this.course);
+          await this.rpc('set_attendance', { p_session: this.course.id, p_customer: r.customer_id, p_art: art });
+          this.notify(this.fullName(r) + ({ war_da: ': war da', nicht_da: ': war nicht da', kulanz: ': Besuch zurückgegeben' })[art]);
+          await Promise.all([this.openCourse(this.course), this.loadPeople()]);
         });
+      },
+      async openCourseId(id) {
+        var r = await this.sb.from('sessions').select('*').eq('id', id).maybeSingle();
+        if (r.data) await this.openCourse(r.data);
+      },
+      courseSync() {
+        var c = this.course, info = c.abgleich_info || {};
+        var um = function (iso) { return new Date(iso).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' Uhr'; };
+        if (!c.flenski_event_id) return { art: 'aus', titel: 'Eigener Termin.', text: 'Nicht aus der App, die Liste pflegst du selbst.' };
+        var offen = this.roster.filter(function (r) { return r.status === 'registered'; }).length;
+        if (c.abgeglichen_at) {
+          var t = 'Wer zu Beginn auf der Liste der App stand, zählt als „war da“, wer sich vorher abgemeldet hat, zahlt nichts.';
+          if (offen) return { art: 'warn', titel: 'Fast fertig abgeglichen.', text: offen + (offen === 1 ? ' Person ist' : ' Personen sind') + ' unklar – bitte kurz bestätigen (Knopf „Prüfen“).' };
+          return { art: 'ok', titel: 'Mit der App abgeglichen am ' + um(c.abgeglichen_at) + '.', text: t };
+        }
+        if (info.fehlt && offen) return { art: 'warn', titel: 'Abgleich hat nicht geklappt.', text: 'Die App war zu Kursbeginn nicht erreichbar. Bitte bestätige die Angemeldeten mit „Prüfen“.' };
+        if (this.started()) return { art: 'ok', titel: 'Wird gerade abgeglichen.', text: 'Wenige Minuten nach Kursbeginn holt das CRM die endgültige Liste aus der App.' };
+        return { art: 'ok', titel: 'Live aus der App' + (c.flenski_seen_at ? ', Stand ' + um(c.flenski_seen_at) : '') + '.',
+                 text: 'Wer sich in der App an- oder abmeldet, erscheint hier automatisch. 5 Minuten nach Beginn zählt, wer noch auf der Liste steht: Besuch wird abgezogen.' };
       },
 
       // ---------- Angebote ----------

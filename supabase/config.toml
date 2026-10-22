@@ -418,3 +418,7 @@ enabled = true
 # Schutz kommt über die Signatur X-Flenski-Signature (sobald das Verfahren bekannt ist, Phase 0/3).
 [functions.flenski-webhook]
 verify_jwt = false
+
+# Wird von pg_cron aufgerufen, Schutz über den Header x-sync-secret (Supabase-Secret SYNC_SECRET, Vault ecrm_sync_secret).
+[functions.flenski-sync]
+verify_jwt = false

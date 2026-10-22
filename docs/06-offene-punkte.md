@@ -58,3 +58,9 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 > 4. Wie wird X-Flenski-Signature berechnet, und werden Webhooks bei einer Fehlerantwort erneut zugestellt?
 > 5. Gibt es einen Trigger oder eine Schnittstelle für den Aktivitätsverlauf eines Mitglieds (so wie ihn Admins im Profil unter „Aktivität" sehen, z. B. „Kurs gestartet")?
 > Danke und viele Grüße, Marcel (Systemsafari)
+
+
+## Seit 23.10.2026 (automatischer Abgleich)
+- [x] Flenski-API-Schlüssel für den Server: vorhanden, Abgleich läuft alle 5 Minuten (`flenski-sync`).
+- [ ] **Flenski-Support fragen:** Ist `lastAttended` in der Termin-Liste auf eine Anzahl begrenzt? Gibt es die vollständige Teilnehmerliste (`/events/{id}/attendees`) auch mit API-Schlüssel? Bis dahin: bei gekürzter Liste meldet das CRM „Teilnahme unklar“ statt zu raten.
+- [ ] Plan per API entziehen (Make-Modul `revokePlansProfile` zeigt, dass es geht) – Pfad mit dem Schlüssel noch ermitteln.

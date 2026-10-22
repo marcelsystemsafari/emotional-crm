@@ -107,3 +107,12 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 4. In Flenski eine Custom Page „Kundinnen" anlegen, Sichtbarkeit nur Team, ein **Embed-Widget** einfügen und darin den Inhalt von `ui/crm.html` mit dem Mandanten-Slug einfügen.
 5. Erstimport bestehender Mitglieder + CSV der externen Kundinnen.
 6. Lehrerin einladen: `node scripts/invite-user.mjs <email> <slug> owner` (Registrierung ist geschlossen).
+
+
+## Flenski-Schnittstelle mit API-Schlüssel (ermittelt 23.10.2026)
+
+- Basis: `https://app.flenski.io/api/v1`, Header `X-API-KEY: <Schlüssel>` (Bearer wird abgelehnt). Schlüssel je App, liegt in `tenant_secrets` (nur Server).
+- Erreichbar mit dem Schlüssel: `/apps/{appId}/events?page=&limit=` (auch vergangene Termine), `/apps/{appId}/profiles`. Pläne vermutlich ebenfalls unter `/apps/{appId}/…`.
+- **Nicht** erreichbar mit dem Schlüssel: `/events/{id}/attendees` (401, braucht eingeloggte Person; Make nutzte dafür seine eigene Flenski-Verbindung).
+- Je Termin liefert die Liste `attendedCount` (Anzahl Angemeldete) und `lastAttended` (Namen der zuletzt Angemeldeten, nur Profil-ID genutzt). Ob `lastAttended` bei großen Kursen gekürzt ist, ist unbekannt – der Abgleich behandelt das vorsichtig (Entscheidung 0006, Migration `20261023100000_flenski_abgleich`).
+- Teilnehmende sind auch Team-Mitglieder und Profile mit Ausschluss-Tag; sie zählen in `attendedCount` mit, werden im CRM aber nicht als Kundin geführt.

@@ -64,3 +64,7 @@ Datenbank-Regeln aus Phase 1 (Buchungsprotokoll, FEFO, Storno, Signale) – sie 
 ## Oberfläche v2 (22.10.2026)
 
 Nach Marcels Feedback: hochwertiger (Glas- und Glanzoptik, eigene beige Fläche mit gleichmäßigem Innenabstand), selbsterklärend (Erklärtexte unter jeder Kachel), Knopf „Begrüßen/Schreiben“ öffnet das Flenski-Profil (`settings.profil_url`, die Chat-ID lässt sich nicht ableiten), „Zahlung von Hand“ entfernt, Kurse-Menü als Knöpfe statt Ausklappmenü, Reiter „Angebote“ mit Chips zum Verbinden der Flenski-Pläne und Erklärung der Kopplung, Kurse nur echte Flenski-Termine (Migration 240000), Profilfotos (Migration 250000).
+
+
+## Automatischer Teilnehmer-Abgleich (23.10.2026, Entscheidung 0006)
+Edge Function `flenski-sync` (alle 5 Min. per pg_cron + pg_net) → `sync_flenski_events`: Termine anlegen, Anmeldungen live angleichen (Flenski gewinnt), 5 Min. nach Beginn abschließen (auf der Liste = war da + Abzug, abgemeldet = kein Abzug, gekürzte Liste = „Teilnahme unklar“). Ohne Stand von Kursbeginn wird nichts abgebucht; nach 24 h „Abgleich fehlt“. Lehrerin: „Prüfen“ (War da / War nicht da) und „Kulanz“ in der Kurs-Ansicht (`set_attendance`). Einrichten je Mandantin: `node scripts/setup-flenski-sync.mjs <slug> <app-id>`. Tests: `phase3_04_flenski_abgleich` (23).
