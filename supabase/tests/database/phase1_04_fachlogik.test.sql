@@ -113,6 +113,12 @@ select ok((public.checkin('50000000-0000-0000-0000-000000000001', 'c0000000-0000
   'Ohne Karte: trotzdem anwesend, als „offen“ markiert');
 select is((select status::text from public.attendances where customer_id = 'c0000000-0000-0000-0000-000000000005'), 'present',
   'Ohne Karte: Status anwesend');
+-- Danach Karte verkauft: erneuter Check-in bucht den Besuch nachträglich ab – genau einmal
+select public.sell('c0000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000001', 'bar', null, now() - interval '1 hour');
+select ok(not (public.checkin('50000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000005') ->> 'ohne_karte')::boolean,
+  'Nach Verkauf: Check-in bucht nachträglich von der neuen Karte ab');
+select public.checkin('50000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000005');
+select is(pg_temp.guthaben('c0000000-0000-0000-0000-000000000005'), 3, 'Nachträgliche Abbuchung nur einmal (4 − 1 = 3)');
 
 -- Späte Absage und nicht erschienen
 select public.sell('c0000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000001', 'bar');

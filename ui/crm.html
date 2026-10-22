@@ -146,8 +146,11 @@
                         <span class="ecrm-sub" x-text="rowText(r)"></span>
                       </span>
                     </button>
-                    <template x-if="rowWarn(r)">
+                    <template x-if="rowWarn(r) && !canRebook(r)">
                       <button class="ecrm-btn ecrm-btn-small ecrm-btn-warn" @click="sellFor(r)">Karte verkaufen</button>
+                    </template>
+                    <template x-if="canRebook(r)">
+                      <button class="ecrm-btn ecrm-btn-small ecrm-btn-primary" @click="rebook(r)" :disabled="r._busy">Jetzt abbuchen</button>
                     </template>
                     <button class="ecrm-more" @click="r._menu = !r._menu" aria-label="Weitere Aktionen">⋯</button>
                     <div class="ecrm-menu" x-show="r._menu" @click.outside="r._menu = false">
@@ -397,7 +400,7 @@
             <div>
               <button class="ecrm-link" @click="sale.customer = null; sale.product = null">‹ andere Kundin</button>
               <h2 class="ecrm-h2" x-text="'Verkauf an ' + fullName(sale.customer)"></h2>
-              <p class="ecrm-muted" x-text="sale.product ? 'Wie wurde bezahlt?' : 'Was kauft sie?'"></p>
+              <p class="ecrm-muted" x-text="sale.product ? 'Wie wurde bezahlt?' : 'Was wird gekauft?'"></p>
               <template x-if="!sale.product">
                 <div class="ecrm-tiles">
                   <template x-for="p in products.filter(p => p.active)" :key="p.id">
@@ -910,6 +913,20 @@
           this.notify(this.fullName(row) + ': ' + txt);
         });
       },
+      // da, aber ohne Karte – und inzwischen ist Guthaben vorhanden (z. B. gerade verkauft)
+      canRebook(r) { return r.status === 'present' && !r.entitlement_id && (r.credits_balance > 0 || r.has_unlimited); },
+      async rebook(r) {
+        if (r._busy) return;
+        r._busy = true;
+        try {
+          var res = await this.rpc('checkin', { p_session: this.session.id, p_customer: r.customer_id });
+          this.applyResult(r, res);
+          await this.refreshBalance(r);
+          this.notify(res.entitlement_id ? this.fullName(r) + ': Besuch abgebucht' + (res.rest != null && !res.unbegrenzt ? ' · noch ' + res.rest : '')
+                                         : 'Keine passende Karte für diese Stunde gefunden.', !res.entitlement_id);
+        } catch (e) { this.notify(message(e), true); }
+        r._busy = false;
+      },
       rowWarn(r) { return (r.status === 'present' && !r.entitlement_id) || (r.status === 'registered' && !r.has_unlimited && !r.credits_balance); },
       rowText(r) {
         if (r.status === 'present') {
@@ -1109,8 +1126,8 @@
           var name = this.fullName(this.sale.customer);
           var d = e.data;
           this.sale.done = d && !d.unlimited
-            ? name + ' hat jetzt ' + d.balance + ' Besuche' + (d.expires_at ? ' · gültig bis ' + this.dateShort(d.expires_at) : '') + '.'
-            : name + ' hat jetzt ' + this.sale.product.name + (d && d.expires_at ? ' bis ' + this.dateShort(d.expires_at) : '') + '.';
+            ? name + ' hat jetzt ' + d.balance + ' Besuche' + (d.expires_at ? ' · gültig bis ' + this.dateShort(d.expires_at) : '')
+            : name + ' hat jetzt ' + this.sale.product.name + (d && d.expires_at ? ' bis ' + this.dateShort(d.expires_at) : '');
           this.loadCustomers();
         });
       },
