@@ -305,7 +305,7 @@
               <div class="ecrm-card ecrm-history">
                 <template x-for="h in history" :key="h.id">
                   <div class="ecrm-hrow">
-                    <div class="ecrm-hdate" x-text="dateShort(h.session_starts_at || h.created_at)"></div>
+                    <div class="ecrm-hdate" x-text="dateShort(h.occurred_at)"></div>
                     <div class="ecrm-htext">
                       <div x-text="historyText(h)"></div>
                       <div class="ecrm-muted ecrm-small" x-text="h.product_name + ' · ' + who(h.created_by)"></div>
@@ -1017,7 +1017,8 @@
         var e = await this.sb.from('v_entitlement_balance').select('*').eq('customer_id', id)
           .order('status').order('expires_at', { ascending: true, nullsFirst: false });
         this.entitlements = e.data || [];
-        var h = await this.sb.from('v_customer_history').select('*').eq('customer_id', id).order('created_at', { ascending: false }).limit(200);
+        var h = await this.sb.from('v_customer_history').select('*').eq('customer_id', id)
+          .order('occurred_at', { ascending: false }).order('created_at', { ascending: false }).limit(200);
         this.history = h.data || [];
       },
       entText(e) {
