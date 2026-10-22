@@ -91,7 +91,7 @@ select is(pg_temp.verarbeite('e1000000-0000-0000-0000-000000000020'), 'ok', 'Eve
 select is((select a.status::text || ':' || s.title from public.attendances a join public.sessions s on s.id = a.session_id
            join public.customers c on c.id = a.customer_id where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'),
   'registered:' || ({{am-event-teilgenommen}} -> 'event' ->> 'title'), 'Flenski-"teilgenommen" = angemeldet (noch kein Besuch)');
-select is((select category from public.sessions where flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid),
+select is((select category from public.sessions where tenant_id = '00000000-0000-0000-0000-00000000000a' and flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid),
   {{am-event-teilgenommen}} -> 'category' ->> 'name', 'Stunde übernimmt die Event-Kategorie');
 select is((select count(*)::int from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'event_attended'), 1, 'Anmeldung steht auch im Aktivitätsverlauf');
 
@@ -110,7 +110,7 @@ select throws_ok($$select public.finalize_past_sessions()$$, '42501', null, 'Ter
 select pg_temp.logout();
 -- Termin in die Vergangenheit legen (= er hat stattgefunden)
 update public.sessions set starts_at = now() - interval '1 hour', ends_at = null
-where flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid;
+where tenant_id = '00000000-0000-0000-0000-00000000000a' and flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid;
 select ok(public.finalize_past_sessions() >= 1, 'Termine abschließen läuft');
 select is((select a.status::text from public.attendances a join public.customers c on c.id = a.customer_id
            where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'), 'present', 'Nach Terminbeginn: angemeldet wird „da“');
@@ -194,7 +194,7 @@ select is(public.import_flenski_snapshot('00000000-0000-0000-0000-00000000000b',
     'recurringEventPattern', jsonb_build_object('frequency', 'weekly', 'repeatEvery', 1, 'totalOccurrences', 10),
     'lastAttended', jsonb_build_array('b1000000-0000-0000-0000-000000000001'))))),
   '{"personen": 1, "produkte": 1, "karten": 1, "serien": 1, "anmeldungen": 1}'::jsonb, 'Erstabgleich übernimmt Person, Plan, Karte, Serie, Anmeldung');
-select is((select count(*)::int from public.sessions where flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 10,
+select is((select count(*)::int from public.sessions where tenant_id = '00000000-0000-0000-0000-00000000000b' and flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 10,
   'Serie mit 10 Terminen wird als 10 Stunden angelegt');
 select ok((select bool_and((starts_at at time zone 'Europe/Berlin')::time = time '19:00') from public.sessions
            where flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 'Alle Termine um 19:00 Uhr (auch nach der Zeitumstellung)');
