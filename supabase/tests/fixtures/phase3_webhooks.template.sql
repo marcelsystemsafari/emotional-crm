@@ -194,8 +194,8 @@ select is(public.import_flenski_snapshot('00000000-0000-0000-0000-00000000000b',
     'recurringEventPattern', jsonb_build_object('frequency', 'weekly', 'repeatEvery', 1, 'totalOccurrences', 10),
     'lastAttended', jsonb_build_array('b1000000-0000-0000-0000-000000000001'))))),
   '{"personen": 1, "produkte": 1, "karten": 1, "serien": 1, "anmeldungen": 1}'::jsonb, 'Erstabgleich übernimmt Person, Plan, Karte, Serie, Anmeldung');
-select is((select count(*)::int from public.sessions where tenant_id = '00000000-0000-0000-0000-00000000000b' and flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 10,
-  'Serie mit 10 Terminen wird als 10 Stunden angelegt');
+select is((select count(*)::int from public.sessions where tenant_id = '00000000-0000-0000-0000-00000000000b' and flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 1,
+  'Serie: nur der Termin, den Flenski liefert (keine hochgerechneten Folgetermine)');
 select ok((select bool_and((starts_at at time zone 'Europe/Berlin')::time = time '19:00') from public.sessions
            where flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 'Alle Termine um 19:00 Uhr (auch nach der Zeitumstellung)');
 select public.import_flenski_snapshot('00000000-0000-0000-0000-00000000000b', jsonb_build_object(
