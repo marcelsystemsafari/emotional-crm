@@ -48,6 +48,22 @@ Für **jede Zeile** der Tabelle unten legst du eine Automation an. Pro Automatio
 
 ---
 
+## Teil 1b – Automationen neu anlegen und Schlüssel sichern (22.10.2026)
+
+Flenski signiert jede echte Nachricht mit einem **eigenen Schlüssel pro Automation** und zeigt ihn **nur einmal** beim Anlegen. Der „Testen“-Knopf benutzt dagegen einen Einmalschlüssel, Testnachrichten lassen sich also nie prüfen. Echte Nachrichten schon.
+
+Vorbereitung: `.env.local` im Editor öffnen. Ganz unten steht für jede Automation eine leere Zeile `FLENSKI_SECRET_…=`.
+
+Für **jede** der 16 Automationen (auch „Neues Mitglied“, dessen Schlüssel im Chat stand):
+1. **Alte Automation löschen.** Sonst kommen Nachrichten doppelt, eine davon mit unbekanntem Schlüssel.
+2. Neue Automation anlegen, gleicher Trigger, **gleiche Adresse** wie in der Tabelle oben, Limits „ohne Limit / sofort“.
+3. Sobald Flenski den Schlüssel zeigt: kopieren → im Editor hinter das passende `=` einfügen → **sofort Strg + S**.
+4. Erst danach den Flenski-Dialog schließen.
+
+Den Schlüssel nie in den Chat. Wenn alle 16 drin sind, Claude Code Bescheid geben. Claude überträgt sie dann sicher in die Datenbank und prüft mit einer echten Nachricht.
+
+---
+
 ## Teil 2 – Eigener Mailversand in Supabase (für den Login per Code)
 
 Im kostenlosen Supabase-Tarif steht in der Login-Mail nur ein Link und **kein Code**. Der Link öffnet sich aber im normalen Browser statt in der Flenski-App. Deshalb soll Supabase die Mails über dein eigenes Postfach verschicken. Das ist sowieso nötig, denn Supabase selbst verschickt nur 2 Mails pro Stunde und nur an dich.
