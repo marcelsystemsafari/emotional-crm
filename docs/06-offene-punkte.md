@@ -16,7 +16,7 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 
 - [x] Webhook-Payloads je Trigger über „Testen“ (22.10.2026, 16 Trigger, `inbox/webhooks/`). „Beitrag in der Community“ und „Frage gestellt“ gibt es in Lanas App nicht.
 - [ ] **Echte** Ereignisse auslösen (Testmitglied anlegen, Plan zuweisen/entziehen, Event-Teilnahme, Kurs, Beitrag). Bisher sind alles Beispieldaten vom Testen-Knopf.
-- [x] **Signatur-Schlüssel:** ein Schlüssel pro Automation, alle 16 neu angelegt und gesichert (22.10.2026, Entscheidung 0004). Offen: Beweis mit einer echten Nachricht.
+- [x] **Signatur-Schlüssel:** ein Schlüssel pro Automation, alle 16 neu angelegt und gesichert (22.10.2026, Entscheidung 0004). Bewiesen am 22.10.2026, 11:46 (echtes „Artikel gelesen“, `signature_valid = true`).
 - [ ] Support-Anfrage: REST-API für eigene Server? Plan per API entziehen? Mitgliedsdaten in Custom Pages? Wiederholte Zustellung bei Fehler? (Textvorschlag unten)
 - [ ] Test: `ui/phase0-test.html` in eine Test-Custom-Page einfügen und Ergebnis auf Handy + Desktop als Screenshot in `inbox/screenshots/` legen
 - [ ] **Aktivität:** Als Admin ein Mitglied → Profil ansehen → Aktivität öffnen, F12 → Reiter „Netzwerk" → Seite neu laden und Screenshot der geladenen Anfrage (nur Name und Adresse) in `inbox/screenshots/` legen. Ergebnis entscheidet, ob es eine Historie gibt oder ob sie erst mit dem Mitschnitt beginnt.
