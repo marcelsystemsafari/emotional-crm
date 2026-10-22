@@ -745,6 +745,7 @@
           case 'karte_fast_leer': return 'Karte fast leer – Zeit für die nächste';
           case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ' · noch ' + d.rest : '');
           case 'neu_dabei': return 'zum ersten Mal da – willkommen heißen';
+          case 'neu_in_app': return 'neu in der App seit ' + this.dateShort(d.seit) + ' – willkommen heißen';
           default: return NOTICE[g.art] || g.art;
         }
       },
@@ -752,12 +753,13 @@
         var o = this.overview[id];
         return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : '';
       },
-      actionLabel(art) { return art === 'neu_dabei' ? 'Willkommen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Nachricht'; },
+      actionLabel(art) { return art === 'neu_dabei' || art === 'neu_in_app' ? 'Willkommen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Nachricht'; },
       // Vorbefüllte Nachricht – warm, ohne Überwachungssprache (08, Abschnitt 4)
       messageText(id, art) {
         var p = this.person(id), o = this.overview[id] || {}, vor = p.first_name || '';
         var gruss = '\n\nLiebe Grüße\n' + ((this.tenant.settings && this.tenant.settings.signatur) || this.tenant.name);
         if (art === 'neu_dabei') return 'Hallo ' + vor + ', schön, dass du dabei bist! Wie hat dir die erste Stunde gefallen? Ich freue mich auf das nächste Mal.' + gruss;
+        if (art === 'neu_in_app') return 'Hallo ' + vor + ', herzlich willkommen in meiner App! Schön, dass du da bist. Wenn du Fragen hast oder nicht weißt, welcher Kurs zu dir passt, schreib mir einfach.' + gruss;
         if (art === 'karte_fast_leer') return 'Hallo ' + vor + ', deine Karte ist fast aufgebraucht. Soll ich dir eine neue zurücklegen?' + gruss;
         if (art === 'laeuft_bald_ab') return 'Hallo ' + vor + ', kleine Erinnerung: deine Karte läuft bald ab' + (o.credits_balance ? ' und du hast noch ' + o.credits_balance + ' Besuche' : '') + '. Ich freue mich, dich bald zu sehen!' + gruss;
         if (art === 'zahlung_fehlgeschlagen') return 'Hallo ' + vor + ', bei deiner letzten Zahlung in der App hat etwas nicht geklappt. Magst du kurz nachschauen? Bei Fragen melde dich gern.' + gruss;
@@ -767,7 +769,9 @@
         var o = this.overview[id] || {}, text = encodeURIComponent(this.messageText(id, art));
         var phone = (o.phone || '').replace(/[^\d+]/g, '').replace(/^00/, '+').replace(/^0/, '+49');
         if (phone) return 'https://wa.me/' + phone.replace('+', '') + '?text=' + text;
-        if (o.email) return 'mailto:' + o.email + '?subject=' + encodeURIComponent('Ich habe an dich gedacht') + '&body=' + text;
+        var betreff = { neu_in_app: 'Herzlich willkommen', neu_dabei: 'Schön, dass du da warst', karte_fast_leer: 'Deine Karte',
+          laeuft_bald_ab: 'Deine Karte', zahlung_fehlgeschlagen: 'Deine Zahlung' }[art] || 'Ich habe an dich gedacht';
+        if (o.email) return 'mailto:' + o.email + '?subject=' + encodeURIComponent(betreff) + '&body=' + text;
         return '';
       },
       feedKind(art) {
@@ -857,9 +861,12 @@
         return p ? 'https://wa.me/' + p.replace('+', '') : '';
       },
       balanceShort() {
-        var o = this.overview[this.personId] || {};
-        if (o.has_unlimited) return 'Block';
-        var hasCard = this.detail.ents.some(function (e) { return !e.unlimited; });
+        var o = this.overview[this.personId] || {}, products = this.products;
+        // Pläne, die noch nicht eingerichtet sind, zählen noch nicht – sonst stünde dort fälschlich "Block"
+        var offen = function (e) { var p = products.find(function (x) { return x.id === e.product_id; }); return p && p.needs_setup; };
+        var aktiv = this.detail.ents.filter(function (e) { return e.status === 'active' && !offen(e); });
+        if (aktiv.some(function (e) { return e.unlimited; })) return 'Block';
+        var hasCard = aktiv.some(function (e) { return !e.unlimited; });
         return hasCard ? String(o.credits_balance || 0) : '–';
       },
       entText(e) {

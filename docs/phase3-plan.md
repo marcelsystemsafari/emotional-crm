@@ -1,6 +1,6 @@
 # Plan Phase 3 (neu) – Automatisch aus der App + neue Oberfläche
 
-Stand: 22.10.2026 · Status: **in Arbeit** – Schritt 1 und 2 fertig (22.10.2026)
+Stand: 22.10.2026 · Status: **gebaut, wartet auf Test in Flenski + Abnahme** – Schritte 1–4 fertig (22.10.2026)
 Grundlage: Entscheidung 0005, echte Payloads in `inbox/webhooks/`, Modul Aktivität (`08-aktivitaet.md`).
 
 ## Ziel in einem Satz
@@ -53,3 +53,9 @@ Datenbank-Regeln aus Phase 1 (Buchungsprotokoll, FEFO, Storno, Signale) – sie 
 - „Am Event teilgenommen“ erscheint als Besuch im Verlauf und bucht von der Karte ab (sobald der Plan eingerichtet ist).
 - Martinas Artikel-Lesen steht in ihrem Verlauf, ihr Status stimmt.
 - Lana sagt beim Blick auf die Übersicht: „Ja, so sehe ich meine Leute.“
+
+## Stand Schritt 3 + 4 (22.10.2026)
+- Aktivitätsstatus `v_customer_engagement`, Zeitleiste `activity_feed`, Kümmern-Liste `care_list` (inkl. „neu in der App – willkommen heißen“), Beitrittsdatum aus Flenski. 175 Tests grün.
+- Neue Oberfläche `ui/crm.html`: Übersicht · Menschen · Kurse · Einstellungen (Zahnrad). Mit Lanas echten Daten in der Vorschau geprüft (Martina, Sarah, 44 Termine, 3 Pläne zum Einrichten); Schreibwege (Zahlung von Hand) in der Demo geprüft, Buchungen gezählt.
+- Gefunden und behoben: Neue Mitglieder fehlten in der Kümmern-Liste; Guthaben zeigte „Block“ bei nicht eingerichtetem Plan; E-Mail-Betreff passte nicht zum Anlass; Demo-Personen waren alle „neu“ (Beitrittsdatum).
+- Offen: Lanas Pläne einrichten (macht Lana), Test in Flenski am iPhone, Abnahme.

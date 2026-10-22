@@ -75,6 +75,9 @@ select is((select prio from public.care_list('00000000-0000-0000-0000-0000000000
 select ok(not exists (select 1 from public.care_list('00000000-0000-0000-0000-00000000000a') where customer_id = 'c0000000-0000-0000-0000-000000000003'),
   'Kümmern-Liste: Wer dabei ist, steht nicht drauf');
 
+select is((select gruende -> 0 ->> 'art' from public.care_list('00000000-0000-0000-0000-00000000000a') where customer_id = 'c0000000-0000-0000-0000-000000000005'),
+  'neu_in_app', 'Kümmern-Liste: Neue ohne Kursbesuch werden zum Begrüßen vorgeschlagen');
+
 -- Rechte (08: Mandant A sieht keine Aktivität von B)
 select pg_temp.login('10000000-0000-0000-0000-00000000000b');
 select is((select count(*)::int from public.v_customer_engagement where tenant_id = '00000000-0000-0000-0000-00000000000a'), 0,

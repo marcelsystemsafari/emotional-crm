@@ -97,5 +97,12 @@ begin
   -- Eine verpasste Stunde ohne Absage
   perform public.cancel_attendance(v_erw[9], (select id from public.customers where tenant_id = v_t and first_name = 'Katrin'), true);
 
+  -- Beitrittsdatum: kurz vor dem ersten Kauf/Besuch (sonst wären alle "neu")
+  update public.customers c set joined_at = coalesce(least(
+      (select min(e.starts_at) from public.entitlements e where e.customer_id = c.id),
+      (select min(s.starts_at) from public.attendances a join public.sessions s on s.id = a.session_id where a.customer_id = c.id)),
+    c.joined_at) - interval '3 days'
+  where c.tenant_id = v_t;
+
   raise notice 'Demo angelegt: %', v_t;
 end $$;
