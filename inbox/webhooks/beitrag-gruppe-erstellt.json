@@ -1,0 +1,144 @@
+{
+  "post": {
+    "id": "920232da-71a5-4977-8965-45a331a5b858",
+    "url": "https://appdemo.systemsafari.de/yoga-by-lana/groups/g/nach-der-stunde/p/6ad8d57da251f",
+    "text": "<div>[Inhalt entfernt]</div>",
+    "createdAt": "2026-10-21T15:08:45+00:00",
+    "mediaCount": 0
+  },
+  "space": {
+    "id": "fd45d301-054f-4821-b5a7-fd68fb8ef53a",
+    "name": "Nach der Stunde"
+  },
+  "member": {
+    "id": "94844fa1-d501-4c08-bc29-370db405dd30",
+    "bio": null,
+    "tags": "Yogalehrerin",
+    "cover": null,
+    "email": "erika.muster@example.com",
+    "phone": null,
+    "plans": null,
+    "avatar": {
+      "id": "bbeada90-0898-4ad9-b1a1-f292337cda01",
+      "url": "https://cdn.flenski.io/beispiel.jpg",
+      "meta": {
+        "duration": null,
+        "isVoiceRecord": false
+      },
+      "type": "image",
+      "status": "uploaded",
+      "formats": [
+        {
+          "id": "9de10d06-e2c7-4562-be62-41e923674c43",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad48f938fc39109364165.png",
+            "size": 277673,
+            "width": 400,
+            "height": 400,
+            "mimeType": "image/png",
+            "dimensions": [
+              "400",
+              "400"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"400\" height=\"400\""
+          }
+        },
+        {
+          "id": "4408f112-6f11-4bce-b9b1-c05388fb6630",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_webp_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad48f9415825452312871.webp",
+            "size": 28592,
+            "width": 800,
+            "height": 800,
+            "mimeType": "image/webp",
+            "dimensions": [
+              "800",
+              "800"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"800\" height=\"800\""
+          }
+        }
+      ],
+      "fileInfo": {
+        "name": "6ad48f938fc39109364165.png",
+        "size": 277673,
+        "width": 400,
+        "height": 400,
+        "mimeType": "image/png",
+        "dimensions": [
+          "400",
+          "400"
+        ],
+        "originalName": "beispiel.jpg",
+        "htmlDimensions": "width=\"400\" height=\"400\""
+      },
+      "createdAt": "2026-10-18T09:21:23+00:00",
+      "isDeleted": false,
+      "timeCodes": [],
+      "updatedAt": "2026-10-18T09:21:23+00:00",
+      "transcript": null,
+      "trimSource": null,
+      "permissions": {
+        "id": "bbeada90-0898-4ad9-b1a1-f292337cda01",
+        "can": [
+          "view",
+          "edit",
+          "delete",
+          "add_to_favorites",
+          "attach"
+        ],
+        "scope": "file",
+        "restrictions": [
+          {
+            "action": "denied",
+            "reason": "Only document files can be replaced. Replacing images, audio and video is not supported.",
+            "attribute": "replace_content",
+            "purchasePoint": null,
+            "purchaseItemType": null
+          }
+        ]
+      },
+      "errorMessage": null,
+      "encodeProgress": null,
+      "playtimeSeconds": null,
+      "isCustomThumbnail": false,
+      "isEnabledTimeCodes": false,
+      "transcriptionStatus": "none"
+    },
+    "status": "active",
+    "isAdmin": false,
+    "website": null,
+    "fullName": "Erika Muster",
+    "headline": null,
+    "language": "de",
+    "lastName": "Muster",
+    "createdAt": "2026-10-18T09:19:19+00:00",
+    "firstName": "Erika",
+    "isBlocked": false,
+    "isFlagged": false,
+    "isInvited": false,
+    "isPunished": false,
+    "postsCount": 1,
+    "twitterUrl": null,
+    "facebookUrl": null,
+    "linkedinUrl": null,
+    "instagramUrl": null,
+    "commentsCount": 0,
+    "isMemberOfTeam": false
+  },
+  "envelope": {
+    "appId": "ec50109c-45d1-45a2-86d6-a93429f73fe7",
+    "event": "groups_post_created",
+    "appName": "Yoga.by.Lana",
+    "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
+    "occurredAt": "2026-10-22T06:47:00+00:00"
+  }
+}

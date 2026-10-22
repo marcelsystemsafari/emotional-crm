@@ -43,6 +43,48 @@ Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gel�
 | Enthalten die Aktivitäts-Webhooks Profil-ID **und** Titel (Kurs/Artikel/Event)? | Zuordnung zur Kundin, Anzeige im Verlauf | Ereignis ohne Titel speichern, Zuordnung nur über Profil-ID |
 | Liefert die Admin-Profilansicht ihren Verlauf über eine Anfrage, die ein eigener Server (mit Schlüssel) aufrufen dürfte? | Historie rückwirkend | Historie beginnt erst mit dem Mitschnitt; Spike in Phase 0, kein Fundament |
 
+## Ergebnisse Phase 0 (Stand 22.10.2026, Webhook-Mitschnitt)
+
+Quelle: 19 Webhooks über den Knopf „Testen“ in Lanas App, anonymisiert in `inbox/webhooks/`. **Alles Beispieldaten** („Sample plan“, „SAMPLE-ORDER-1“), das Mitglied ist das Profil der testenden Person. Echte Ereignisse stehen noch aus.
+
+**Format (gesichert):**
+- JSON-Body, Header `X-Flenski-Signature: sha256=<hex>`, `User-Agent: Symfony HttpClient (Curl)`.
+- Jeder Body hat `envelope` mit `appId`, `appName`, `projectId`, `event` (Ereignisname) und `occurredAt`. Fast jeder Body hat `member` mit `id` (= Profil-ID), `email`, `firstName`, `lastName`, `fullName`, `tags`, `plans`, `isMemberOfTeam` u. a.
+- Ein Knopfdruck auf „Testen“ ist am Header `baggage` (`sentry-transaction=…app_automation_webhook_test`) erkennbar. Das ist kein offizielles Merkmal, also nicht als Logik verwenden.
+
+| Trigger (unsere URL) | `envelope.event` | Wichtige Felder außer `member` |
+|---|---|---|
+| neues-mitglied | `new_member` | – |
+| neuer-kontakt | `lead_created` | `contact.id`, `fullName`, `email`, `phone`, `message` (kein `member`) |
+| plan-zugewiesen | `member_plan_assigned` | `plan.id`, `plan.name`, `source` (z. B. `payment`), `expireAt`, `assignedBy` |
+| plan-entzogen | `member_plan_removed` | `plan.id`, `reason` (z. B. `refunded`), `removedBy` |
+| mitglied-geloescht | `member_deleted` | `reason`, `deletedAt` |
+| bestellung-abgeschlossen | `order_completed` | `order` (`id`, `orderId`, `amount`, `currency`, `paySystemType`), `plans[]`, `subscription` |
+| zahlung-fehlgeschlagen | `payment_failed` | `order`, `subscription`, `attemptNumber`, `failureReason` |
+| abonnement-gekuendigt | `subscription_cancelled` | `plans[]`, `subscription`, `cancelledAt`, `lastPaidDay` |
+| am-event-teilgenommen | `event_attended` | `event` (`id`, `title`, `startAt`, `endAt`), `category`, `source` (`signup`), `attendedAt` |
+| event-beginnt-bald | `event_starts_soon` | `event`, `category`, `minutesBefore` |
+| zum-kurs-angemeldet | `course_enrolled` | `course` (`id`, `title`), `accessSource`, `enrolledAt` |
+| kurs-abgeschlossen | `course_completed` | `course`, `startedAt`, `completedAt`, `completedLessonsCount` |
+| beitrag-gruppe-erstellt | `groups_post_created` | `post` (`id`, **`text` = kompletter Beitrag**), `space.name` |
+| kommentar-erstellt | `comment_created` | `comment` (**`text`**), `target` (`title` = Textanfang des Beitrags), **`targetAuthor`** (Name + E-Mail einer zweiten Person) |
+| datei-heruntergeladen | `file_downloaded` | `download` (`id`, `title`), `category`, `file` |
+| artikel-gelesen | `article_viewed` | `article` (`id`, `title`), `category` |
+
+Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Community erstellt“, „Frage in der Fragebox gestellt“.
+
+**Damit beantwortet:**
+- Webhooks enthalten die Profil-ID (`member.id`) und bei Plänen die Plan-ID (`plan.id`). ✅
+- „Bestellung abgeschlossen“ enthält Betrag, Währung, Pläne und Mitglied. ✅ Automatischer Kauf-Eintrag ist möglich.
+- Aktivitäts-Webhooks enthalten Profil-ID **und** Titel. ✅
+- Fachliche Ereignis-ID für die Doppelerkennung: `envelope.event` + `envelope.occurredAt` + `member.id` + ID des Objekts (Plan, Kurs, Event …). Wird in Phase 3 umgesetzt. Bis dahin gilt der SHA-256 des Bodys.
+
+**Weiter offen:**
+- **Signatur:** Format `sha256=<hex>`. Es ist **nicht** HMAC mit unserem `webhook_secret`, nicht ohne Schlüssel und kein reiner SHA-256. Flenski benutzt also einen eigenen Schlüssel. Wo er angezeigt wird, ist unbekannt (siehe 06, Abschnitt B).
+- „Am Event teilgenommen“ hat `source: signup`. Ob das „angemeldet“ oder „anwesend“ heißt, bleibt offen, bis ein echtes Ereignis vorliegt. Bis dahin gilt weiter: nur `registered`.
+- Beispieldaten ersetzen keine echten Ereignisse: Plan-IDs, Beträge und `source` müssen an echten Vorgängen bestätigt werden.
+- **Datenschutz:** Beitrags- und Kommentartexte sowie `targetAuthor` kommen mit. Regel 10 (CLAUDE.md) verbietet, Inhalte in `activity_events` zu übernehmen. Im Rohspeicher `webhook_events` liegen sie aber derzeit vollständig. Entscheidung offen (06, Abschnitt A).
+
 ## Mapping Trigger → Domain-Ereignis
 
 | Flenski-Trigger | Wirkung im CRM |

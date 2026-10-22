@@ -1,0 +1,27 @@
+# Empfangen 2026-10-22 06:45:50.505796+00 · über den Knopf „Testen“ in Flenski (Beispieldaten)
+accept: */*
+accept-encoding: gzip
+baggage: sentry-trace_id=f4f2ed1ecbf14a05aa40e4f8ddec8f61,sentry-transaction=POST%20app_automation_webhook_test,sentry-public_key=a22c1a50df0e3b196da7afe8f9490432,sentry-release=1.0.0%2Bno-version-set,sentry-environment=prod,sentry-sampled=false,sentry-sample_rand=0.366006,sb-request-id=01a1625b-dd3a-7f10-ab78-9ca2d64c66b4
+cdn-loop: cloudflare; loops=1
+cf-connecting-ip: 116.202.39.98
+cf-ew-via: 15
+cf-ray: a4e68a9bcb114db9-FRA
+cf-visitor: {"scheme":"https"}
+cf-worker: supabase.co
+content-length: 2917
+content-type: application/json
+host: edge-runtime.supabase.com
+sb-request-id: 01a1625b-dd3a-7f10-ab78-9ca2d64c66b4
+sentry-trace: f4f2ed1ecbf14a05aa40e4f8ddec8f61-610ad284de57450c-0
+traceparent: 00-6ad9b11d000000008f3cd193610a1f2a-ff50d8ca87cb0b7a-01
+tracestate: dd=p:ff50d8ca87cb0b7a;t.dm:-1
+user-agent: Symfony HttpClient (Curl)
+x-amzn-trace-id: Root=1-6ad9b11e-0fec6b465ba1fab408efc344
+x-datadog-parent-id: 18397442842181700474
+x-datadog-sampling-priority: 1
+x-datadog-tags: _dd.p.tid=6ad9b11d00000000,_dd.p.dm=-1
+x-datadog-trace-id: 10321354876944785194
+x-flenski-signature: sha256=7fbdfdaae559bbe122161644652d1ab8fe118f1e5bb7e7f3a3cc79cf5edbb2f9
+x-forwarded-for: 116.202.39.98,116.202.39.98, 99.83.99.145
+x-forwarded-port: 443
+x-forwarded-proto: https

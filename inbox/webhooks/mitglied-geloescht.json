@@ -1,0 +1,135 @@
+{
+  "member": {
+    "id": "72f8bf20-79da-4883-9cfa-e95d2e8069d7",
+    "bio": null,
+    "tags": null,
+    "cover": null,
+    "email": "erika.muster@example.com",
+    "phone": null,
+    "plans": null,
+    "avatar": {
+      "id": "6ca3dd64-6c49-43ba-80f6-521dc72e0e0c",
+      "url": "https://cdn.flenski.io/beispiel.jpg",
+      "meta": {
+        "duration": null,
+        "isVoiceRecord": false
+      },
+      "type": "image",
+      "status": "uploaded",
+      "formats": [
+        {
+          "id": "f5027ec3-4b0c-454c-89fb-040ac29a0d11",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad49952af1a4698312626.jpg",
+            "size": 54254,
+            "width": 720,
+            "height": 720,
+            "mimeType": "image/jpeg",
+            "dimensions": [
+              "720",
+              "720"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"720\" height=\"720\""
+          }
+        },
+        {
+          "id": "6eef3396-70d1-4730-8121-133db5ce1b59",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_webp_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad499533d453640168723.webp",
+            "size": 29106,
+            "width": 800,
+            "height": 800,
+            "mimeType": "image/webp",
+            "dimensions": [
+              "800",
+              "800"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"800\" height=\"800\""
+          }
+        }
+      ],
+      "fileInfo": {
+        "name": "6ad49952af1a4698312626.jpg",
+        "size": 54254,
+        "width": 720,
+        "height": 720,
+        "mimeType": "image/jpeg",
+        "dimensions": [
+          "720",
+          "720"
+        ],
+        "originalName": "beispiel.jpg",
+        "htmlDimensions": "width=\"720\" height=\"720\""
+      },
+      "createdAt": "2026-10-18T10:02:58+00:00",
+      "isDeleted": false,
+      "timeCodes": [],
+      "updatedAt": "2026-10-18T10:02:58+00:00",
+      "transcript": null,
+      "trimSource": null,
+      "permissions": {
+        "id": "6ca3dd64-6c49-43ba-80f6-521dc72e0e0c",
+        "can": [
+          "view",
+          "edit",
+          "delete",
+          "add_to_favorites",
+          "attach"
+        ],
+        "scope": "file",
+        "restrictions": [
+          {
+            "action": "denied",
+            "reason": "Only document files can be replaced. Replacing images, audio and video is not supported.",
+            "attribute": "replace_content",
+            "purchasePoint": null,
+            "purchaseItemType": null
+          }
+        ]
+      },
+      "errorMessage": null,
+      "encodeProgress": null,
+      "playtimeSeconds": null,
+      "isCustomThumbnail": false,
+      "isEnabledTimeCodes": false,
+      "transcriptionStatus": "none"
+    },
+    "status": "active",
+    "isAdmin": false,
+    "website": null,
+    "fullName": "Erika Muster",
+    "headline": null,
+    "language": "de",
+    "lastName": "Muster",
+    "createdAt": "2026-10-16T11:29:19+00:00",
+    "firstName": "Erika",
+    "isBlocked": false,
+    "isFlagged": false,
+    "isInvited": false,
+    "isPunished": false,
+    "postsCount": 1,
+    "twitterUrl": null,
+    "facebookUrl": null,
+    "linkedinUrl": null,
+    "instagramUrl": null,
+    "commentsCount": 1,
+    "isMemberOfTeam": true
+  },
+  "reason": "admin",
+  "envelope": {
+    "appId": "ec50109c-45d1-45a2-86d6-a93429f73fe7",
+    "event": "member_deleted",
+    "appName": "Yoga.by.Lana",
+    "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
+    "occurredAt": "2026-10-22T06:43:02+00:00"
+  },
+  "deletedAt": "2026-10-22T06:43:02+00:00"
+}

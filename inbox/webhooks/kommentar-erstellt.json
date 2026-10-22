@@ -1,0 +1,150 @@
+{
+  "member": {
+    "id": "e47965ee-4a4c-4a1a-81b3-cdf9ca903000",
+    "bio": null,
+    "tags": null,
+    "cover": null,
+    "email": "erika.muster@example.com",
+    "phone": null,
+    "plans": null,
+    "avatar": {
+      "id": "567a1fd2-db71-47e8-8493-958a7d14b5ca",
+      "url": "https://cdn.flenski.io/beispiel.jpg",
+      "meta": {
+        "duration": null,
+        "isVoiceRecord": false
+      },
+      "type": "image",
+      "status": "uploaded",
+      "formats": [
+        {
+          "id": "3e82c05d-1c52-4651-af6a-5ee3002531e7",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad4f0dbbbe49779141806.jpg",
+            "size": 42080,
+            "width": 400,
+            "height": 400,
+            "mimeType": "image/jpeg",
+            "dimensions": [
+              "400",
+              "400"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"400\" height=\"400\""
+          }
+        },
+        {
+          "id": "8b5c6b2a-b289-4e56-86f2-ec88ab553c8b",
+          "url": "https://cdn.flenski.io/beispiel.jpg",
+          "format": "thumb_webp_800x800",
+          "status": "uploaded",
+          "fileInfo": {
+            "name": "6ad4f0dc6478a298222150.webp",
+            "size": 37846,
+            "width": 800,
+            "height": 800,
+            "mimeType": "image/webp",
+            "dimensions": [
+              "800",
+              "800"
+            ],
+            "originalName": "beispiel.jpg",
+            "htmlDimensions": "width=\"800\" height=\"800\""
+          }
+        }
+      ],
+      "fileInfo": {
+        "name": "6ad4f0dbbbe49779141806.jpg",
+        "size": 42080,
+        "width": 400,
+        "height": 400,
+        "mimeType": "image/jpeg",
+        "dimensions": [
+          "400",
+          "400"
+        ],
+        "originalName": "beispiel.jpg",
+        "htmlDimensions": "width=\"400\" height=\"400\""
+      },
+      "createdAt": "2026-10-18T16:16:27+00:00",
+      "isDeleted": false,
+      "timeCodes": [],
+      "updatedAt": "2026-10-18T16:16:27+00:00",
+      "transcript": null,
+      "trimSource": null,
+      "permissions": {
+        "id": "567a1fd2-db71-47e8-8493-958a7d14b5ca",
+        "can": [
+          "view",
+          "edit",
+          "delete",
+          "add_to_favorites",
+          "attach"
+        ],
+        "scope": "file",
+        "restrictions": [
+          {
+            "action": "denied",
+            "reason": "Only document files can be replaced. Replacing images, audio and video is not supported.",
+            "attribute": "replace_content",
+            "purchasePoint": null,
+            "purchaseItemType": null
+          }
+        ]
+      },
+      "errorMessage": null,
+      "encodeProgress": null,
+      "playtimeSeconds": null,
+      "isCustomThumbnail": false,
+      "isEnabledTimeCodes": false,
+      "transcriptionStatus": "none"
+    },
+    "status": "active",
+    "isAdmin": false,
+    "website": null,
+    "fullName": "Erika Muster",
+    "headline": null,
+    "language": "de",
+    "lastName": "Muster",
+    "createdAt": "2026-10-18T16:12:36+00:00",
+    "firstName": "Erika",
+    "isBlocked": false,
+    "isFlagged": false,
+    "isInvited": false,
+    "isPunished": false,
+    "postsCount": 1,
+    "twitterUrl": null,
+    "facebookUrl": null,
+    "linkedinUrl": null,
+    "instagramUrl": null,
+    "commentsCount": 1,
+    "isMemberOfTeam": false
+  },
+  "target": {
+    "id": "920232da-71a5-4977-8965-45a331a5b858",
+    "url": "https://appdemo.systemsafari.de/yoga-by-lana/groups/g/nach-der-stunde/p/6ad8d57da251f",
+    "type": "post",
+    "title": "[Beitragsanfang entfernt]"
+  },
+  "comment": {
+    "id": "3fcf1759-4120-445b-9551-9ac8cfe6d4c1",
+    "url": "https://appdemo.systemsafari.de/yoga-by-lana/groups/g/nach-der-stunde/p/6ad8d57da251f#comment-3fcf1759-4120-445b-9551-9ac8cfe6d4c1",
+    "text": "<div>[Inhalt entfernt]</div>",
+    "createdAt": "2026-10-21T15:17:35+00:00"
+  },
+  "envelope": {
+    "appId": "ec50109c-45d1-45a2-86d6-a93429f73fe7",
+    "event": "comment_created",
+    "appName": "Yoga.by.Lana",
+    "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
+    "occurredAt": "2026-10-22T06:47:19+00:00"
+  },
+  "targetAuthor": {
+    "id": "94844fa1-d501-4c08-bc29-370db405dd30",
+    "email": "erika.muster@example.com",
+    "fullName": "Erika Muster"
+  }
+}

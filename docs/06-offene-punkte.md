@@ -9,16 +9,18 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 - [ ] **Stornoregel Default:** Bis wie viele Stunden vorher kostenlos absagen? Was passiert bei No-Show?
 - [ ] **Ruhemodus bei Kündigung:** Daten bis zu 12 Monate aufbewahren, wenn die Kundin das bei Kündigung ausdrücklich wählt (siehe 01, Abschnitt 6)?
 - [ ] **Produktname** (Arbeitstitel „Emotional CRM").
+- [ ] **Beitragsinhalte im Rohspeicher:** Flenski schickt bei Beiträgen und Kommentaren den kompletten Text und Name/E-Mail der angesprochenen Person mit. Vorschlag: Sobald die Signatur prüfbar ist, prüft der Empfänger sie direkt beim Eingang und speichert danach nur noch eine bereinigte Fassung ohne Texte. Bis dahin liegen die Texte im Rohspeicher (nur Server-Zugriff).
 - [ ] **Schwellen vereinheitlichen:** Signal „Droht abzuspringen" (21 Tage + Guthaben) und Aktivitätsstatus „Kühlt ab" (Standard 15–30 Tage) dürfen sich nicht widersprechen. Vorschlag: Status 14/30 Tage, Signal bleibt zusätzlich an Guthaben > 0 gekoppelt. Lana soll im Gespräch sagen, ab wann sie bei einer Kundin sagt „die habe ich lange nicht gesehen".
 
 ## B. Von Flenski / aus der Flenski-Oberfläche
 
-- [ ] Echte Webhook-Payloads je Trigger (Phase 0, Anleitung in `inbox/README.md`)
-- [ ] Wie das Signatur-Secret gesetzt/angezeigt wird (Screenshot)
+- [x] Webhook-Payloads je Trigger über „Testen“ (22.10.2026, 16 Trigger, `inbox/webhooks/`). „Beitrag in der Community“ und „Frage gestellt“ gibt es in Lanas App nicht.
+- [ ] **Echte** Ereignisse auslösen (Testmitglied anlegen, Plan zuweisen/entziehen, Event-Teilnahme, Kurs, Beitrag). Bisher sind alles Beispieldaten vom Testen-Knopf.
+- [ ] **Signatur-Schlüssel:** Flenski signiert mit `sha256=<hex>` und einem eigenen Schlüssel. Wo zeigt Flenski ihn an (Automation, App-Einstellungen, Integrationen)? Screenshot mit geschwärztem Schlüssel; den Schlüssel selbst trägt Marcel als `FLENSKI_WEBHOOK_SECRET` in `.env.local` ein.
 - [ ] Support-Anfrage: REST-API für eigene Server? Plan per API entziehen? Mitgliedsdaten in Custom Pages? Wiederholte Zustellung bei Fehler? (Textvorschlag unten)
 - [ ] Test: `ui/phase0-test.html` in eine Test-Custom-Page einfügen und Ergebnis auf Handy + Desktop als Screenshot in `inbox/screenshots/` legen
 - [ ] **Aktivität:** Als Admin ein Mitglied → Profil ansehen → Aktivität öffnen, F12 → Reiter „Netzwerk" → Seite neu laden und Screenshot der geladenen Anfrage (nur Name und Adresse) in `inbox/screenshots/` legen. Ergebnis entscheidet, ob es eine Historie gibt oder ob sie erst mit dem Mitschnitt beginnt.
-- [ ] **Aktivität:** Automationen für die Aktivitäts-Trigger (Liste in `08-aktivitaet.md`, Abschnitt 6) anlegen und auf den Empfänger zeigen lassen, so früh wie möglich.
+- [x] **Aktivität:** Automationen für die Aktivitäts-Trigger (angelegt 22.10.2026) (Liste in `08-aktivitaet.md`, Abschnitt 6) anlegen und auf den Empfänger zeigen lassen, so früh wie möglich.
 
 ## C. Von Lana (erste Mandantin)
 
