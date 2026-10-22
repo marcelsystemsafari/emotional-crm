@@ -6,11 +6,11 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 
 - [ ] **Ablauf einer Stunde bei Lana:** Melden sich Teilnehmerinnen vorher an (Flenski-Event, anderes Tool) oder kommen sie einfach? → bestimmt, ob der Check-in aus Anmeldungen vorbefüllt wird.
 - [ ] **Bindungslogik bestätigt:** CRM ist Teil des Monatspakets, bei Kündigung 30 Tage Lesen + Export, dann Löschung (siehe 01, Abschnitt 6).
-- [ ] **Stornoregel Default:** Bis wie viele Stunden vorher kostenlos absagen? Was passiert bei No-Show?
+- [x] **Stornoregel Default:** 12 Stunden vorher kostenlos; später absagen oder No-Show = Abzug (22.10.2026)
 - [ ] **Ruhemodus bei Kündigung:** Daten bis zu 12 Monate aufbewahren, wenn die Kundin das bei Kündigung ausdrücklich wählt (siehe 01, Abschnitt 6)?
 - [ ] **Produktname** (Arbeitstitel „Emotional CRM").
 - [ ] **Beitragsinhalte im Rohspeicher:** Flenski schickt bei Beiträgen und Kommentaren den kompletten Text und Name/E-Mail der angesprochenen Person mit. Vorschlag: Sobald die Signatur prüfbar ist, prüft der Empfänger sie direkt beim Eingang und speichert danach nur noch eine bereinigte Fassung ohne Texte. Bis dahin liegen die Texte im Rohspeicher (nur Server-Zugriff).
-- [ ] **Schwellen vereinheitlichen:** Signal „Droht abzuspringen" (21 Tage + Guthaben) und Aktivitätsstatus „Kühlt ab" (Standard 15–30 Tage) dürfen sich nicht widersprechen. Vorschlag: Status 14/30 Tage, Signal bleibt zusätzlich an Guthaben > 0 gekoppelt. Lana soll im Gespräch sagen, ab wann sie bei einer Kundin sagt „die habe ich lange nicht gesehen".
+- [x] **Schwellen vereinheitlichen (22.10.2026: Signal 21 Tage + Guthaben, Status 14/30, beides pro Mandantin änderbar):** Signal „Droht abzuspringen" (21 Tage + Guthaben) und Aktivitätsstatus „Kühlt ab" (Standard 15–30 Tage) dürfen sich nicht widersprechen. Vorschlag: Status 14/30 Tage, Signal bleibt zusätzlich an Guthaben > 0 gekoppelt. Lana soll im Gespräch sagen, ab wann sie bei einer Kundin sagt „die habe ich lange nicht gesehen".
 
 ## B. Von Flenski / aus der Flenski-Oberfläche
 

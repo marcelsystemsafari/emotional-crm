@@ -1,6 +1,6 @@
 # Plan Phase 1 – Fundament
 
-Stand: 22.10.2026 · Status: **Entwurf, wartet auf Marcels Okay**
+Stand: 22.10.2026 · Status: **Entscheidungen getroffen, wartet auf Go**
 Grundlage: `03-datenmodell.md`, `05-phasen.md`. Phase 1 baut **keine Oberfläche**. Alles passiert in der Datenbank und wird mit automatischen Tests bewiesen. Die Oberfläche kommt in Phase 2.
 
 ## In einem Satz
@@ -50,7 +50,7 @@ Jede Änderung an Kundinnen, Produkten und Einstellungen landet im `audit_log`.
 - `ledger_entries` lässt sich nicht ändern oder löschen.
 - Karte mit 4 → drei Besuche → ein Storno → Stand 2, Verlauf zeigt 5 Buchungen.
 - FEFO: Von zwei Karten wird die zuerst ablaufende belastet.
-- Kursblock: Teilnahme ohne Abzug. Keine Karte: Check-in klappt, Kundin „offen“.
+- Produkt vom Typ Zeitraum/Abo: Teilnahme ohne Abzug. Keine Karte: Check-in klappt, Kundin „offen“.
 - Storno rechtzeitig / zu spät / nicht erschienen nach Einstellung.
 - Ablauf: Rest verfällt mit Buchung. Korrektur ohne Kommentar wird abgelehnt.
 - Jedes Signal mit Beispiel. `staff` kann keine Produkte ändern. `cancelled` kann nur lesen, `dormant` gar nichts.
@@ -59,4 +59,9 @@ Jede Änderung an Kundinnen, Produkten und Einstellungen landet im `audit_log`.
 Noch keine Oberfläche, aber: eine Liste grüner Tests und auf Wunsch eine Tabelle der Demo-Kundinnen mit Restguthaben und Signalen, abgefragt direkt aus der Datenbank.
 
 ## Entscheidungen (von Marcel, 22.10.2026)
-Siehe Abschnitt unten, wird nach der Rückfrage ausgefüllt.
+| Frage | Entscheidung | Folge im Bau |
+|---|---|---|
+| Stornofrist | **12 Stunden** | `storno_frist_stunden = 12`; später absagen oder nicht kommen = Abzug |
+| Kursblock Erwachsene | **10er-Karte flexibel** | Produkt `type = credits`, `credits = 10`, `validity_days = 70`; jeder Besuch zieht 1 ab |
+| Abos | **nur unbegrenzt** | `subscription` ohne Kontingent, kein Abzug; Monatskontingente später |
+| Droht abzuspringen | **21 Tage + Guthaben** | `signal_inaktiv_tage = 21`; Status „Kühlt ab" bleibt 15–30 Tage, beides pro Mandantin änderbar |
