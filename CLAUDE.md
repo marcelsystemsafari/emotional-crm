@@ -45,8 +45,8 @@ Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 7. **Mobil zuerst.** Jede Ansicht muss auf 375 px Breite einhändig bedienbar sein. Der Check-in ist der wichtigste Screen. Die Oberfläche muss im Flenski-Layout leben: Präfix `ecrm-` für alle Klassen, alles in `#ecrm-root`, keine globalen Styles.
 8. **Keine Gesundheitsdaten**, keine zusätzlichen personenbezogenen Felder ohne Rückfrage.
 9. **Keine Löschung von Buchungen**, auch nicht beim Löschen einer Kundin (dann anonymisieren).
-11. **Alpine.js: keine Funktionen im beobachteten Zustand.** Alpine ruft Funktionen, die in einem Ausdruck (`x-if`, `x-show`, `x-text` …) als Ergebnis auftauchen, selbst auf. Am 22.10.2026 hat das eine Check-in-Schleife mit über 500 Buchungen ausgelöst. Rückruf-Funktionen außerhalb des Alpine-Zustands halten. Nach jedem Oberflächentest mit Buchungen die Anzahl der Buchungen zweimal zählen.
 10. **Aktivitätsdaten sparsam:** nur Ereignisart, Zeitpunkt und Titel (Kurs/Event/Artikel), nie Inhalte von Beiträgen, Kommentaren oder Fragen. Rollierend 12 Monate, danach löschen. Der Aktivitätsstatus (Neu/Aktiv/Kühlt ab/Eingeschlafen) wird in der Datenbank berechnet, nicht in der Oberfläche.
+11. **Alpine.js: keine Funktionen im beobachteten Zustand.** Alpine ruft Funktionen, die in einem Ausdruck (`x-if`, `x-show`, `x-text` …) als Ergebnis auftauchen, selbst auf. Am 22.10.2026 hat das eine Check-in-Schleife mit über 500 Buchungen ausgelöst. Rückruf-Funktionen außerhalb des Alpine-Zustands halten. Nach jedem Oberflächentest mit Buchungen die Anzahl der Buchungen zweimal zählen.
 
 ## Sprache und Ton der Oberfläche
 
