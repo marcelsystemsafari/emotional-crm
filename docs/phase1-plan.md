@@ -1,6 +1,6 @@
 # Plan Phase 1 – Fundament
 
-Stand: 22.10.2026 · Status: **Entscheidungen getroffen, wartet auf Go**
+Stand: 22.10.2026 · Status: **gebaut am 22.10.2026, wartet auf Abnahme** – 93 Datenbank-Tests grün
 Grundlage: `03-datenmodell.md`, `05-phasen.md`. Phase 1 baut **keine Oberfläche**. Alles passiert in der Datenbank und wird mit automatischen Tests bewiesen. Die Oberfläche kommt in Phase 2.
 
 ## In einem Satz

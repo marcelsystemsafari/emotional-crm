@@ -106,3 +106,4 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 3. In Flenski je Trigger eine Automation „Webhook senden" anlegen (URL mit `?tenant=<slug>&trigger=<name>`), Limits auf „ohne Limit / sofort". Den angezeigten Schlüssel **sofort** als `FLENSKI_SECRET_<TRIGGER>` in `.env.local` sichern, danach `node scripts/upload-webhook-secrets.mjs <slug>` (Entscheidung 0004).
 4. In Flenski eine Custom Page „Kundinnen" anlegen, Sichtbarkeit nur Team, ein **Embed-Widget** einfügen und darin den Inhalt von `ui/crm.html` mit dem Mandanten-Slug einfügen.
 5. Erstimport bestehender Mitglieder + CSV der externen Kundinnen.
+6. Lehrerin einladen: `node scripts/invite-user.mjs <email> <slug> owner` (Registrierung ist geschlossen).

@@ -109,7 +109,9 @@ Regeln (als SQL-Funktionen in Supabase, mit Datenbank-Tests):
 - `signature_valid` boolean nullable, `dedupe_key` (unique)
 - `received_at`, `processed_at`, `error`
 
-**audit_log** – wer hat wann was an Kundinnen/Produkten/Einstellungen geändert (`actor`, `action`, `entity`, `entity_id`, `diff jsonb`).
+**audit_log** – wer hat wann was an Kundinnen/Produkten/Einstellungen geändert (`actor`, `action`, `entity`, `entity_id`, `diff jsonb`). Bei Kundinnen enthält `diff` nur die **Namen** der geänderten Felder, keine Werte (sonst blieben Personendaten nach einer Löschung im Protokoll).
+
+**webhook_trigger_secrets** – Flenski-Schlüssel je Mandantin und Trigger, nur Server (Entscheidung 0004). `webhook_events` speichert zusätzlich `raw_body` (Signatur wird über die Rohbytes berechnet).
 
 ## Row Level Security
 

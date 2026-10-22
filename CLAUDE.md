@@ -62,10 +62,12 @@ supabase test db                         # Datenbank-Tests
 ```
 Auf Marcels Rechner heißt `supabase` konkret `./.tools/supabase.exe`, mit `SUPABASE_ACCESS_TOKEN` und `SUPABASE_DB_PASSWORD` aus `.env.local` als Umgebungsvariablen (kein `supabase login`, siehe Entscheidung 0003). Diese Werte nie ausgeben.
 
+Weitere Skripte (`scripts/`): `sql.mjs` (SQL ausführen), `test-db.mjs` (Datenbank-Tests), `invite-user.mjs` (Person einladen), `upload-webhook-secrets.mjs` (Flenski-Schlüssel), `export-webhooks.mjs` (Beispiel-Payloads anonymisiert).
+
 Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfiguration).
 
 ## Aktueller Stand
 
-**Phase 0 abgenommen am 22.10.2026.** Phase 1 in Planung (`docs/phase1-plan.md`). Fertig: Tabellen `tenants` + `webhook_events`, Edge Function `flenski-webhook` (speichert roh, dedupliziert), erweiterte `ui/phase0-test.html`. Erledigt: 17 Automationen mit Signaturprüfung (Entscheidung 0004), eigener Mailversand + deutsche Code-Mail. Einbettung entschieden: direkt im Flenski-Embed-Widget (Entscheidung 0001). iPhone getestet. Für Phase 1 merken: offene Registrierung (`disable_signup`) schließen, Nutzer nur per Einladung. Datenbank-Tests: `node scripts/test-db.mjs` (Ersatz für `supabase test db`, weil Docker fehlt). Offene Entscheidungen: `docs/06-offene-punkte.md`, Abschnitt A.
+**Phase 0 abgenommen am 22.10.2026. Phase 1 gebaut am 22.10.2026, wartet auf Abnahme** (`docs/phase1-plan.md`): alle Tabellen, RLS, Fachfunktionen (`sell`, `checkin`, `undo_checkin`, `cancel_attendance`, `correct`, `expire_entitlements`, `customer_signals`, `anonymize_customer`), nächtliche Jobs (pg_cron), Demo-Mandantin `yoga-by-lana-demo` (`supabase/seed.sql`), Registrierung geschlossen – Einladung per `node scripts/invite-user.mjs`. Fertig: Tabellen `tenants` + `webhook_events`, Edge Function `flenski-webhook` (speichert roh, dedupliziert), erweiterte `ui/phase0-test.html`. Erledigt: 17 Automationen mit Signaturprüfung (Entscheidung 0004), eigener Mailversand + deutsche Code-Mail. Einbettung entschieden: direkt im Flenski-Embed-Widget (Entscheidung 0001). iPhone getestet. Für Phase 1 merken: offene Registrierung (`disable_signup`) schließen, Nutzer nur per Einladung. Datenbank-Tests: `node scripts/test-db.mjs` (Ersatz für `supabase test db`, weil Docker fehlt). Offene Entscheidungen: `docs/06-offene-punkte.md`, Abschnitt A.
 
 Neu seit 21.10.2026: Modul Aktivität (`docs/08-aktivitaet.md`, Entscheidung `docs/entscheidungen/0002-aktivitaets-modul.md`). Wichtig für Phase 0: Die Aktivitäts-Trigger müssen von Anfang an mitgeschnitten werden, weil sich Historie nicht nachholen lässt.

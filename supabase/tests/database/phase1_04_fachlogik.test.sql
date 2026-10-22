@@ -160,6 +160,8 @@ select ok(pg_temp.hat_signal('c0000000-0000-0000-0000-000000000010', 'karte_fast
 select ok(pg_temp.hat_signal('c0000000-0000-0000-0000-000000000010', 'neu_dabei'), 'Signal „neu dabei“: erster Besuch vor 3 Tagen');
 select ok(pg_temp.hat_signal('c0000000-0000-0000-0000-000000000002', 'laeuft_bald_ab'), 'Signal „läuft bald ab“: Karte endet in 10 Tagen');
 select ok(not pg_temp.hat_signal('c0000000-0000-0000-0000-000000000001', 'droht_abzuspringen'), 'Kein Fehlalarm bei aktiver Kundin');
+select ok(not pg_temp.hat_signal('c0000000-0000-0000-0000-000000000005', 'karte_fast_leer'),
+  'Kundin ganz ohne Karte bekommt nicht „Karte fast leer“');
 select pg_temp.logout();
 
 -- Rechte
