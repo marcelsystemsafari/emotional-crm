@@ -8,7 +8,7 @@
 -->
 <script>window.CRM_CONFIG = { tenant: "yoga-by-lana" };</script>
 
-<div id="ecrm-root">
+<div id="ecrm-root" lang="de">
   <div class="ecrm-boot" id="ecrm-boot">Deine Menschen werden geladen …</div>
 
   <div class="ecrm-app" x-data="ecrm" x-cloak>
@@ -457,7 +457,13 @@
 
     <a class="ecrm-powered" x-show="view !== 'boot'" href="https://www.systemsafari.de/" target="_blank" rel="noopener">Powered by <b>Systemsafari</b></a>
 
-    <div class="ecrm-toast" x-show="toast" x-transition.opacity :class="toast && toast.error && 'ecrm-toast-error'" x-text="toast && toast.text"></div>
+    <template x-teleport="body">
+      <div id="ecrm-overlay">
+        <div class="ecrm-toast" role="alert" x-show="toast" x-transition.opacity :class="toast && toast.error && 'ecrm-toast-error'" @click="toast = null">
+          <span x-text="toast && toast.text"></span><small x-show="toast && toast.error">Tippen zum Schließen</small>
+        </div>
+      </div>
+    </template>
   </div>
 </div>
 
@@ -470,7 +476,8 @@
   font-family: inherit; color: var(--ink); width: auto; margin: 0; padding: 20px; background: var(--page); border-radius: 20px;
   font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 #ecrm-root *, #ecrm-root *::before, #ecrm-root *::after { box-sizing: border-box; }
-#ecrm-root .ecrm-app { max-width: 1120px; margin: 0 auto; }
+#ecrm-root .ecrm-app { max-width: 1120px; margin: 0 auto; container-type: inline-size; container-name: ecrm; }
+#ecrm-root .ecrm-hero-stats span, #ecrm-root .ecrm-state span, #ecrm-root .ecrm-kpis span { display: block; line-height: 1.25; hyphens: auto; }
 #ecrm-root .ecrm-narrow { max-width: 820px; margin: 0 auto; }
 #ecrm-root [x-cloak] { display: none !important; }
 #ecrm-root .ecrm-boot { padding: 40px 16px; text-align: center; color: var(--muted); }
@@ -620,9 +627,12 @@
 #ecrm-root .ecrm-pick button.ecrm-on { background: var(--a-d); border-color: var(--a-d); color: #fff; }
 #ecrm-root .ecrm-explain { background: #fcf5e7; border: 1px solid #efdcb8; border-radius: 20px; padding: 16px 18px; margin: 0 0 14px; color: #633806; font-size: 13px; }
 #ecrm-root .ecrm-explain p { margin: 6px 0 0; line-height: 1.55; }
-#ecrm-root .ecrm-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; margin: 0 auto; max-width: 480px; z-index: 9999; background: #1f1d1a; color: #fff;
-  padding: 12px 16px; border-radius: 14px; font-size: 15px; box-shadow: 0 8px 28px rgba(0,0,0,.25); }
-#ecrm-root .ecrm-toast-error { background: var(--danger); }
+#ecrm-overlay .ecrm-toast { position: fixed; left: 12px; right: 12px; top: max(12px, env(safe-area-inset-top)); margin: 0 auto; max-width: 460px; z-index: 2147483000;
+  background: #1f3d31; color: #fff; padding: 14px 18px; border-radius: 16px; font: 500 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .3); cursor: pointer; }
+#ecrm-overlay .ecrm-toast span { display: block; }
+#ecrm-overlay .ecrm-toast small { display: block; font-size: 12px; opacity: .8; margin-top: 4px; }
+#ecrm-overlay .ecrm-toast-error { background: #a3221b; }
 #ecrm-root .ecrm-login { max-width: 420px; margin: 8px auto; padding: 26px; }
 #ecrm-root .ecrm-login-title { font-size: 30px; margin-bottom: 6px; }
 /* ===== Glanzoptik (Marcel, 22.10.2026): Glas-Karten, Lichtkante oben, weiche Tiefe ===== */
@@ -701,6 +711,37 @@
   #ecrm-root .ecrm-fillbar { display: none; }
   #ecrm-root .ecrm-item { gap: 12px; }
 }
+@container ecrm (max-width: 360px) {
+  #ecrm-root .ecrm-hero { padding: 18px 14px 14px; border-radius: 22px; }
+  #ecrm-root .ecrm-hero .ecrm-hero-logo { width: 42px; height: 42px; top: 14px; right: 14px; }
+  #ecrm-root .ecrm-hero-date, #ecrm-root .ecrm-hero-hello { padding-right: 50px; }
+  #ecrm-root .ecrm-hero-hello { font-size: 24px; }
+  #ecrm-root .ecrm-hero-line { font-size: 13px; }
+  #ecrm-root .ecrm-hero-stats, #ecrm-root .ecrm-states, #ecrm-root .ecrm-kpis { gap: 6px; }
+  #ecrm-root .ecrm-hero-stats { margin-top: 14px; }
+  #ecrm-root .ecrm-hero-stats button, #ecrm-root .ecrm-state, #ecrm-root .ecrm-kpis div { padding: 9px 8px; border-radius: 14px; }
+  #ecrm-root .ecrm-hero-stats b, #ecrm-root .ecrm-state b, #ecrm-root .ecrm-kpis b { font-size: 18px; }
+  #ecrm-root .ecrm-state span, #ecrm-root .ecrm-kpis span { font-size: 11px; }
+  /* Zahlen im grünen Feld: als Reihe kleiner Pillen statt drei enger Spalten */
+  #ecrm-root .ecrm-hero-stats { display: flex; flex-wrap: wrap; }
+  #ecrm-root .ecrm-hero-stats button { flex: 1 1 auto; display: flex; align-items: baseline; gap: 6px; padding: 8px 12px; border-radius: 999px; }
+  #ecrm-root .ecrm-hero-stats b { font-size: 17px; }
+  #ecrm-root .ecrm-hero-stats span { font-size: 12px; white-space: nowrap; }
+  /* Listen: Knopf rutscht unter den Text, damit der Name Platz hat */
+  #ecrm-root .ecrm-item { flex-wrap: wrap; }
+  #ecrm-root .ecrm-item > .ecrm-item-main { flex: 1 1 100%; }
+  #ecrm-root .ecrm-item > .ecrm-item-main + .ecrm-btn-soft { margin-left: 50px; }
+  #ecrm-root .ecrm-item-row { flex-wrap: wrap; }
+  #ecrm-root .ecrm-item-row > .ecrm-item-main { flex: 1 1 100%; }
+  #ecrm-root .ecrm-item-row > .ecrm-item-main + .ecrm-btn-soft { margin-left: 50px; }
+  #ecrm-root .ecrm-section { padding: 0 14px 4px; }
+  #ecrm-root .ecrm-item { gap: 10px; }
+  #ecrm-root .ecrm-ava { width: 40px; height: 40px; }
+  #ecrm-root .ecrm-btn-soft { padding: 6px 12px; }
+  #ecrm-root .ecrm-nav button span { font-size: 10px; }
+  #ecrm-root .ecrm-page-title { font-size: 26px; }
+  #ecrm-root .ecrm-profile-name { font-size: 24px; }
+}
 </style>
 
 <script>
@@ -737,7 +778,8 @@
     comment_created: 'hat kommentiert', question_asked: 'hat eine Frage gestellt', file_downloaded: 'hat heruntergeladen',
     article_read: 'hat gelesen', lockscreen_cta: 'interessiert sich für', other: 'war aktiv' };
   var NOTICE = { zahlung_fehlgeschlagen: 'Zahlung ist fehlgeschlagen', abo_gekuendigt: 'Abo wurde gekündigt', plan_entzogen: 'Plan wurde entzogen',
-    moegliche_dublette: 'Gibt es vielleicht doppelt', mitglied_geloescht: 'Hat die App verlassen' };
+    moegliche_dublette: 'Gibt es vielleicht doppelt', mitglied_geloescht: 'Hat die App verlassen',
+    plan_entziehen: 'Karte leer – bitte den Plan in der App entziehen' };
 
   function message(err) {
     var m = (err && (err.message || err.msg)) || String(err);
@@ -852,7 +894,8 @@
         clearTimeout(this._t);
         this.toast = { text: text, error: !!error };
         var self = this;
-        this._t = setTimeout(function () { self.toast = null; }, 3500);
+        this._t = setTimeout(function () { self.toast = null; }, error ? 8000 : 3500);
+        if (error) console.warn('CRM:', text);
       },
       async rpc(name, args) { var r = await this.sb.rpc(name, args); if (r.error) throw r.error; return r.data; },
       toTop() { this.$nextTick(function () { if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' }); }); },
@@ -882,7 +925,7 @@
         var feed = (res[3].data || []).filter(function (f) { return new Date(f.am) <= now; });
         this.feed = feed;
         var last = {};
-        feed.forEach(function (f) { if (!last[f.customer_id] && f.art !== 'angemeldet') last[f.customer_id] = f; });
+        feed.forEach(function (f) { if (!last[f.customer_id] && f.art !== 'angemeldet' && f.art !== 'korrektur') last[f.customer_id] = f; });
         this.lastByPerson = last;
       },
       async loadProducts() {
@@ -959,6 +1002,7 @@
           case 'neu_dabei': return 'War zum ersten Mal im Kurs' + spur;
           case 'kuehlt_ab': return 'Seit ' + (d.tage_still != null ? d.tage_still : '?') + ' Tagen nichts mehr' + this.balanceSuffix(id);
           case 'droht_abzuspringen': return 'Lange nicht da, hat aber noch Besuche übrig' + this.balanceSuffix(id);
+          case 'plan_entziehen': return (d.produkt || 'Karte') + ' ' + (d.grund || 'aufgebraucht') + ' – Plan in der App entziehen';
           case 'karte_fast_leer': return 'Karte fast aufgebraucht – guter Moment für die nächste';
           case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ', noch ' + d.rest + ' Besuche' : '');
           default: return NOTICE[g.art] || g.art;
@@ -966,7 +1010,7 @@
       },
       sinceText(iso) { var d = days(iso); return d <= 0 ? 'heute' : d === 1 ? 'gestern' : d + ' Tagen'; },
       balanceSuffix(id) { var o = this.overview[id]; return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : ''; },
-      actionLabel(art) { return art === 'neu_dabei' || art === 'neu_in_app' ? 'Begrüßen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Schreiben'; },
+      actionLabel(art) { if (art === 'plan_entziehen') return 'Zum Profil'; return art === 'neu_dabei' || art === 'neu_in_app' ? 'Begrüßen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Schreiben'; },
       feedKind(art) {
         if (art === 'besuch') return 'besuch';
         if (art === 'kauf') return 'kauf';
@@ -1005,7 +1049,7 @@
       summary() {
         var e = this.detail.eng, c = this.detail.c, vor = c.first_name;
         var seit = this.dateShort(e.joined_at || c.joined_at);
-        var last = this.detail.feed.find(function (f) { return f.art !== 'angemeldet'; });
+        var last = this.detail.feed.find(function (f) { return f.art !== 'angemeldet' && f.art !== 'korrektur'; });
         var spur = last ? ' Zuletzt: ' + this.feedText(last, true).replace(/^./, function (x) { return x.toLowerCase(); }) + ' (' + this.ago(last.am) + ').' : ' Bisher noch keine Aktivität.';
         if (c.source !== 'flenski') return vor + ' ist ohne App-Konto im CRM.' + spur;
         return vor + ' ist seit ' + seit + ' in deiner App.' + spur;
@@ -1077,6 +1121,8 @@
       },
       noticeText(n) {
         var d = n.detail || {}, t = NOTICE[n.kind] || n.kind;
+        if (n.kind === 'plan_entziehen') return '„' + (d.produkt || 'Karte') + '“ ist ' + (d.grund || 'aufgebraucht') +
+          '. Entzieh den Plan im Profil der App, sonst hat sie weiter Zugang. Danach hier auf „Erledigt“.';
         if (d.plan) t += ': ' + d.plan;
         if (d.produkt) t += ': ' + d.produkt;
         return t;
