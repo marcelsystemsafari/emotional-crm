@@ -1,7 +1,7 @@
 # 0001 – Einbettung: direkt im Flenski-Embed-Widget
 
 Datum: 22.10.2026
-Status: entschieden (Desktop und mobiler Browser getestet, native App ausstehend)
+Status: entschieden (Desktop, mobiler Browser und iPhone getestet)
 
 ## Kontext
 
@@ -30,4 +30,4 @@ Wichtig: Der Code läuft nur im **Embed-Widget** einer Custom Page. Im **Fußzei
 
 - Alle Styles mit Präfix `ecrm-`, alles in `#ecrm-root`, weil die Oberfläche im Flenski-Layout lebt (Regel 7 in CLAUDE.md).
 - Größe des Widget-Inhalts im Blick behalten. Falls Flenski die Länge begrenzt, wird früher als geplant auf eine Ladezeile mit zentral gehosteter Datei umgestellt (02, „Updates bei mehreren Mandantinnen“).
-- **Offen:** Test in der nativen Flenski-App auf iPhone und Android (WebView). Fällt er negativ aus, wird diese Entscheidung neu bewertet.
+- iPhone (22.10.2026): läuft, Login bleibt nach Neuladen. Android noch nicht getestet, kein Blocker.
