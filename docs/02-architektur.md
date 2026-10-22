@@ -50,6 +50,7 @@ Was **nie** in die Oberfläche darf: der `service_role`-Key und Webhook-Secrets.
 ### Abhängigkeit von Phase 0
 
 Diese Variante setzt voraus, dass Flenski eigenes JavaScript in Custom Pages **direkt in der Seite** ausführt und Anfragen an Supabase zulässt. Das wird in Phase 0 mit einem Testskript geprüft.
+**Ergebnis (22.10.2026):** bestätigt, im **Embed-Widget** einer Custom Page (nicht im Fußzeilen-Feld). Plan B wird nicht gebraucht. Siehe `docs/entscheidungen/0001-einbettung.md`.
 **Fallback**, falls nicht: dieselbe Datei als statische Seite hosten (z. B. Cloudflare Pages, kostenlos, kein Servercode) und per iframe einbetten. Dann gilt wieder das iframe-Login-Thema (siehe `docs/entscheidungen/`).
 
 ## Webhook-Empfang (Supabase Edge Function `flenski-webhook`)

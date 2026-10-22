@@ -81,6 +81,8 @@ Im kostenlosen Supabase-Tarif steht in der Login-Mail nur ein Link und **kein Co
 
 ## Teil 3 – Testseite in Flenski
 
+✅ Erledigt am 22.10.2026 im **Embed-Widget** (im Fußzeilen-Feld läuft der Code nicht): Desktop und mobiler Browser alles JA, Login bleibt nach Neuladen. Offen: native App auf dem iPhone.
+
 1. In Flenski eine **neue Custom Page** anlegen, Name z. B. „CRM-Test“, Sichtbarkeit **nur Team**.
 2. **Eigenen Code** einschalten (`isCustomCodeEnabled`).
 3. Den kompletten Inhalt der Datei `ui/phase0-test.html` in das Code-Feld kopieren. Claude Code kann dir die Datei öffnen, dann **Strg + A** und **Strg + C**.

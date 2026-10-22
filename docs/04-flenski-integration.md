@@ -19,7 +19,7 @@ Pläne der ersten Mandantin: „Kinderyoga 4er-Paket" und „Kursblock Erwachsen
 
 Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gelöscht, Neuer Kontakt, Bestellung abgeschlossen, Zahlung fehlgeschlagen, Abonnement gekündigt, Am Event teilgenommen, Event beginnt bald.
 
-**Custom Pages** haben ein Feld für eigenen Code (`isCustomCodeEnabled`, `header`/`footer` als HTML).
+**Custom Pages** haben ein Feld für eigenen Code (`isCustomCodeEnabled`, `header`/`footer` als HTML). Eigenes JavaScript läuft aber nur im **Embed-Widget** der Seite, nicht im Fußzeilen-Feld (getestet 22.10.2026).
 
 **Aktivität (Stand 21.10.2026):** Im Flenski-Admin zeigt „Mitglied → Profil ansehen → Aktivität" einen Verlauf je Mitglied (z. B. „Mai: Kurs gestartet · geführte Audioentspannung · Event registriert"). Dieser Verlauf ist über die abgefragte Schnittstelle **nicht** abrufbar; sie liefert pro Mitglied nur `lastLoginAt`. Weitere für Aktivität relevante Trigger laut Dropdown: Zum Kurs angemeldet, Kurs abgeschlossen, Beitrag in Community/Gruppe erstellt, Kommentar erstellt, Frage in der Fragebox gestellt, Artikel gelesen, Datei heruntergeladen, Punkte vergeben.
 
@@ -27,7 +27,7 @@ Relevante Trigger: Neues Mitglied, Plan zugewiesen, Plan entzogen, Mitglied gel�
 
 - Signatur ist HMAC-SHA256 über den Rohbody mit einem Secret, das Flenski anzeigt oder das wir setzen.
 - Webhooks enthalten die Profil-ID des Mitglieds und bei Plänen die Plan-ID.
-- Eigenes JavaScript in Custom Pages läuft direkt in der Seite (nicht in einem abgeschotteten iframe) und darf Anfragen an Supabase stellen. Test: `ui/phase0-test.html`.
+- ~~Eigenes JavaScript in Custom Pages läuft direkt in der Seite~~ → **bestätigt** im Embed-Widget (Entscheidung 0001).
 
 ## Unbekannt (blockiert einzelne Funktionen, nicht das MVP)
 
@@ -104,5 +104,5 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 1. Mandant im CRM anlegen → erhält Slug, Webhook-URL, Secret.
 2. Flenski-Pläne auflisten und je einem CRM-Produkt zuordnen (Typ, Einheiten, Gültigkeit, Preis).
 3. In Flenski je Trigger eine Automation „Webhook senden" anlegen (URL mit `?tenant=<slug>&trigger=<name>`), Limits auf „ohne Limit / sofort". Den angezeigten Schlüssel **sofort** als `FLENSKI_SECRET_<TRIGGER>` in `.env.local` sichern, danach `node scripts/upload-webhook-secrets.mjs <slug>` (Entscheidung 0004).
-4. In Flenski eine Custom Page „Kundinnen" anlegen, Sichtbarkeit nur Team, Inhalt von `ui/crm.html` mit dem Mandanten-Slug einfügen.
+4. In Flenski eine Custom Page „Kundinnen" anlegen, Sichtbarkeit nur Team, ein **Embed-Widget** einfügen und darin den Inhalt von `ui/crm.html` mit dem Mandanten-Slug einfügen.
 5. Erstimport bestehender Mitglieder + CSV der externen Kundinnen.
