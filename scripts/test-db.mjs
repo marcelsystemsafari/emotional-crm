@@ -1,6 +1,6 @@
 // Ersatz für "supabase test db" ohne Docker: führt supabase/tests/database/*.test.sql
 // gegen das verknüpfte Projekt aus. Jede Testdatei endet mit rollback, es bleiben keine Testdaten zurück.
-// Aufruf (im Projektordner): node scripts/test-db.mjs
+// Aufruf (im Projektordner): node scripts/test-db.mjs [dateiname-teil]   (optional nur passende Dateien)
 import { readFileSync, readdirSync } from "node:fs";
 // pg liegt (wie die Supabase-CLI) im nicht hochgeladenen Ordner .tools: cd .tools && npm install pg@8.13.1
 import pg from "../.tools/node_modules/pg/lib/index.js";
@@ -25,7 +25,7 @@ await client.connect();
 
 const dir = new URL("supabase/tests/database/", root);
 let failed = 0;
-for (const file of readdirSync(dir).filter((f) => f.endsWith(".test.sql")).sort()) {
+for (const file of readdirSync(dir).filter((f) => f.endsWith(".test.sql") && f.includes(process.argv[2] || "")).sort()) {
   console.log(`# ${file}`);
   try {
     const results = [].concat(await client.query(readFileSync(new URL(file, dir), "utf8")));

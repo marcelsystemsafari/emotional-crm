@@ -84,35 +84,45 @@ select is((select price_cents from public.entitlements e join public.customers c
            where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'),
   round(({{bestellung-abgeschlossen}} -> 'order' ->> 'amount')::numeric * 100)::int, 'Betrag aus der Bestellung steht an der Karte');
 
--- ===== Teilnahme an einem Event =====
+-- ===== Anmeldung zu einem Event (Flenski "teilgenommen") =====
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000020', '00000000-0000-0000-0000-00000000000a', 'am-event-teilgenommen',
   pg_temp.als({{am-event-teilgenommen}}, 'f1000000-0000-0000-0000-000000000001'));
 select is(pg_temp.verarbeite('e1000000-0000-0000-0000-000000000020'), 'ok', 'Event-Teilnahme wird verarbeitet');
 select is((select a.status::text || ':' || s.title from public.attendances a join public.sessions s on s.id = a.session_id
            join public.customers c on c.id = a.customer_id where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'),
-  'present:' || ({{am-event-teilgenommen}} -> 'event' ->> 'title'), 'Teilnahme = anwesend in der Stunde aus der App');
+  'registered:' || ({{am-event-teilgenommen}} -> 'event' ->> 'title'), 'Flenski-"teilgenommen" = angemeldet (noch kein Besuch)');
 select is((select category from public.sessions where flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid),
   {{am-event-teilgenommen}} -> 'category' ->> 'name', 'Stunde übernimmt die Event-Kategorie');
-select is((select count(*)::int from public.activity_events where type = 'event_attended'), 1, 'Teilnahme steht auch im Aktivitätsverlauf');
+select is((select count(*)::int from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'event_attended'), 1, 'Anmeldung steht auch im Aktivitätsverlauf');
 
--- ===== Produkt einrichten: Teilnahme wird nachträglich abgebucht =====
+-- ===== Produkt einrichten, dann Termin vorbei: Besuch wird abgebucht =====
 select pg_temp.login('20000000-0000-0000-0000-00000000000a');
-select throws_ok($$select public.setup_product((select id from public.products where needs_setup limit 1), 'credits', 10, 70, null, null)$$,
+select throws_ok($$select public.setup_product((select id from public.products where tenant_id = '00000000-0000-0000-0000-00000000000a' and needs_setup limit 1), 'credits', 10, 70, null, null)$$,
   '42501', null, 'Staff richtet keine Produkte ein');
 select pg_temp.logout();
 select pg_temp.login('10000000-0000-0000-0000-00000000000a');
-select is(public.setup_product((select id from public.products where needs_setup limit 1), 'credits', 10, 120, null, null), 1,
+select is(public.setup_product((select id from public.products where tenant_id = '00000000-0000-0000-0000-00000000000a' and needs_setup limit 1), 'credits', 10, 120, null, null), 1,
   'Owner richtet das Produkt ein (eine bestehende Karte)');
 select is((select credits_balance from public.v_customer_overview o join public.customers c on c.id = o.customer_id
-           where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'), 9,
-  'Nach dem Einrichten: 10 gekauft, 1 Teilnahme nachträglich abgebucht = 9');
+           where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'), 10,
+  'Nach dem Einrichten: 10 Besuche, Anmeldung bucht noch nichts ab');
+select throws_ok($$select public.finalize_past_sessions()$$, '42501', null, 'Termine abschließen macht nur das System');
 select pg_temp.logout();
+-- Termin in die Vergangenheit legen (= er hat stattgefunden)
+update public.sessions set starts_at = now() - interval '1 hour', ends_at = null
+where flenski_event_id = ({{am-event-teilgenommen}} -> 'event' ->> 'id')::uuid;
+select ok(public.finalize_past_sessions() >= 1, 'Termine abschließen läuft');
+select is((select a.status::text from public.attendances a join public.customers c on c.id = a.customer_id
+           where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'), 'present', 'Nach Terminbeginn: angemeldet wird „da“');
+select is((select credits_balance from public.v_customer_overview o join public.customers c on c.id = o.customer_id
+           where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'), 9, 'Besuch wird abgebucht: 10 − 1 = 9');
+select is(public.finalize_past_sessions(), 0, 'Zweiter Lauf bucht nicht doppelt ab');
 
 -- ===== Aktivität =====
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000030', '00000000-0000-0000-0000-00000000000a', 'artikel-gelesen',
   pg_temp.als({{artikel-gelesen}}, 'f1000000-0000-0000-0000-000000000001'));
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000030');
-select is((select title from public.activity_events where type = 'article_read'), {{artikel-gelesen}} -> 'article' ->> 'title',
+select is((select title from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'article_read'), {{artikel-gelesen}} -> 'article' ->> 'title',
   'Artikel gelesen: Titel steht im Verlauf');
 select ok((select last_app_activity_at is not null from public.customers where flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'),
   'Letzte App-Aktivität wird mitgeführt');
@@ -120,7 +130,7 @@ select ok((select last_app_activity_at is not null from public.customers where f
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000031', '00000000-0000-0000-0000-00000000000a', 'kommentar-erstellt',
   pg_temp.als({{kommentar-erstellt}}, 'f1000000-0000-0000-0000-000000000001'));
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000031');
-select ok((select title is null from public.activity_events where type = 'comment_created'), 'Kommentar: kein Inhalt im Verlauf');
+select ok((select title is null from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'comment_created'), 'Kommentar: kein Inhalt im Verlauf');
 select ok((select payload #> '{comment,text}' is null and payload -> 'targetAuthor' is null and raw_body not like '%text%'
            from public.webhook_events where id = 'e1000000-0000-0000-0000-000000000031'),
   'Kommentartext und zweite Person werden nach der Prüfung aus dem Rohspeicher entfernt');
@@ -128,20 +138,20 @@ select ok((select payload #> '{comment,text}' is null and payload -> 'targetAuth
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000032', '00000000-0000-0000-0000-00000000000a', 'sperrbildschirm-cta-geklickt',
   pg_temp.als({{sperrbildschirm-cta-geklickt}}, 'f1000000-0000-0000-0000-000000000001'));
 select is(pg_temp.verarbeite('e1000000-0000-0000-0000-000000000032'), 'ok', 'Sperrbildschirm-Klick wird verarbeitet');
-select is((select title from public.activity_events where type = 'lockscreen_cta'),
+select is((select title from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'lockscreen_cta'),
   {{sperrbildschirm-cta-geklickt}} -> 'lockScreen' ->> 'name', 'Sperrbildschirm: Name des Angebots im Verlauf');
 
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000033', '00000000-0000-0000-0000-00000000000a', 'zum-kurs-angemeldet',
   pg_temp.als({{zum-kurs-angemeldet}}, 'f1000000-0000-0000-0000-000000000001'));
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000033');
-select is((select title from public.activity_events where type = 'course_enrolled'), {{zum-kurs-angemeldet}} -> 'course' ->> 'title',
+select is((select title from public.activity_events where tenant_id = '00000000-0000-0000-0000-00000000000a' and type = 'course_enrolled'), {{zum-kurs-angemeldet}} -> 'course' ->> 'title',
   'Kursanmeldung im Verlauf');
 
 -- ===== Hinweise, Löschen, Kontakt =====
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000040', '00000000-0000-0000-0000-00000000000a', 'plan-entzogen',
   pg_temp.als({{plan-entzogen}}, 'f1000000-0000-0000-0000-000000000001'));
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000040');
-select is((select kind from public.customer_notices where kind = 'plan_entzogen'), 'plan_entzogen', 'Plan entzogen: Hinweis an der Person');
+select is((select kind from public.customer_notices where tenant_id = '00000000-0000-0000-0000-00000000000a' and kind = 'plan_entzogen'), 'plan_entzogen', 'Plan entzogen: Hinweis an der Person');
 select is((select count(*)::int from public.entitlements e join public.customers c on c.id = e.customer_id
            where c.flenski_profile_id = 'f1000000-0000-0000-0000-000000000001' and e.status = 'active'), 1,
   'Plan entzogen löscht keine Karte (Guthaben bleibt sichtbar)');
@@ -149,12 +159,12 @@ select is((select count(*)::int from public.entitlements e join public.customers
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000041', '00000000-0000-0000-0000-00000000000a', 'zahlung-fehlgeschlagen',
   pg_temp.als({{zahlung-fehlgeschlagen}}, 'f1000000-0000-0000-0000-000000000001'));
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000041');
-select ok(exists (select 1 from public.customer_notices where kind = 'zahlung_fehlgeschlagen'), 'Zahlung fehlgeschlagen: Hinweis');
+select ok(exists (select 1 from public.customer_notices where tenant_id = '00000000-0000-0000-0000-00000000000a' and kind = 'zahlung_fehlgeschlagen'), 'Zahlung fehlgeschlagen: Hinweis');
 
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000042', '00000000-0000-0000-0000-00000000000a', 'neuer-kontakt',
   {{neuer-kontakt}});
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000042');
-select is((select source::text from public.customers where email = lower({{neuer-kontakt}} ->> 'email')), 'extern',
+select is((select source::text from public.customers where tenant_id = '00000000-0000-0000-0000-00000000000a' and email = lower({{neuer-kontakt}} ->> 'email')), 'extern',
   'Neuer Kontakt ohne App-Konto wird externe Person');
 
 select pg_temp.empfang('e1000000-0000-0000-0000-000000000043', '00000000-0000-0000-0000-00000000000a', 'mitglied-geloescht',
@@ -162,6 +172,37 @@ select pg_temp.empfang('e1000000-0000-0000-0000-000000000043', '00000000-0000-00
 select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000043');
 select ok((select archived_at is not null from public.customers where flenski_profile_id = 'f1000000-0000-0000-0000-000000000001'),
   'Mitglied gelöscht: Person archiviert, Buchungen bleiben');
+
+-- ===== Ausschluss per Tag (z. B. Lehrerinnen) =====
+update public.tenants set settings = settings || '{"ausschluss_tags": ["Yogalehrerin"]}' where id = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.empfang('e1000000-0000-0000-0000-000000000050', '00000000-0000-0000-0000-00000000000a', 'neues-mitglied',
+  jsonb_set(pg_temp.als({{neues-mitglied}}, 'f1000000-0000-0000-0000-000000000050'), '{member,tags}', '["Yogalehrerin"]'));
+select pg_temp.verarbeite('e1000000-0000-0000-0000-000000000050');
+select is((select count(*)::int from public.customers where flenski_profile_id = 'f1000000-0000-0000-0000-000000000050'), 0,
+  'Profil mit Ausschluss-Tag „Yogalehrerin“ wird keine Kundin');
+
+-- ===== Erstabgleich =====
+select is(public.import_flenski_snapshot('00000000-0000-0000-0000-00000000000b', jsonb_build_object(
+  'plans', jsonb_build_array(jsonb_build_object('id', 'b0000000-0000-0000-0000-000000000001', 'name', '10er-Karte')),
+  'members', jsonb_build_array(
+    jsonb_build_object('id', 'b1000000-0000-0000-0000-000000000001', 'fullName', 'Bea Beispiel', 'email', 'bea@test.local',
+                       'tags', jsonb_build_array(), 'plans', jsonb_build_array('10er-Karte'), 'isMemberOfTeam', false, 'isAdmin', false),
+    jsonb_build_object('id', 'b1000000-0000-0000-0000-000000000002', 'fullName', 'Lehrerin Team', 'isMemberOfTeam', true)),
+  'events', jsonb_build_array(jsonb_build_object('id', 'b2000000-0000-0000-0000-000000000001', 'title', 'Yoga am Montag',
+    'startsAt', '2027-01-11T19:00:00+01:00', 'endsAt', '2027-01-11T20:00:00+01:00', 'timeZone', 'Europe/Berlin',
+    'category', jsonb_build_object('name', 'Yoga für Erwachsene'), 'participantsNumberLimit', 12,
+    'recurringEventPattern', jsonb_build_object('frequency', 'weekly', 'repeatEvery', 1, 'totalOccurrences', 10),
+    'lastAttended', jsonb_build_array('b1000000-0000-0000-0000-000000000001'))))),
+  '{"personen": 1, "produkte": 1, "karten": 1, "serien": 1, "anmeldungen": 1}'::jsonb, 'Erstabgleich übernimmt Person, Plan, Karte, Serie, Anmeldung');
+select is((select count(*)::int from public.sessions where flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 10,
+  'Serie mit 10 Terminen wird als 10 Stunden angelegt');
+select ok((select bool_and((starts_at at time zone 'Europe/Berlin')::time = time '19:00') from public.sessions
+           where flenski_event_id = 'b2000000-0000-0000-0000-000000000001'), 'Alle Termine um 19:00 Uhr (auch nach der Zeitumstellung)');
+select public.import_flenski_snapshot('00000000-0000-0000-0000-00000000000b', jsonb_build_object(
+  'members', jsonb_build_array(jsonb_build_object('id', 'b1000000-0000-0000-0000-000000000001', 'fullName', 'Bea Beispiel',
+    'plans', jsonb_build_array('10er-Karte')))));
+select is((select count(*)::int from public.entitlements e join public.customers c on c.id = e.customer_id
+           where c.flenski_profile_id = 'b1000000-0000-0000-0000-000000000001'), 1, 'Erstabgleich zweimal = keine doppelte Karte');
 
 -- ===== Rechte =====
 select pg_temp.login('10000000-0000-0000-0000-00000000000b');
