@@ -41,6 +41,7 @@ Für **jede Zeile** der Tabelle unten legst du eine Automation an. Pro Automatio
 | Frage in der Fragebox gestellt | `https://aipnvftsuhnffkvnrygt.supabase.co/functions/v1/flenski-webhook?tenant=yoga-by-lana&trigger=frage-gestellt` |
 | Datei heruntergeladen | `https://aipnvftsuhnffkvnrygt.supabase.co/functions/v1/flenski-webhook?tenant=yoga-by-lana&trigger=datei-heruntergeladen` |
 | Artikel gelesen | `https://aipnvftsuhnffkvnrygt.supabase.co/functions/v1/flenski-webhook?tenant=yoga-by-lana&trigger=artikel-gelesen` |
+| CTA auf dem Sperrbildschirm geklickt (alle Sperrbildschirme, alle CTA-Typen) | `https://aipnvftsuhnffkvnrygt.supabase.co/functions/v1/flenski-webhook?tenant=yoga-by-lana&trigger=sperrbildschirm-cta-geklickt` |
 
 **Nicht** anlegen: „Beitrag gelesen“ (zu viele Ereignisse, siehe `08-aktivitaet.md`) und „Punkte vergeben“.
 

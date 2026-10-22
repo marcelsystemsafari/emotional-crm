@@ -80,7 +80,7 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 - Fachliche Ereignis-ID für die Doppelerkennung: `envelope.event` + `envelope.occurredAt` + `member.id` + ID des Objekts (Plan, Kurs, Event …). Wird in Phase 3 umgesetzt. Bis dahin gilt der SHA-256 des Bodys.
 
 **Weiter offen:**
-- **Signatur:** Format `sha256=<hex>`. Es ist **nicht** HMAC mit unserem `webhook_secret`, nicht ohne Schlüssel und kein reiner SHA-256. Flenski benutzt also einen eigenen Schlüssel. Wo er angezeigt wird, ist unbekannt (siehe 06, Abschnitt B).
+- **Signatur (geklärt 22.10.2026):** HMAC-SHA256 über den Rohbody, `sha256=<hex>`, **ein Schlüssel pro Automation**, nur einmal sichtbar. „Testen“ nutzt einen Einmalschlüssel. Umsetzung: Entscheidung 0004.
 - „Am Event teilgenommen“ hat `source: signup`. Ob das „angemeldet“ oder „anwesend“ heißt, bleibt offen, bis ein echtes Ereignis vorliegt. Bis dahin gilt weiter: nur `registered`.
 - Beispieldaten ersetzen keine echten Ereignisse: Plan-IDs, Beträge und `source` müssen an echten Vorgängen bestätigt werden.
 - **Datenschutz:** Beitrags- und Kommentartexte sowie `targetAuthor` kommen mit. Regel 10 (CLAUDE.md) verbietet, Inhalte in `activity_events` zu übernehmen. Im Rohspeicher `webhook_events` liegen sie aber derzeit vollständig. Entscheidung offen (06, Abschnitt A).
@@ -102,6 +102,6 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 
 1. Mandant im CRM anlegen → erhält Slug, Webhook-URL, Secret.
 2. Flenski-Pläne auflisten und je einem CRM-Produkt zuordnen (Typ, Einheiten, Gültigkeit, Preis).
-3. In Flenski je Trigger eine Automation „Webhook senden" anlegen (URL + Secret), Limits auf „ohne Limit / sofort".
+3. In Flenski je Trigger eine Automation „Webhook senden" anlegen (URL mit `?tenant=<slug>&trigger=<name>`), Limits auf „ohne Limit / sofort". Den angezeigten Schlüssel **sofort** als `FLENSKI_SECRET_<TRIGGER>` in `.env.local` sichern, danach `node scripts/upload-webhook-secrets.mjs <slug>` (Entscheidung 0004).
 4. In Flenski eine Custom Page „Kundinnen" anlegen, Sichtbarkeit nur Team, Inhalt von `ui/crm.html` mit dem Mandanten-Slug einfügen.
 5. Erstimport bestehender Mitglieder + CSV der externen Kundinnen.

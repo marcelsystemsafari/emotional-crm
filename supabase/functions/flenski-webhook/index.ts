@@ -1,5 +1,5 @@
 // Empfänger für Flenski-Automationen ("Webhook senden").
-// Phase 0: speichert jede Anfrage unverändert in webhook_events und antwortet sofort mit 200.
+// Phase 0: speichert jede Anfrage unverändert in webhook_events, prüft die Flenski-Signatur und antwortet sofort mit 200.
 // Verarbeitung (Kundinnen, Pläne, Aktivität) kommt in Phase 3, auf Basis der hier gesammelten echten Payloads.
 //
 // URL je Automation:
@@ -26,9 +26,47 @@ function reply(status: number, body: Record<string, unknown>) {
   });
 }
 
+function toHex(buffer: ArrayBuffer) {
+  return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function sha256Hex(text: string) {
-  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, "0")).join("");
+  return toHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
+}
+
+async function hmacSha256Hex(secret: string, text: string) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  return toHex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text)));
+}
+
+// Vergleich ohne frühen Abbruch, damit die Laufzeit nichts über den Schlüssel verrät
+function sameText(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+// Flenski: X-Flenski-Signature = "sha256=" + HMAC-SHA256(Schlüssel der Automation, Rohbody).
+// null = kein Schlüssel hinterlegt. Der Knopf „Testen“ nutzt einen Einmalschlüssel und ergibt immer false.
+async function checkSignature(tenantId: string, trigger: string | null, header: string | null, rawBody: string) {
+  if (!trigger) return null;
+  const { data, error } = await supabase
+    .from("webhook_trigger_secrets")
+    .select("secret")
+    .eq("tenant_id", tenantId)
+    .eq("trigger", trigger)
+    .maybeSingle();
+  if (error) console.error("Schlüssel nicht lesbar", error);
+  if (!data) return null;
+  if (!header) return false;
+  return sameText(header, "sha256=" + await hmacSha256Hex(data.secret, rawBody));
 }
 
 Deno.serve(async (req) => {
@@ -63,13 +101,17 @@ Deno.serve(async (req) => {
     if (!SKIP_HEADERS.has(key.toLowerCase())) headers[key] = value;
   });
 
+  const trigger = url.searchParams.get("trigger");
+
   const { error } = await supabase.from("webhook_events").upsert(
     {
       tenant_id: tenant.id,
-      trigger: url.searchParams.get("trigger"),
+      trigger,
       headers,
       payload,
       raw_body: rawBody,
+      // Auch bei falscher Signatur speichern (Regel 4); verarbeitet werden in Phase 3 nur gültige
+      signature_valid: await checkSignature(tenant.id, trigger, req.headers.get("x-flenski-signature"), rawBody),
       dedupe_key: await sha256Hex(rawBody),
     },
     { onConflict: "tenant_id,dedupe_key", ignoreDuplicates: true },
