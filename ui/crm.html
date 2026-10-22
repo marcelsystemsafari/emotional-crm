@@ -1,642 +1,564 @@
 <!--
-  Emotional CRM – Oberfläche (Phase 2)
-  Komplett in ein EMBED-WIDGET einer Flenski-Custom-Page einfügen (Titel des Widgets aus, Sichtbarkeit "nur Team").
+  Emotional CRM – Oberfläche (Neuausrichtung, Entscheidung 0005)
+  Komplett in ein EMBED-WIDGET einer Flenski-Custom-Page einfügen (Widget-Titel aus, Sichtbarkeit "nur Team").
   Nicht ins Fußzeilen-Feld – dort läuft kein Skript (Entscheidung 0001).
   Pro Mandantin nur die Zeile CRM_CONFIG anpassen. Supabase-Adresse und "anon key" sind öffentlich und dürfen hier stehen.
-  Alle Regeln (Guthaben, Abbuchung, Signale) rechnet die Datenbank, hier wird nur angezeigt und aufgerufen.
+  Alles kommt automatisch aus der App. Regeln (Status, Guthaben, Hinweise) rechnet die Datenbank – hier wird nur angezeigt.
+  Regel 11 (CLAUDE.md): keine Funktionen im Alpine-Zustand.
 -->
 <script>window.CRM_CONFIG = { tenant: "yoga-by-lana" };</script>
 
 <div id="ecrm-root">
-  <div class="ecrm-boot" id="ecrm-boot">CRM wird geladen …</div>
+  <div class="ecrm-boot" id="ecrm-boot">Deine Menschen werden geladen …</div>
 
   <div class="ecrm-app" x-data="ecrm" x-cloak>
     <!-- ===== Anmeldung ===== -->
     <template x-if="view === 'login'">
       <div class="ecrm-card ecrm-login">
-        <h2 class="ecrm-h2">Anmelden</h2>
+        <h2 class="ecrm-title">Anmelden</h2>
         <template x-if="!login.codeSent">
           <div>
             <p class="ecrm-muted">Gib deine E-Mail-Adresse ein. Du bekommst einen 6-stelligen Code.</p>
-            <input class="ecrm-input" type="email" inputmode="email" autocomplete="email" placeholder="deine E-Mail-Adresse"
+            <input class="ecrm-input" type="email" inputmode="email" autocomplete="email" placeholder="name@beispiel.de"
                    x-model.trim="login.email" @keydown.enter="sendCode()">
-            <button class="ecrm-btn ecrm-btn-primary ecrm-btn-block" @click="sendCode()" :disabled="busy">Code senden</button>
+            <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="sendCode()" :disabled="busy">Code senden</button>
           </div>
         </template>
         <template x-if="login.codeSent">
           <div>
-            <p class="ecrm-muted">Code ist unterwegs an <b x-text="login.email"></b>. Schau auch im Spam-Ordner.</p>
+            <p class="ecrm-muted">Der Code ist unterwegs an <b x-text="login.email"></b>. Schau auch im Spam-Ordner.</p>
             <input class="ecrm-input ecrm-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
                    placeholder="6-stelliger Code" x-model.trim="login.code" @keydown.enter="verifyCode()">
-            <button class="ecrm-btn ecrm-btn-primary ecrm-btn-block" @click="verifyCode()" :disabled="busy">Anmelden</button>
+            <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="verifyCode()" :disabled="busy">Anmelden</button>
             <button class="ecrm-link" @click="login.codeSent = false; login.code = ''">Andere E-Mail-Adresse</button>
           </div>
         </template>
       </div>
     </template>
 
-    <!-- ===== Kein Zugang ===== -->
     <template x-if="view === 'nozugang'">
       <div class="ecrm-card">
-        <h2 class="ecrm-h2">Kein Zugang</h2>
+        <h2 class="ecrm-title">Kein Zugang</h2>
         <p>Du bist angemeldet als <b x-text="userEmail"></b>, aber für diese App noch nicht freigeschaltet.</p>
         <p class="ecrm-muted">Bitte melde dich bei Systemsafari, dann wirst du eingeladen.</p>
         <button class="ecrm-btn" @click="logout()">Abmelden</button>
       </div>
     </template>
 
-    <!-- ===== Hauptbereich ===== -->
+    <!-- ===== App ===== -->
     <template x-if="view === 'app'">
-      <div>
-        <nav class="ecrm-tabs">
-          <button :class="tab === 'checkin' && 'ecrm-active'" @click="openTab('checkin')">Check-in</button>
-          <button :class="tab === 'kundinnen' && 'ecrm-active'" @click="openTab('kundinnen')">Kundinnen</button>
-          <button :class="tab === 'verkauf' && 'ecrm-active'" @click="openTab('verkauf')">Verkauf</button>
-          <button :class="tab === 'mehr' && 'ecrm-active'" @click="openTab('mehr')">Mehr</button>
+      <div class="ecrm-shell">
+        <nav class="ecrm-nav">
+          <button :class="tab === 'uebersicht' && 'ecrm-on'" @click="go('uebersicht')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
+          <button :class="tab === 'menschen' && 'ecrm-on'" @click="go('menschen')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.8.2 4.8 1.9 5.4 5.4"/></svg>Menschen</button>
+          <button :class="tab === 'kurse' && 'ecrm-on'" @click="go('kurse')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Kurse</button>
+          <button class="ecrm-gear" :class="tab === 'einstellungen' && 'ecrm-on'" @click="go('einstellungen')" aria-label="Einstellungen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
         </nav>
 
-        <!-- ===== CHECK-IN: Stunden des Tages ===== -->
-        <section x-show="tab === 'checkin' && !session">
-          <div class="ecrm-daybar">
-            <button class="ecrm-btn ecrm-btn-icon" @click="shiftDay(-1)" aria-label="Tag zurück">‹</button>
-            <div class="ecrm-daylabel" x-text="dayLabel()"></div>
-            <button class="ecrm-btn ecrm-btn-icon" @click="shiftDay(1)" aria-label="Tag vor">›</button>
+        <!-- ================= ÜBERSICHT ================= -->
+        <section x-show="tab === 'uebersicht'">
+          <div class="ecrm-hello">
+            <div class="ecrm-muted" x-text="greeting()"></div>
+            <h2 class="ecrm-title">Deine Menschen</h2>
           </div>
 
-          <template x-for="s in sessions" :key="s.id">
-            <button class="ecrm-card ecrm-session" @click="openSession(s)">
-              <div>
-                <div class="ecrm-strong" x-text="s.title"></div>
-                <div class="ecrm-muted" x-text="time(s.starts_at) + (s.category ? ' · ' + s.category : '')"></div>
-              </div>
-              <div class="ecrm-pill" x-text="(s.present || 0) + ' da'"></div>
+          <div class="ecrm-stats">
+            <button class="ecrm-stat" @click="openList('')"><span>Alle</span><b x-text="people.length"></b></button>
+            <button class="ecrm-stat ecrm-st-dabei" @click="openList('dabei')"><span>Dabei</span><b x-text="count('dabei')"></b></button>
+            <button class="ecrm-stat ecrm-st-kuehlt_ab" @click="openList('kuehlt_ab')"><span>Kühlt ab</span><b x-text="count('kuehlt_ab')"></b></button>
+            <button class="ecrm-stat ecrm-st-neu" @click="openList('neu')"><span>Neu</span><b x-text="count('neu')"></b></button>
+          </div>
+
+          <template x-if="isOwner && setupNeeded().length">
+            <button class="ecrm-banner" @click="go('einstellungen')">
+              <b x-text="setupNeeded().length + (setupNeeded().length === 1 ? ' Plan' : ' Pläne') + ' aus deiner App noch einrichten'"></b>
+              <span>Sag einmal, wie viele Besuche drin sind – dann zählt das CRM die Guthaben automatisch.</span>
             </button>
           </template>
 
-          <template x-for="v in suggestions" :key="v.source_session">
-            <button class="ecrm-card ecrm-session ecrm-suggestion" @click="takeSuggestion(v)">
-              <div>
-                <div class="ecrm-strong" x-text="v.title"></div>
-                <div class="ecrm-muted" x-text="time(v.starts_at) + ' · wie letzte Woche'"></div>
-              </div>
-              <div class="ecrm-pill ecrm-pill-ghost">+ anlegen</div>
-            </button>
-          </template>
-
-          <template x-if="!sessions.length && !suggestions.length && !loading">
-            <p class="ecrm-empty">Für diesen Tag ist noch keine Stunde angelegt.</p>
-          </template>
-
-          <template x-if="!newSession">
-            <button class="ecrm-btn ecrm-btn-block" @click="startNewSession()">+ Stunde anlegen</button>
-          </template>
-          <template x-if="newSession">
-            <div class="ecrm-card">
-              <h3 class="ecrm-h3">Neue Stunde</h3>
-              <label class="ecrm-label">Titel<input class="ecrm-input" x-model.trim="newSession.title" placeholder="z. B. Yoga am Dienstag"></label>
-              <div class="ecrm-row2">
-                <label class="ecrm-label">Beginn<input class="ecrm-input" type="time" x-model="newSession.time"></label>
-                <label class="ecrm-label">Dauer (Min.)<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="newSession.minutes"></label>
-              </div>
-              <label class="ecrm-label">Kategorie
-                <select class="ecrm-input" x-model="newSession.category">
-                  <option value="">alle Karten gelten</option>
-                  <template x-for="c in categories()" :key="c"><option :value="c" x-text="c"></option></template>
-                </select>
-              </label>
-              <div class="ecrm-actions">
-                <button class="ecrm-btn" @click="newSession = null">Abbrechen</button>
-                <button class="ecrm-btn ecrm-btn-primary" @click="saveSession()" :disabled="busy">Anlegen</button>
-              </div>
+          <h3 class="ecrm-h3">Um diese Menschen kümmerst du dich jetzt</h3>
+          <template x-for="c in care.slice(0, careLimit)" :key="c.customer_id">
+            <div class="ecrm-card ecrm-care">
+              <button class="ecrm-care-main" @click="openPerson(c.customer_id)">
+                <span class="ecrm-avatar" :class="'ecrm-st-' + personStatus(c.customer_id)" x-text="initials(person(c.customer_id))"></span>
+                <span class="ecrm-grow">
+                  <span class="ecrm-name" x-text="fullName(person(c.customer_id))"></span>
+                  <span class="ecrm-sub" x-text="reasonText(c.gruende[0], c.customer_id)"></span>
+                </span>
+              </button>
+              <a class="ecrm-btn ecrm-btn-small" :href="messageLink(c.customer_id, c.gruende[0].art)" target="_blank" rel="noopener"
+                 x-show="messageLink(c.customer_id, c.gruende[0].art)" x-text="actionLabel(c.gruende[0].art)"></a>
             </div>
           </template>
-        </section>
-
-        <!-- ===== CHECK-IN: eine Stunde ===== -->
-        <section x-show="tab === 'checkin' && session">
-          <template x-if="session">
-            <div>
-              <button class="ecrm-link" @click="closeSession()">‹ alle Stunden</button>
-              <div class="ecrm-headline">
-                <div>
-                  <h2 class="ecrm-h2" x-text="session.title"></h2>
-                  <div class="ecrm-muted" x-text="dateLong(session.starts_at) + ', ' + time(session.starts_at)"></div>
-                </div>
-                <div class="ecrm-count"><b x-text="presentCount()"></b><span x-text="'von ' + roster.length + ' da'"></span></div>
-              </div>
-
-              <input class="ecrm-input" type="search" placeholder="Kundin hinzufügen: Name tippen …" x-model="rosterSearch">
-              <template x-for="c in rosterMatches()" :key="c.customer_id">
-                <button class="ecrm-result" @click="addToRoster(c)">
-                  <span x-text="fullName(c)"></span><span class="ecrm-muted" x-text="balanceText(c)"></span>
-                </button>
-              </template>
-
-              <template x-if="!roster.length && !loading">
-                <p class="ecrm-empty">Noch niemand auf der Liste. Tippe oben einen Namen.</p>
-              </template>
-
-              <div class="ecrm-list">
-                <template x-for="r in roster" :key="r.customer_id">
-                  <div class="ecrm-person" :class="{ 'ecrm-present': r.status === 'present', 'ecrm-warn': rowWarn(r), 'ecrm-off': ['cancelled_in_time','cancelled_late','no_show'].includes(r.status) }">
-                    <button class="ecrm-person-main" @click="toggleCheckin(r)" :disabled="r._busy">
-                      <span class="ecrm-check" x-text="r.status === 'present' ? '✓' : ''"></span>
-                      <span>
-                        <span class="ecrm-strong" x-text="fullName(r)"></span>
-                        <span class="ecrm-sub" x-text="rowText(r)"></span>
-                      </span>
-                    </button>
-                    <template x-if="rowWarn(r) && !canRebook(r)">
-                      <button class="ecrm-btn ecrm-btn-small ecrm-btn-warn" @click="sellFor(r)">Karte verkaufen</button>
-                    </template>
-                    <template x-if="canRebook(r)">
-                      <button class="ecrm-btn ecrm-btn-small ecrm-btn-primary" @click="rebook(r)" :disabled="r._busy">Jetzt abbuchen</button>
-                    </template>
-                    <button class="ecrm-more" @click="r._menu = !r._menu" aria-label="Weitere Aktionen">⋯</button>
-                    <div class="ecrm-menu" x-show="r._menu" @click.outside="r._menu = false">
-                      <button @click="cancelRow(r, false)">Abgesagt</button>
-                      <button @click="cancelRow(r, true)">Nicht erschienen</button>
-                      <button @click="openCustomerById(r.customer_id)">Kundin ansehen</button>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
+          <template x-if="!care.length && !loading">
+            <p class="ecrm-empty">Gerade braucht niemand besondere Aufmerksamkeit. Schön!</p>
           </template>
+          <button class="ecrm-link" x-show="care.length > careLimit" @click="careLimit = 50" x-text="'Alle ' + care.length + ' anzeigen'"></button>
+
+          <h3 class="ecrm-h3">Gerade passiert</h3>
+          <div class="ecrm-card ecrm-feed">
+            <template x-for="(f, i) in feed.slice(0, 8)" :key="i">
+              <button class="ecrm-feed-row" @click="openPerson(f.customer_id)">
+                <span class="ecrm-dot" :class="'ecrm-k-' + feedKind(f.art)"></span>
+                <span class="ecrm-grow"><b x-text="f.first_name"></b> <span x-text="feedText(f)"></span></span>
+                <span class="ecrm-when" x-text="ago(f.am)"></span>
+              </button>
+            </template>
+            <template x-if="!feed.length && !loading"><p class="ecrm-empty">Noch nichts passiert – sobald jemand in der App aktiv ist, siehst du es hier.</p></template>
+          </div>
         </section>
 
-        <!-- ===== KUNDINNEN: Liste ===== -->
-        <section x-show="tab === 'kundinnen' && !customer && !customerForm">
+        <!-- ================= MENSCHEN: Liste ================= -->
+        <section x-show="tab === 'menschen' && !personId && !form">
           <div class="ecrm-searchrow">
-            <input class="ecrm-input" type="search" placeholder="Name oder E-Mail suchen" x-model="search">
-            <button class="ecrm-btn" :class="filterOpen && 'ecrm-btn-primary'" @click="filterOpen = !filterOpen"
-                    x-text="'Filter' + (activeFilterCount() ? ' (' + activeFilterCount() + ')' : '')"></button>
+            <input class="ecrm-input" type="search" placeholder="Name suchen" x-model="search">
           </div>
-          <div class="ecrm-card ecrm-filters" x-show="filterOpen">
-            <div class="ecrm-chips">
-              <button :class="f.source === 'flenski' && 'ecrm-on'" @click="f.source = f.source === 'flenski' ? '' : 'flenski'">App</button>
-              <button :class="f.source === 'extern' && 'ecrm-on'" @click="f.source = f.source === 'extern' ? '' : 'extern'">Extern</button>
-              <button :class="f.balance === '0' && 'ecrm-on'" @click="f.balance = f.balance === '0' ? '' : '0'">Guthaben 0</button>
-              <button :class="f.balance === '1' && 'ecrm-on'" @click="f.balance = f.balance === '1' ? '' : '1'">Guthaben 1</button>
-              <button :class="f.balance === 'more' && 'ecrm-on'" @click="f.balance = f.balance === 'more' ? '' : 'more'">Guthaben &gt; 1</button>
-              <button :class="f.expiring && 'ecrm-on'" @click="f.expiring = !f.expiring">läuft ab ≤ 14 Tage</button>
-              <button :class="f.away && 'ecrm-on'" @click="f.away = f.away ? 0 : 21">lange nicht da</button>
-              <button :class="f.archived && 'ecrm-on'" @click="f.archived = !f.archived">archiviert</button>
-            </div>
-            <div class="ecrm-row2" x-show="f.away">
-              <label class="ecrm-label">nicht da seit mehr als (Tagen)<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="f.away"></label>
-            </div>
-            <div class="ecrm-row2">
-              <label class="ecrm-label">Produkt
-                <select class="ecrm-input" x-model="f.product">
-                  <option value="">alle</option>
-                  <template x-for="p in products" :key="p.id"><option :value="p.name" x-text="p.name"></option></template>
-                </select>
-              </label>
-              <label class="ecrm-label">Tag
-                <select class="ecrm-input" x-model="f.tag">
-                  <option value="">alle</option>
-                  <template x-for="t in allTags()" :key="t"><option :value="t" x-text="t"></option></template>
-                </select>
-              </label>
-            </div>
-            <button class="ecrm-link" @click="resetFilters()">Filter zurücksetzen</button>
+          <div class="ecrm-chips">
+            <template x-for="s in statusFilters" :key="s.value">
+              <button :class="filter === s.value && 'ecrm-on'" @click="filter = s.value"
+                      x-text="s.label + ' ' + (s.value ? count(s.value) : people.length)"></button>
+            </template>
           </div>
-
-          <button class="ecrm-btn ecrm-btn-block" @click="openCustomerForm(null)">+ Neue Kundin</button>
-
-          <div class="ecrm-muted ecrm-small" x-text="filteredCustomers().length + ' Kundinnen'"></div>
-          <template x-for="c in filteredCustomers()" :key="c.customer_id">
-            <button class="ecrm-card ecrm-customer" @click="openCustomer(c)">
-              <div>
-                <div class="ecrm-strong">
-                  <span x-text="fullName(c)"></span>
-                  <span class="ecrm-badge" x-show="c.source === 'flenski'">App</span>
-                  <span class="ecrm-badge" x-show="c.is_child">Kind</span>
-                </div>
-                <div class="ecrm-muted" x-text="lastVisitText(c)"></div>
-                <div class="ecrm-signals">
-                  <template x-for="s in (signals[c.customer_id] || [])" :key="s">
-                    <span class="ecrm-signal" :class="'ecrm-signal-' + s" x-text="signalLabel(s)"></span>
-                  </template>
-                </div>
-              </div>
-              <div class="ecrm-pill" :class="balanceClass(c)" x-text="balanceShort(c)"></div>
+          <template x-for="p in filteredPeople()" :key="p.customer_id">
+            <button class="ecrm-card ecrm-person" @click="openPerson(p.customer_id)">
+              <span class="ecrm-avatar" :class="'ecrm-st-' + p.status" x-text="initials(p)"></span>
+              <span class="ecrm-grow">
+                <span class="ecrm-name"><span x-text="fullName(p)"></span>
+                  <span class="ecrm-tag" x-show="p.source !== 'flenski'">ohne App</span><span class="ecrm-tag" x-show="p.is_child">Kind</span></span>
+                <span class="ecrm-sub" x-text="lastText(p)"></span>
+              </span>
+              <span class="ecrm-spark" aria-hidden="true">
+                <template x-for="(n, i) in (p.events_8w || [])" :key="i"><i :style="barStyle(n, p.events_8w)" :class="'ecrm-st-' + p.status"></i></template>
+              </span>
             </button>
           </template>
-          <template x-if="!customers.length && !loading">
-            <p class="ecrm-empty">Noch keine Kundinnen – lege die erste an.</p>
+          <template x-if="!filteredPeople().length && !loading">
+            <p class="ecrm-empty" x-text="people.length ? 'Niemand passt zu diesem Filter.' : 'Noch niemand da. Sobald sich jemand in deiner App registriert, erscheint die Person hier automatisch.'"></p>
           </template>
+          <button class="ecrm-btn ecrm-block ecrm-quiet" @click="openForm(null)">+ Person ohne App anlegen</button>
         </section>
 
-        <!-- ===== KUNDIN: Detail ===== -->
-        <section x-show="tab === 'kundinnen' && customer && !customerForm">
-          <template x-if="customer">
+        <!-- ================= MENSCH: Detail ================= -->
+        <section x-show="tab === 'menschen' && personId && !form">
+          <template x-if="detail">
             <div>
-              <button class="ecrm-link" @click="customer = null">‹ alle Kundinnen</button>
-              <div class="ecrm-card">
-                <div class="ecrm-headline">
-                  <div>
-                    <h2 class="ecrm-h2" x-text="fullName(customer)"></h2>
-                    <div class="ecrm-muted">
-                      <span x-text="customer.source === 'flenski' ? 'App-Mitglied' : 'extern'"></span>
-                      <span x-show="customer.archived_at"> · archiviert</span>
-                    </div>
-                  </div>
-                  <button class="ecrm-btn ecrm-btn-small" @click="openCustomerForm(customer)">Bearbeiten</button>
+              <button class="ecrm-link" @click="personId = null">‹ Menschen</button>
+              <div class="ecrm-profile">
+                <span class="ecrm-avatar ecrm-avatar-l" :class="'ecrm-st-' + detail.eng.status" x-text="initials(detail.eng)"></span>
+                <div class="ecrm-grow">
+                  <h2 class="ecrm-title" x-text="fullName(detail.eng)"></h2>
+                  <div class="ecrm-sub" x-text="profileLine()"></div>
                 </div>
-                <template x-if="customer.is_child">
-                  <p class="ecrm-small">Kind – Kontakt über <b x-text="customer.guardian_name || 'Eltern'"></b>
-                    <template x-if="customer.guardian_phone"><a class="ecrm-a" :href="'tel:' + customer.guardian_phone" x-text="' · ' + customer.guardian_phone"></a></template>
-                    <template x-if="customer.guardian_email"><a class="ecrm-a" :href="'mailto:' + customer.guardian_email" x-text="' · ' + customer.guardian_email"></a></template>
-                  </p>
-                </template>
-                <p class="ecrm-small">
-                  <template x-if="customer.phone"><a class="ecrm-a" :href="'tel:' + customer.phone" x-text="customer.phone"></a></template>
-                  <template x-if="customer.phone && customer.email"><span> · </span></template>
-                  <template x-if="customer.email"><a class="ecrm-a" :href="'mailto:' + customer.email" x-text="customer.email"></a></template>
-                </p>
-                <div class="ecrm-signals">
-                  <template x-for="s in (signals[customer.id] || [])" :key="s">
-                    <span class="ecrm-signal" :class="'ecrm-signal-' + s" x-text="signalLabel(s)"></span>
-                  </template>
-                </div>
-                <template x-if="customer.note">
-                  <p class="ecrm-note" x-text="customer.note"></p>
-                </template>
+              </div>
+              <div class="ecrm-pills">
+                <span class="ecrm-pill" :class="'ecrm-st-' + detail.eng.status" x-text="statusLabel(detail.eng)"></span>
+                <template x-for="t in (detail.c.tags || [])" :key="t"><span class="ecrm-pill" x-text="t"></span></template>
+              </div>
+              <div class="ecrm-contact">
+                <a class="ecrm-btn ecrm-btn-small" x-show="waLink(detail.c)" :href="waLink(detail.c)" target="_blank" rel="noopener">WhatsApp</a>
+                <a class="ecrm-btn ecrm-btn-small" x-show="contactMail(detail.c)" :href="'mailto:' + contactMail(detail.c)">E-Mail</a>
+                <a class="ecrm-btn ecrm-btn-small" x-show="contactPhone(detail.c)" :href="'tel:' + contactPhone(detail.c)">Anrufen</a>
               </div>
 
-              <div class="ecrm-headline"><h3 class="ecrm-h3">Karten</h3>
-                <button class="ecrm-btn ecrm-btn-small ecrm-btn-primary" @click="sellFor({ customer_id: customer.id })" x-show="!customer.archived_at">+ Verkauf</button>
+              <div class="ecrm-stats ecrm-stats-3">
+                <div class="ecrm-stat"><span>Kursbesuche</span><b x-text="detail.eng.besuche_gesamt"></b></div>
+                <div class="ecrm-stat"><span>Guthaben</span><b x-text="balanceShort()"></b></div>
+                <div class="ecrm-stat"><span>Aktiv, 30 Tage</span><b x-text="detail.eng.score_30d"></b></div>
               </div>
-              <template x-for="e in entitlements" :key="e.entitlement_id">
-                <div class="ecrm-card ecrm-ent" :class="e.status !== 'active' && 'ecrm-off'">
-                  <div class="ecrm-headline">
-                    <div>
-                      <div class="ecrm-strong" x-text="e.product_name"></div>
-                      <div class="ecrm-muted" x-text="entText(e)"></div>
-                    </div>
-                    <div class="ecrm-pill" x-text="e.unlimited ? '∞' : e.balance"></div>
-                  </div>
-                  <template x-if="isOwner && e.status !== 'cancelled'">
-                    <div>
-                      <button class="ecrm-link" x-show="correctFor !== e.entitlement_id" @click="correctFor = e.entitlement_id; correction = { delta: 1, comment: '' }">Korrektur</button>
-                      <div x-show="correctFor === e.entitlement_id" class="ecrm-correct">
-                        <div class="ecrm-stepper">
-                          <button class="ecrm-btn ecrm-btn-icon" @click="correction.delta--">−</button>
-                          <b x-text="(correction.delta > 0 ? '+' : '') + correction.delta"></b>
-                          <button class="ecrm-btn ecrm-btn-icon" @click="correction.delta++">+</button>
+
+              <div class="ecrm-card">
+                <div class="ecrm-sub">Aktivität, letzte 8 Wochen</div>
+                <div class="ecrm-bars">
+                  <template x-for="(n, i) in detail.eng.events_8w" :key="i">
+                    <i :style="barStyle(n, detail.eng.events_8w, 56)" :class="i >= 6 ? 'ecrm-st-' + detail.eng.status : 'ecrm-st-dabei'"></i>
+                  </template>
+                </div>
+              </div>
+
+              <template x-for="n in detail.notices" :key="n.id">
+                <div class="ecrm-card ecrm-notice">
+                  <span class="ecrm-grow" x-text="noticeText(n)"></span>
+                  <button class="ecrm-btn ecrm-btn-small" @click="resolveNotice(n)">Erledigt</button>
+                </div>
+              </template>
+
+              <template x-if="detail.ents.length">
+                <div>
+                  <h3 class="ecrm-h3">Karten und Pläne</h3>
+                  <template x-for="e in detail.ents" :key="e.entitlement_id">
+                    <div class="ecrm-card ecrm-ent" :class="e.status !== 'active' && 'ecrm-off'">
+                      <div class="ecrm-row">
+                        <div class="ecrm-grow">
+                          <div class="ecrm-name" x-text="e.product_name"></div>
+                          <div class="ecrm-sub" x-text="entText(e)"></div>
                         </div>
-                        <input class="ecrm-input" placeholder="Grund (Pflicht), z. B. Kulanz" x-model="correction.comment">
-                        <div class="ecrm-actions">
-                          <button class="ecrm-btn" @click="correctFor = null">Abbrechen</button>
-                          <button class="ecrm-btn ecrm-btn-primary" @click="saveCorrection(e)" :disabled="busy">Buchen</button>
-                        </div>
+                        <span class="ecrm-num" x-text="e.unlimited ? '–' : e.balance"></span>
                       </div>
+                      <template x-if="isOwner && !e.unlimited && e.status !== 'cancelled'">
+                        <div>
+                          <button class="ecrm-link ecrm-small" x-show="correctFor !== e.entitlement_id" @click="correctFor = e.entitlement_id; correction = { delta: 1, comment: '' }">Korrigieren</button>
+                          <div x-show="correctFor === e.entitlement_id">
+                            <div class="ecrm-stepper">
+                              <button class="ecrm-btn ecrm-btn-small" @click="correction.delta--">−</button>
+                              <b x-text="(correction.delta > 0 ? '+' : '') + correction.delta"></b>
+                              <button class="ecrm-btn ecrm-btn-small" @click="correction.delta++">+</button>
+                            </div>
+                            <input class="ecrm-input" placeholder="Grund (Pflicht), z. B. Kulanz" x-model="correction.comment">
+                            <div class="ecrm-actions">
+                              <button class="ecrm-btn" @click="correctFor = null">Abbrechen</button>
+                              <button class="ecrm-btn ecrm-btn-primary" @click="saveCorrection(e)" :disabled="busy">Buchen</button>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
                     </div>
                   </template>
                 </div>
-              </template>
-              <template x-if="!entitlements.length">
-                <p class="ecrm-empty">Noch keine Karte.</p>
               </template>
 
               <h3 class="ecrm-h3">Verlauf</h3>
-              <div class="ecrm-card ecrm-history">
-                <template x-for="h in history" :key="h.id">
-                  <div class="ecrm-hrow">
-                    <div class="ecrm-hdate" x-text="dateShort(h.occurred_at)"></div>
-                    <div class="ecrm-htext">
-                      <div x-text="historyText(h)"></div>
-                      <div class="ecrm-muted ecrm-small" x-text="h.product_name + ' · ' + who(h.created_by)"></div>
-                    </div>
-                    <div class="ecrm-hdelta" :class="h.delta > 0 ? 'ecrm-plus' : 'ecrm-minus'" x-text="(h.delta > 0 ? '+' : '') + h.delta"></div>
+              <div class="ecrm-card ecrm-feed">
+                <template x-for="(f, i) in detail.feed" :key="i">
+                  <div class="ecrm-feed-row">
+                    <span class="ecrm-dot" :class="'ecrm-k-' + feedKind(f.art)"></span>
+                    <span class="ecrm-grow" x-text="feedText(f, true)"></span>
+                    <span class="ecrm-when" x-text="dateShort(f.am)"></span>
+                    <span class="ecrm-delta" x-show="f.delta" x-text="(f.delta > 0 ? '+' : '') + f.delta"></span>
                   </div>
                 </template>
-                <template x-if="!history.length"><p class="ecrm-empty">Noch keine Buchungen.</p></template>
+                <template x-if="!detail.feed.length"><p class="ecrm-empty">Noch keine Aktivität.</p></template>
               </div>
 
-              <div class="ecrm-actions ecrm-danger-zone">
-                <button class="ecrm-btn" @click="toggleArchive()" x-text="customer.archived_at ? 'Wieder aktivieren' : 'Archivieren'"></button>
-                <template x-if="isOwner">
-                  <button class="ecrm-btn ecrm-btn-danger" @click="anonymize()">Kundin löschen</button>
-                </template>
-              </div>
-            </div>
-          </template>
-        </section>
-
-        <!-- ===== KUNDIN: anlegen / bearbeiten ===== -->
-        <section x-show="tab === 'kundinnen' && customerForm">
-          <template x-if="customerForm">
-            <div class="ecrm-card">
-              <h3 class="ecrm-h3" x-text="customerForm.id ? 'Kundin bearbeiten' : 'Neue Kundin'"></h3>
-              <div class="ecrm-row2">
-                <label class="ecrm-label">Vorname *<input class="ecrm-input" x-model.trim="customerForm.first_name"></label>
-                <label class="ecrm-label">Nachname<input class="ecrm-input" x-model.trim="customerForm.last_name"></label>
-              </div>
-              <label class="ecrm-check-label"><input type="checkbox" x-model="customerForm.is_child"> Kind (Kontakt über die Eltern)</label>
-              <template x-if="customerForm.is_child">
-                <div>
-                  <label class="ecrm-label">Name Elternteil<input class="ecrm-input" x-model.trim="customerForm.guardian_name"></label>
-                  <div class="ecrm-row2">
-                    <label class="ecrm-label">Telefon Eltern<input class="ecrm-input" type="tel" x-model.trim="customerForm.guardian_phone"></label>
-                    <label class="ecrm-label">E-Mail Eltern<input class="ecrm-input" type="email" x-model.trim="customerForm.guardian_email"></label>
-                  </div>
-                </div>
-              </template>
-              <template x-if="!customerForm.is_child">
-                <div class="ecrm-row2">
-                  <label class="ecrm-label">Telefon<input class="ecrm-input" type="tel" x-model.trim="customerForm.phone"></label>
-                  <label class="ecrm-label">E-Mail<input class="ecrm-input" type="email" x-model.trim="customerForm.email"></label>
-                </div>
-              </template>
-              <label class="ecrm-label">Tags (mit Komma trennen)<input class="ecrm-input" x-model="customerForm.tagsText" placeholder="z. B. Erwachsene, Dienstag"></label>
-              <label class="ecrm-label">Notiz (nur Organisatorisches)
-                <textarea class="ecrm-input" rows="3" x-model="customerForm.note"></textarea>
-              </label>
-              <p class="ecrm-hint">Bitte keine Gesundheitsangaben (z. B. Verletzungen, Beschwerden) eintragen.</p>
-              <div class="ecrm-actions">
-                <button class="ecrm-btn" @click="customerForm = null">Abbrechen</button>
-                <button class="ecrm-btn ecrm-btn-primary" @click="saveCustomer()" :disabled="busy">Speichern</button>
-              </div>
-            </div>
-          </template>
-        </section>
-
-        <!-- ===== VERKAUF ===== -->
-        <section x-show="tab === 'verkauf'">
-          <!-- Schritt 1: Kundin -->
-          <template x-if="!sale.customer && !sale.done">
-            <div>
-              <h2 class="ecrm-h2">Verkauf</h2>
-              <p class="ecrm-muted">Wer kauft?</p>
-              <input class="ecrm-input" type="search" placeholder="Name tippen …" x-model="sale.search">
-              <template x-for="c in saleMatches()" :key="c.customer_id">
-                <button class="ecrm-result" @click="sale.customer = c">
-                  <span x-text="fullName(c)"></span><span class="ecrm-muted" x-text="balanceText(c)"></span>
-                </button>
-              </template>
-              <template x-if="!sale.quick">
-                <button class="ecrm-btn ecrm-btn-block" @click="sale.quick = { first_name: sale.search.trim(), last_name: '' }">+ Neue Kundin</button>
-              </template>
-              <template x-if="sale.quick">
+              <details class="ecrm-more">
+                <summary>Weitere Aktionen</summary>
                 <div class="ecrm-card">
+                  <h3 class="ecrm-h3 ecrm-h3-tight">Zahlung von Hand nachtragen</h3>
+                  <p class="ecrm-sub">Nur für Zahlungen außerhalb der App (bar, Überweisung …). App-Käufe kommen automatisch.</p>
+                  <select class="ecrm-input" x-model="manual.product">
+                    <option value="">Produkt wählen …</option>
+                    <template x-for="p in products.filter(p => p.active && !p.needs_setup)" :key="p.id"><option :value="p.id" x-text="p.name"></option></template>
+                  </select>
                   <div class="ecrm-row2">
-                    <label class="ecrm-label">Vorname *<input class="ecrm-input" x-model.trim="sale.quick.first_name"></label>
-                    <label class="ecrm-label">Nachname<input class="ecrm-input" x-model.trim="sale.quick.last_name"></label>
+                    <select class="ecrm-input" x-model="manual.paid_via">
+                      <option value="bar">bar</option><option value="ueberweisung">Überweisung</option><option value="verein">Verein</option>
+                      <option value="gutschein">Gutschein</option><option value="sonstiges">sonstiges</option>
+                    </select>
+                    <input class="ecrm-input" type="number" inputmode="decimal" step="0.01" placeholder="Preis € (optional)" x-model="manual.price">
                   </div>
-                  <div class="ecrm-actions">
-                    <button class="ecrm-btn" @click="sale.quick = null">Abbrechen</button>
-                    <button class="ecrm-btn ecrm-btn-primary" @click="quickCustomer()" :disabled="busy">Weiter</button>
-                  </div>
+                  <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="saveManual()" :disabled="busy || !manual.product">Eintragen</button>
+                  <p class="ecrm-sub" x-show="!products.some(p => p.active && !p.needs_setup)">Erst ein Produkt einrichten (Einstellungen).</p>
                 </div>
-              </template>
+                <div class="ecrm-actions ecrm-spread">
+                  <button class="ecrm-btn" @click="openForm(detail.c)">Bearbeiten</button>
+                  <button class="ecrm-btn" @click="toggleArchive()" x-text="detail.c.archived_at ? 'Wieder aufnehmen' : 'Ausblenden'"></button>
+                  <template x-if="isOwner"><button class="ecrm-btn ecrm-danger" @click="anonymize()">Löschen</button></template>
+                </div>
+              </details>
             </div>
           </template>
+        </section>
 
-          <!-- Schritt 2 + 3: Produkt und Zahlweg -->
-          <template x-if="sale.customer && !sale.done">
-            <div>
-              <button class="ecrm-link" @click="sale.customer = null; sale.product = null">‹ andere Kundin</button>
-              <h2 class="ecrm-h2" x-text="'Verkauf an ' + fullName(sale.customer)"></h2>
-              <p class="ecrm-muted" x-text="sale.product ? 'Wie wurde bezahlt?' : 'Was wird gekauft?'"></p>
-              <template x-if="!sale.product">
-                <div class="ecrm-tiles">
-                  <template x-for="p in products.filter(p => p.active)" :key="p.id">
-                    <button class="ecrm-tile" @click="sale.product = p; sale.price = p.price_cents != null ? (p.price_cents / 100) : ''">
-                      <span class="ecrm-strong" x-text="p.name"></span>
-                      <span class="ecrm-muted" x-text="productText(p)"></span>
-                    </button>
-                  </template>
-                  <template x-if="!products.some(p => p.active)">
-                    <p class="ecrm-empty">Noch keine Produkte – lege sie unter „Mehr“ an.</p>
-                  </template>
+        <!-- ================= MENSCH: anlegen / bearbeiten ================= -->
+        <section x-show="tab === 'menschen' && form">
+          <template x-if="form">
+            <div class="ecrm-card">
+              <h3 class="ecrm-h3 ecrm-h3-tight" x-text="form.id ? 'Bearbeiten' : 'Person ohne App'"></h3>
+              <template x-if="form.source === 'flenski'"><p class="ecrm-sub">Name und E-Mail kommen aus der App und werden dort gepflegt.</p></template>
+              <template x-if="form.source !== 'flenski'">
+                <div class="ecrm-row2">
+                  <label class="ecrm-label">Vorname *<input class="ecrm-input" x-model.trim="form.first_name"></label>
+                  <label class="ecrm-label">Nachname<input class="ecrm-input" x-model.trim="form.last_name"></label>
                 </div>
               </template>
-              <template x-if="sale.product">
+              <label class="ecrm-check"><input type="checkbox" x-model="form.is_child"> Kind (Kontakt über die Eltern)</label>
+              <template x-if="form.is_child">
                 <div>
-                  <div class="ecrm-card ecrm-chosen">
-                    <span class="ecrm-strong" x-text="sale.product.name"></span>
-                    <button class="ecrm-link" @click="sale.product = null">ändern</button>
+                  <label class="ecrm-label">Name Elternteil<input class="ecrm-input" x-model.trim="form.guardian_name"></label>
+                  <div class="ecrm-row2">
+                    <label class="ecrm-label">Telefon Eltern<input class="ecrm-input" type="tel" x-model.trim="form.guardian_phone"></label>
+                    <label class="ecrm-label">E-Mail Eltern<input class="ecrm-input" type="email" x-model.trim="form.guardian_email"></label>
                   </div>
-                  <div class="ecrm-tiles ecrm-tiles-pay">
-                    <template x-for="w in payWays" :key="w.value">
-                      <button class="ecrm-tile ecrm-tile-pay" @click="doSell(w.value)" :disabled="busy" x-text="w.label"></button>
-                    </template>
-                  </div>
-                  <label class="ecrm-label ecrm-small">Preis in € (nur ändern, wenn abweichend)
-                    <input class="ecrm-input" type="number" inputmode="decimal" step="0.01" x-model="sale.price">
-                  </label>
                 </div>
               </template>
-            </div>
-          </template>
-
-          <!-- Fertig -->
-          <template x-if="sale.done">
-            <div class="ecrm-card ecrm-done">
-              <div class="ecrm-bigcheck">✓</div>
-              <p class="ecrm-strong" x-text="sale.done"></p>
+              <div class="ecrm-row2">
+                <label class="ecrm-label">Telefon<input class="ecrm-input" type="tel" x-model.trim="form.phone"></label>
+                <label class="ecrm-label" x-show="form.source !== 'flenski'">E-Mail<input class="ecrm-input" type="email" x-model.trim="form.email"></label>
+              </div>
+              <label class="ecrm-label">Notiz (nur Organisatorisches)<textarea class="ecrm-input" rows="3" x-model="form.note"></textarea></label>
+              <p class="ecrm-hint">Bitte keine Gesundheitsangaben (Verletzungen, Beschwerden) eintragen.</p>
               <div class="ecrm-actions">
-                <template x-if="sale.backToSession">
-                  <button class="ecrm-btn ecrm-btn-primary" @click="backToSession()">Zurück zur Stunde</button>
-                </template>
-                <button class="ecrm-btn" @click="resetSale()">Noch ein Verkauf</button>
+                <button class="ecrm-btn" @click="form = null">Abbrechen</button>
+                <button class="ecrm-btn ecrm-btn-primary" @click="saveForm()" :disabled="busy">Speichern</button>
               </div>
             </div>
           </template>
         </section>
 
-        <!-- ===== MEHR ===== -->
-        <section x-show="tab === 'mehr'">
-          <template x-if="!productForm">
+        <!-- ================= KURSE ================= -->
+        <section x-show="tab === 'kurse' && !course">
+          <h2 class="ecrm-title">Kurse</h2>
+          <div class="ecrm-sub">Termine aus deiner App, mit Anmeldungen.</div>
+          <template x-for="g in courseGroups()" :key="g.label">
             <div>
-              <div class="ecrm-headline"><h3 class="ecrm-h3">Produkte</h3>
-                <button class="ecrm-btn ecrm-btn-small ecrm-btn-primary" x-show="isOwner" @click="openProductForm(null)">+ Produkt</button>
-              </div>
-              <template x-for="p in products" :key="p.id">
-                <button class="ecrm-card ecrm-customer" :class="!p.active && 'ecrm-off'" @click="isOwner && openProductForm(p)">
-                  <div>
-                    <div class="ecrm-strong" x-text="p.name + (p.active ? '' : ' (nicht mehr im Verkauf)')"></div>
-                    <div class="ecrm-muted" x-text="productText(p)"></div>
-                  </div>
+              <h3 class="ecrm-h3" x-text="g.label"></h3>
+              <template x-for="s in g.items" :key="s.id">
+                <button class="ecrm-card ecrm-course" @click="openCourse(s)">
+                  <span class="ecrm-date"><b x-text="dayNum(s.starts_at)"></b><span x-text="weekday(s.starts_at)"></span></span>
+                  <span class="ecrm-grow">
+                    <span class="ecrm-name" x-text="s.title"></span>
+                    <span class="ecrm-sub" x-text="time(s.starts_at) + (s.category ? ' · ' + s.category : '')"></span>
+                  </span>
+                  <span class="ecrm-fill">
+                    <b x-text="(s.n || 0) + (s.capacity ? '/' + s.capacity : '')"></b>
+                    <span x-text="new Date(s.starts_at) < new Date() ? 'da' : 'angemeldet'"></span>
+                  </span>
                 </button>
               </template>
-              <template x-if="!products.length"><p class="ecrm-empty">Noch keine Produkte.</p></template>
-              <p class="ecrm-muted ecrm-small" x-show="!isOwner">Produkte kann nur die Inhaberin ändern.</p>
+            </div>
+          </template>
+          <template x-if="!sessions.length && !loading"><p class="ecrm-empty">Noch keine Termine. Kurse und Events aus deiner App erscheinen hier automatisch.</p></template>
+          <button class="ecrm-link" @click="showPast = !showPast; loadCourses()" x-text="showPast ? 'Nur kommende Termine' : 'Vergangene Termine zeigen'"></button>
+        </section>
 
-              <h3 class="ecrm-h3">Team</h3>
-              <div class="ecrm-card">
-                <template x-for="m in team" :key="m.user_id">
-                  <div class="ecrm-hrow"><span x-text="m.email"></span><span class="ecrm-muted" x-text="m.role === 'owner' ? 'Inhaberin' : 'Vertretung'"></span></div>
-                </template>
-                <template x-if="!team.length">
-                  <p class="ecrm-muted ecrm-small">Noch niemand eingeladen. Neue Personen lädt Systemsafari ein.</p>
-                </template>
+        <section x-show="tab === 'kurse' && course">
+          <template x-if="course">
+            <div>
+              <button class="ecrm-link" @click="course = null">‹ Kurse</button>
+              <h2 class="ecrm-title" x-text="course.title"></h2>
+              <div class="ecrm-sub" x-text="dateLong(course.starts_at) + ', ' + time(course.starts_at) + (course.category ? ' · ' + course.category : '')"></div>
+              <div class="ecrm-stats ecrm-stats-3">
+                <div class="ecrm-stat"><span>Angemeldet</span><b x-text="roster.filter(r => r.status === 'registered').length"></b></div>
+                <div class="ecrm-stat ecrm-st-dabei"><span>Da</span><b x-text="roster.filter(r => r.status === 'present').length"></b></div>
+                <div class="ecrm-stat"><span>Plätze</span><b x-text="course.capacity || '–'"></b></div>
               </div>
+              <template x-for="r in roster" :key="r.customer_id">
+                <div class="ecrm-card ecrm-person ecrm-roster">
+                  <button class="ecrm-care-main" @click="openPerson(r.customer_id)">
+                    <span class="ecrm-avatar" :class="'ecrm-st-' + personStatus(r.customer_id)" x-text="initials(r)"></span>
+                    <span class="ecrm-grow">
+                      <span class="ecrm-name" x-text="fullName(r)"></span>
+                      <span class="ecrm-sub" x-text="rosterText(r)"></span>
+                    </span>
+                  </button>
+                  <button class="ecrm-more-btn" @click="r._menu = !r._menu" aria-label="Weitere Aktionen">⋯</button>
+                  <div class="ecrm-menu" x-show="r._menu" @click.outside="r._menu = false">
+                    <button @click="cancelRow(r, false)">Hat abgesagt</button>
+                    <button @click="cancelRow(r, true)">Nicht erschienen</button>
+                  </div>
+                </div>
+              </template>
+              <template x-if="!roster.length"><p class="ecrm-empty">Noch niemand angemeldet.</p></template>
+            </div>
+          </template>
+        </section>
 
-              <div class="ecrm-card">
-                <p class="ecrm-small">Angemeldet als <b x-text="userEmail"></b> (<span x-text="isOwner ? 'Inhaberin' : 'Vertretung'"></span>) · <span x-text="tenant && tenant.name"></span></p>
-                <button class="ecrm-btn" @click="logout()">Abmelden</button>
-              </div>
+        <!-- ================= EINSTELLUNGEN ================= -->
+        <section x-show="tab === 'einstellungen'">
+          <h2 class="ecrm-title">Einstellungen</h2>
+
+          <template x-if="setupNeeded().length">
+            <div>
+              <h3 class="ecrm-h3">Pläne aus deiner App einrichten</h3>
+              <p class="ecrm-sub">Flenski weiß nicht, wie viele Besuche in einem Plan stecken. Sag es einmal – danach zählt das CRM alles automatisch, auch rückwirkend.</p>
+              <template x-for="p in setupNeeded()" :key="p.id">
+                <div class="ecrm-card">
+                  <div class="ecrm-name" x-text="p.name"></div>
+                  <template x-if="!isOwner"><p class="ecrm-sub">Das richtet die Inhaberin ein.</p></template>
+                  <template x-if="isOwner">
+                    <div>
+                      <label class="ecrm-label">Was ist das?
+                        <select class="ecrm-input" x-model="setup[p.id].type">
+                          <option value="credits">Karte mit Besuchen (z. B. 4er, 10er)</option>
+                          <option value="period">Kursblock / Zeitraum (ohne Zählen)</option>
+                          <option value="subscription">Abo (unbegrenzt)</option>
+                          <option value="single">Einzelstunde</option>
+                        </select>
+                      </label>
+                      <div class="ecrm-row2">
+                        <label class="ecrm-label" x-show="setup[p.id].type === 'credits'">Besuche<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="setup[p.id].credits"></label>
+                        <label class="ecrm-label">Gültig (Tage)<input class="ecrm-input" type="number" inputmode="numeric" placeholder="leer = unbegrenzt" x-model.number="setup[p.id].validity"></label>
+                      </div>
+                      <div class="ecrm-row2">
+                        <label class="ecrm-label">Preis €<input class="ecrm-input" type="number" inputmode="decimal" step="0.01" x-model="setup[p.id].price"></label>
+                        <label class="ecrm-label">Gilt für
+                          <select class="ecrm-input" x-model="setup[p.id].category">
+                            <option value="">alle Kurse</option>
+                            <template x-for="c in categories" :key="c"><option :value="c" x-text="c"></option></template>
+                          </select>
+                        </label>
+                      </div>
+                      <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="saveSetup(p)" :disabled="busy">Einrichten</button>
+                    </div>
+                  </template>
+                </div>
+              </template>
             </div>
           </template>
 
-          <template x-if="productForm">
-            <div class="ecrm-card">
-              <h3 class="ecrm-h3" x-text="productForm.id ? 'Produkt bearbeiten' : 'Neues Produkt'"></h3>
-              <label class="ecrm-label">Name *<input class="ecrm-input" x-model.trim="productForm.name" placeholder="z. B. 10er-Karte"></label>
-              <label class="ecrm-label">Art
-                <select class="ecrm-input" x-model="productForm.type" :disabled="productForm.id">
-                  <option value="credits">Karte mit Einheiten (z. B. 4er, 10er)</option>
-                  <option value="single">Einzelstunde</option>
-                  <option value="period">Kursblock / Zeitraum (ohne Abzug)</option>
-                  <option value="subscription">Abo (unbegrenzt)</option>
-                </select>
-              </label>
-              <div class="ecrm-row2">
-                <label class="ecrm-label" x-show="productForm.type === 'credits'">Einheiten *<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="productForm.credits" :disabled="productForm.id"></label>
-                <label class="ecrm-label">Gültig (Tage)<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="productForm.validity_days" placeholder="leer = unbegrenzt"></label>
-              </div>
-              <div class="ecrm-row2">
-                <label class="ecrm-label">Preis in €<input class="ecrm-input" type="number" inputmode="decimal" step="0.01" x-model="productForm.price"></label>
-                <label class="ecrm-label">Kategorie<input class="ecrm-input" x-model.trim="productForm.category" placeholder="leer = gilt für alle Stunden"></label>
-              </div>
-              <label class="ecrm-check-label" x-show="productForm.id"><input type="checkbox" x-model="productForm.active"> wird verkauft</label>
-              <p class="ecrm-hint" x-show="productForm.id">Art und Einheiten bleiben fest, damit bestehende Karten stimmen. Für etwas Neues ein neues Produkt anlegen.</p>
-              <div class="ecrm-actions">
-                <button class="ecrm-btn" @click="productForm = null">Abbrechen</button>
-                <button class="ecrm-btn ecrm-btn-primary" @click="saveProduct()" :disabled="busy">Speichern</button>
-              </div>
-            </div>
-          </template>
+          <h3 class="ecrm-h3">Produkte</h3>
+          <div class="ecrm-card ecrm-feed">
+            <template x-for="p in products.filter(p => !p.needs_setup)" :key="p.id">
+              <div class="ecrm-feed-row"><span class="ecrm-grow"><b x-text="p.name"></b> <span class="ecrm-sub" x-text="productText(p)"></span></span></div>
+            </template>
+            <template x-if="!products.filter(p => !p.needs_setup).length"><p class="ecrm-empty">Noch keine eingerichteten Produkte.</p></template>
+          </div>
+
+          <h3 class="ecrm-h3">Team</h3>
+          <div class="ecrm-card ecrm-feed">
+            <template x-for="m in team" :key="m.user_id">
+              <div class="ecrm-feed-row"><span class="ecrm-grow" x-text="m.email"></span><span class="ecrm-sub" x-text="m.role === 'owner' ? 'Inhaberin' : 'Vertretung'"></span></div>
+            </template>
+            <template x-if="!team.length"><p class="ecrm-empty">Neue Personen lädt Systemsafari ein.</p></template>
+          </div>
+
+          <div class="ecrm-card">
+            <p class="ecrm-sub">Angemeldet als <b x-text="userEmail"></b> · <span x-text="tenant && tenant.name"></span></p>
+            <button class="ecrm-btn" @click="logout()">Abmelden</button>
+          </div>
         </section>
       </div>
     </template>
 
-    <!-- Meldung unten (mit Rückgängig) -->
-    <div class="ecrm-toast" x-show="toast" x-transition.opacity :class="toast && toast.error && 'ecrm-toast-error'">
-      <span x-text="toast && toast.text"></span>
-      <template x-if="toast && toast.hasUndo"><button @click="runUndo()">Rückgängig</button></template>
-    </div>
+    <div class="ecrm-toast" x-show="toast" x-transition.opacity :class="toast && toast.error && 'ecrm-toast-error'" x-text="toast && toast.text"></div>
   </div>
 </div>
 
 <style>
-#ecrm-root { --ecrm-accent: #38725b; --ecrm-accent-soft: #e8f1ec; --ecrm-warn: #c4661f; --ecrm-warn-soft: #fbeee3;
-  --ecrm-text: #24211e; --ecrm-muted: #74706a; --ecrm-line: #e8e1d6; --ecrm-bg: #ffffff; --ecrm-danger: #b3261e;
-  font-family: inherit; color: var(--ecrm-text); max-width: 640px; margin: 0 auto; font-size: 16px; line-height: 1.4; }
+#ecrm-root { --a: #38725b; --a-soft: #e9f2ed; --ink: #23201d; --muted: #77716a; --line: #ece5da; --card: #fff; --danger: #b3261e;
+  --neu-bg: #E1F5EE; --neu: #0F6E56; --dabei-bg: #EAF3DE; --dabei: #3B6D11; --kuehlt-bg: #FAEEDA; --kuehlt: #854F0B; --schlaf-bg: #F1EFE8; --schlaf: #5F5E5A;
+  font-family: inherit; color: var(--ink); max-width: 680px; margin: 0 auto; font-size: 16px; line-height: 1.45; }
 #ecrm-root *, #ecrm-root *::before, #ecrm-root *::after { box-sizing: border-box; }
 #ecrm-root [x-cloak] { display: none !important; }
-#ecrm-root .ecrm-boot { padding: 24px; text-align: center; color: var(--ecrm-muted); }
-#ecrm-root .ecrm-card { display: block; width: 100%; background: var(--ecrm-bg); border: 1px solid var(--ecrm-line); border-radius: 14px;
-  padding: 14px 16px; margin: 10px 0; text-align: left; font: inherit; color: inherit; }
+#ecrm-root .ecrm-boot { padding: 32px; text-align: center; color: var(--muted); }
+#ecrm-root .ecrm-card { display: block; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
+  margin: 10px 0; text-align: left; font: inherit; color: inherit; }
 #ecrm-root button.ecrm-card { cursor: pointer; }
-#ecrm-root .ecrm-h2 { font-size: 20px; margin: 4px 0; font-weight: 700; }
-#ecrm-root .ecrm-h3 { font-size: 17px; margin: 18px 0 6px; font-weight: 700; }
-#ecrm-root .ecrm-muted { color: var(--ecrm-muted); }
-#ecrm-root .ecrm-small { font-size: 14px; }
-#ecrm-root .ecrm-strong { font-weight: 600; }
-#ecrm-root .ecrm-empty { color: var(--ecrm-muted); text-align: center; padding: 16px 8px; }
-#ecrm-root .ecrm-hint { font-size: 13px; color: var(--ecrm-warn); margin: 4px 0 10px; }
-#ecrm-root .ecrm-input { width: 100%; font: inherit; font-size: 16px; padding: 12px; border: 1px solid #cfc7ba; border-radius: 10px;
-  background: #fff; color: var(--ecrm-text); margin: 6px 0; }
-#ecrm-root .ecrm-input:focus { outline: 2px solid var(--ecrm-accent); outline-offset: 0; border-color: var(--ecrm-accent); }
-#ecrm-root .ecrm-code { font-size: 22px; letter-spacing: 6px; text-align: center; }
-#ecrm-root .ecrm-label { display: block; font-size: 14px; color: var(--ecrm-muted); margin: 6px 0; }
-#ecrm-root .ecrm-check-label { display: flex; gap: 10px; align-items: center; margin: 10px 0; min-height: 44px; }
-#ecrm-root .ecrm-check-label input { width: 22px; height: 22px; accent-color: var(--ecrm-accent); }
+#ecrm-root .ecrm-title { font-size: 22px; font-weight: 600; margin: 2px 0 4px; letter-spacing: -.01em; }
+#ecrm-root .ecrm-h3 { font-size: 15px; font-weight: 600; margin: 22px 0 6px; color: var(--ink); }
+#ecrm-root .ecrm-h3-tight { margin-top: 0; }
+#ecrm-root .ecrm-muted, #ecrm-root .ecrm-sub { color: var(--muted); }
+#ecrm-root .ecrm-sub { display: block; font-size: 13px; }
+#ecrm-root .ecrm-small { font-size: 13px; }
+#ecrm-root .ecrm-empty { color: var(--muted); text-align: center; padding: 14px 8px; margin: 0; font-size: 14px; }
+#ecrm-root .ecrm-hint { font-size: 13px; color: var(--kuehlt); margin: 4px 0 10px; }
+#ecrm-root .ecrm-grow { flex: 1; min-width: 0; }
+#ecrm-root .ecrm-name { display: block; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ecrm-root .ecrm-row { display: flex; align-items: center; gap: 12px; }
 #ecrm-root .ecrm-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-#ecrm-root .ecrm-btn { font: inherit; font-size: 15px; min-height: 44px; padding: 10px 16px; border-radius: 10px; border: 1px solid #cfc7ba;
-  background: #fff; color: var(--ecrm-text); cursor: pointer; }
-#ecrm-root .ecrm-btn:disabled { opacity: .55; cursor: default; }
-#ecrm-root .ecrm-btn-primary { background: var(--ecrm-accent); border-color: var(--ecrm-accent); color: #fff; }
-#ecrm-root .ecrm-btn-warn { background: var(--ecrm-warn); border-color: var(--ecrm-warn); color: #fff; }
-#ecrm-root .ecrm-btn-danger { color: var(--ecrm-danger); border-color: #e6b8b5; }
-#ecrm-root .ecrm-btn-block { width: 100%; margin: 10px 0; }
-#ecrm-root .ecrm-btn-small { min-height: 36px; padding: 6px 12px; font-size: 14px; }
-#ecrm-root .ecrm-btn-icon { min-width: 44px; padding: 8px; font-size: 20px; line-height: 1; }
-#ecrm-root .ecrm-link { background: none; border: 0; color: var(--ecrm-accent); font: inherit; font-size: 15px; padding: 10px 0; cursor: pointer; }
-#ecrm-root .ecrm-a { color: var(--ecrm-accent); text-decoration: none; }
+#ecrm-root .ecrm-input { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid #d9d1c5; border-radius: 12px; background: #fff;
+  color: var(--ink); margin: 6px 0; }
+#ecrm-root .ecrm-input:focus { outline: 2px solid var(--a); outline-offset: 0; border-color: var(--a); }
+#ecrm-root .ecrm-code { font-size: 22px; letter-spacing: 6px; text-align: center; }
+#ecrm-root .ecrm-label { display: block; font-size: 13px; color: var(--muted); margin: 6px 0; }
+#ecrm-root .ecrm-check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
+#ecrm-root .ecrm-check input { width: 20px; height: 20px; accent-color: var(--a); }
+#ecrm-root .ecrm-btn { display: inline-flex; align-items: center; justify-content: center; font: inherit; font-size: 15px; min-height: 44px; padding: 10px 16px;
+  border-radius: 12px; border: 1px solid #d9d1c5; background: #fff; color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; }
+#ecrm-root .ecrm-btn:disabled { opacity: .5; cursor: default; }
+#ecrm-root .ecrm-btn-primary { background: var(--a); border-color: var(--a); color: #fff; }
+#ecrm-root .ecrm-btn-small { min-height: 36px; padding: 6px 12px; font-size: 13px; border-radius: 10px; }
+#ecrm-root .ecrm-block { width: 100%; margin: 10px 0; }
+#ecrm-root .ecrm-quiet { color: var(--muted); border-style: dashed; background: transparent; }
+#ecrm-root .ecrm-danger { color: var(--danger); border-color: #ebc0bd; }
+#ecrm-root .ecrm-link { background: none; border: 0; color: var(--a); font: inherit; font-size: 15px; padding: 10px 0; cursor: pointer; }
 #ecrm-root .ecrm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 10px; }
-#ecrm-root .ecrm-headline { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-#ecrm-root .ecrm-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #f1ece4; padding: 4px; border-radius: 12px; margin: 4px 0 8px; }
-#ecrm-root .ecrm-tabs button { font: inherit; font-size: 14px; min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--ecrm-muted); cursor: pointer; }
-#ecrm-root .ecrm-tabs button.ecrm-active { background: #fff; color: var(--ecrm-accent); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-#ecrm-root .ecrm-daybar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; }
-#ecrm-root .ecrm-daylabel { font-weight: 700; font-size: 17px; text-align: center; flex: 1; }
-#ecrm-root .ecrm-session, #ecrm-root .ecrm-customer { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 64px; }
-#ecrm-root .ecrm-suggestion { border-style: dashed; background: #fbf9f5; }
-#ecrm-root .ecrm-pill { flex-shrink: 0; min-width: 44px; text-align: center; padding: 6px 10px; border-radius: 999px; background: var(--ecrm-accent-soft);
-  color: var(--ecrm-accent); font-weight: 700; font-size: 15px; }
-#ecrm-root .ecrm-pill-ghost { background: transparent; border: 1px dashed var(--ecrm-accent); font-weight: 600; }
-#ecrm-root .ecrm-pill.ecrm-low { background: var(--ecrm-warn-soft); color: var(--ecrm-warn); }
-#ecrm-root .ecrm-pill.ecrm-none { background: #f1efec; color: var(--ecrm-muted); }
-#ecrm-root .ecrm-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; background: #f1ece4; color: var(--ecrm-muted); margin-left: 4px; vertical-align: middle; }
-#ecrm-root .ecrm-count { text-align: right; color: var(--ecrm-muted); font-size: 14px; }
-#ecrm-root .ecrm-count b { display: block; font-size: 26px; color: var(--ecrm-accent); line-height: 1; }
-#ecrm-root .ecrm-result { display: flex; justify-content: space-between; width: 100%; font: inherit; text-align: left; padding: 12px; min-height: 48px;
-  border: 0; border-bottom: 1px solid var(--ecrm-line); background: #fff; cursor: pointer; color: inherit; }
-#ecrm-root .ecrm-list { margin-top: 8px; }
-#ecrm-root .ecrm-person { position: relative; display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--ecrm-line);
-  border-radius: 14px; margin: 8px 0; padding: 4px 4px 4px 0; }
-#ecrm-root .ecrm-person-main { flex: 1; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 6px 12px; border: 0; background: none;
-  font: inherit; color: inherit; text-align: left; cursor: pointer; }
-#ecrm-root .ecrm-person-main > span:last-child { display: flex; flex-direction: column; }
-#ecrm-root .ecrm-check { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #cfc7ba; display: grid; place-items: center;
-  color: #fff; font-weight: 700; }
-#ecrm-root .ecrm-sub { font-size: 14px; color: var(--ecrm-muted); }
-#ecrm-root .ecrm-present { background: var(--ecrm-accent-soft); border-color: #bfd8cb; }
-#ecrm-root .ecrm-present .ecrm-check { background: var(--ecrm-accent); border-color: var(--ecrm-accent); }
-#ecrm-root .ecrm-present .ecrm-sub { color: var(--ecrm-accent); }
-#ecrm-root .ecrm-warn { background: var(--ecrm-warn-soft); border-color: #efcfb5; }
-#ecrm-root .ecrm-warn .ecrm-sub { color: var(--ecrm-warn); }
+#ecrm-root .ecrm-spread { justify-content: space-between; }
+/* Navigation */
+#ecrm-root .ecrm-nav { display: flex; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 5px; margin: 0 0 14px; }
+#ecrm-root .ecrm-nav button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 14px; min-height: 44px;
+  border: 0; border-radius: 13px; background: transparent; color: var(--muted); cursor: pointer; }
+#ecrm-root .ecrm-nav button.ecrm-gear { flex: 0 0 48px; }
+#ecrm-root .ecrm-nav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#ecrm-root .ecrm-nav button.ecrm-on { background: var(--a-soft); color: var(--a); font-weight: 600; }
+/* Übersicht */
+#ecrm-root .ecrm-hello { margin: 4px 2px 10px; }
+#ecrm-root .ecrm-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+#ecrm-root .ecrm-stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#ecrm-root .ecrm-stat { display: flex; flex-direction: column; gap: 2px; text-align: left; font: inherit; border: 0; border-radius: 14px; padding: 10px 12px;
+  background: #f4f0e9; color: var(--ink); cursor: pointer; }
+#ecrm-root div.ecrm-stat { cursor: default; }
+#ecrm-root .ecrm-stat span { font-size: 12px; color: var(--muted); }
+#ecrm-root .ecrm-stat b { font-size: 22px; font-weight: 600; line-height: 1.1; }
+#ecrm-root .ecrm-banner { display: block; width: 100%; text-align: left; font: inherit; border: 1px solid #ecd9b5; background: #fbf4e6; border-radius: 16px;
+  padding: 12px 16px; margin: 10px 0; color: var(--kuehlt); cursor: pointer; }
+#ecrm-root .ecrm-banner b { display: block; font-size: 15px; }
+#ecrm-root .ecrm-banner span { font-size: 13px; }
+#ecrm-root .ecrm-care, #ecrm-root .ecrm-notice { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+#ecrm-root .ecrm-care-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; background: none; font: inherit; color: inherit;
+  text-align: left; cursor: pointer; padding: 2px 0; }
+#ecrm-root .ecrm-feed { padding: 4px 14px; }
+#ecrm-root .ecrm-feed-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 0; border: 0;
+  border-bottom: 1px solid var(--line); background: none; font: inherit; font-size: 14px; color: inherit; text-align: left; }
+#ecrm-root button.ecrm-feed-row { cursor: pointer; }
+#ecrm-root .ecrm-feed-row:last-child { border-bottom: 0; }
+#ecrm-root .ecrm-when { font-size: 12px; color: var(--muted); white-space: nowrap; }
+#ecrm-root .ecrm-delta { font-weight: 600; min-width: 28px; text-align: right; }
+#ecrm-root .ecrm-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #c9c1b4; }
+#ecrm-root .ecrm-k-besuch { background: var(--dabei); }
+#ecrm-root .ecrm-k-app { background: #378ADD; }
+#ecrm-root .ecrm-k-kauf { background: var(--a); }
+#ecrm-root .ecrm-k-angemeldet { background: var(--neu); }
+#ecrm-root .ecrm-k-warn { background: var(--kuehlt); }
+/* Avatare und Status */
+#ecrm-root .ecrm-avatar { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; }
+#ecrm-root .ecrm-avatar-l { width: 56px; height: 56px; font-size: 18px; }
+#ecrm-root .ecrm-st-neu { background: var(--neu-bg); color: var(--neu); }
+#ecrm-root .ecrm-st-dabei { background: var(--dabei-bg); color: var(--dabei); }
+#ecrm-root .ecrm-st-kuehlt_ab { background: var(--kuehlt-bg); color: var(--kuehlt); }
+#ecrm-root .ecrm-st-eingeschlafen { background: var(--schlaf-bg); color: var(--schlaf); }
+#ecrm-root .ecrm-stat.ecrm-st-dabei span, #ecrm-root .ecrm-stat.ecrm-st-neu span, #ecrm-root .ecrm-stat.ecrm-st-kuehlt_ab span { color: inherit; opacity: .85; }
+/* Menschen */
+#ecrm-root .ecrm-searchrow { display: flex; gap: 8px; }
+#ecrm-root .ecrm-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; }
+#ecrm-root .ecrm-chips button { flex-shrink: 0; font: inherit; font-size: 13px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d9d1c5;
+  background: #fff; color: var(--ink); cursor: pointer; }
+#ecrm-root .ecrm-chips button.ecrm-on { background: var(--a); border-color: var(--a); color: #fff; }
+#ecrm-root .ecrm-person { display: flex; align-items: center; gap: 12px; padding: 10px 12px; position: relative; }
+#ecrm-root .ecrm-tag { font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 6px; background: #f1ece4; color: var(--muted); margin-left: 6px; }
+#ecrm-root .ecrm-spark { display: flex; align-items: flex-end; gap: 2px; height: 26px; width: 52px; flex-shrink: 0; }
+#ecrm-root .ecrm-spark i { flex: 1; border-radius: 2px; min-height: 2px; }
+#ecrm-root .ecrm-bars { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 8px; }
+#ecrm-root .ecrm-bars i { flex: 1; border-radius: 4px; min-height: 3px; }
+#ecrm-root .ecrm-spark i.ecrm-st-dabei, #ecrm-root .ecrm-bars i.ecrm-st-dabei { background: #97C459; }
+#ecrm-root .ecrm-spark i.ecrm-st-neu, #ecrm-root .ecrm-bars i.ecrm-st-neu { background: #5DCAA5; }
+#ecrm-root .ecrm-spark i.ecrm-st-kuehlt_ab, #ecrm-root .ecrm-bars i.ecrm-st-kuehlt_ab { background: #FAC775; }
+#ecrm-root .ecrm-spark i.ecrm-st-eingeschlafen, #ecrm-root .ecrm-bars i.ecrm-st-eingeschlafen { background: #D3D1C7; }
+#ecrm-root .ecrm-profile { display: flex; align-items: center; gap: 14px; margin: 6px 0 10px; }
+#ecrm-root .ecrm-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+#ecrm-root .ecrm-pill { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: #f1ece4; color: var(--muted); }
+#ecrm-root .ecrm-contact { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+#ecrm-root .ecrm-num { font-size: 22px; font-weight: 600; min-width: 36px; text-align: right; }
 #ecrm-root .ecrm-off { opacity: .6; }
-#ecrm-root .ecrm-more { width: 44px; min-height: 44px; border: 0; background: none; font-size: 22px; color: var(--ecrm-muted); cursor: pointer; }
-#ecrm-root .ecrm-menu { position: absolute; right: 8px; top: 52px; z-index: 5; background: #fff; border: 1px solid var(--ecrm-line); border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.12); overflow: hidden; }
-#ecrm-root .ecrm-menu button { display: block; width: 100%; text-align: left; font: inherit; padding: 12px 16px; border: 0; background: #fff; cursor: pointer; }
-#ecrm-root .ecrm-menu button + button { border-top: 1px solid var(--ecrm-line); }
-#ecrm-root .ecrm-searchrow { display: flex; gap: 8px; align-items: center; }
-#ecrm-root .ecrm-searchrow .ecrm-input { flex: 1; }
-#ecrm-root .ecrm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-#ecrm-root .ecrm-chips button { font: inherit; font-size: 14px; min-height: 38px; padding: 6px 12px; border-radius: 999px; border: 1px solid #cfc7ba;
-  background: #fff; color: var(--ecrm-text); cursor: pointer; }
-#ecrm-root .ecrm-chips button.ecrm-on { background: var(--ecrm-accent); border-color: var(--ecrm-accent); color: #fff; }
-#ecrm-root .ecrm-signals { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-#ecrm-root .ecrm-signal { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: #f1ece4; color: var(--ecrm-muted); }
-#ecrm-root .ecrm-signal-droht_abzuspringen { background: #fdeaea; color: var(--ecrm-danger); }
-#ecrm-root .ecrm-signal-karte_fast_leer, #ecrm-root .ecrm-signal-laeuft_bald_ab { background: var(--ecrm-warn-soft); color: var(--ecrm-warn); }
-#ecrm-root .ecrm-signal-neu_dabei { background: var(--ecrm-accent-soft); color: var(--ecrm-accent); }
-#ecrm-root .ecrm-note { background: #fbf9f5; border-radius: 10px; padding: 10px; white-space: pre-wrap; margin: 8px 0 0; }
-#ecrm-root .ecrm-history { padding: 4px 12px; }
-#ecrm-root .ecrm-hrow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--ecrm-line); justify-content: space-between; }
-#ecrm-root .ecrm-hrow:last-child { border-bottom: 0; }
-#ecrm-root .ecrm-hdate { width: 52px; flex-shrink: 0; font-size: 14px; color: var(--ecrm-muted); }
-#ecrm-root .ecrm-htext { flex: 1; }
-#ecrm-root .ecrm-hdelta { font-weight: 700; min-width: 32px; text-align: right; }
-#ecrm-root .ecrm-plus { color: var(--ecrm-accent); }
-#ecrm-root .ecrm-minus { color: var(--ecrm-text); }
-#ecrm-root .ecrm-correct { margin-top: 8px; }
-#ecrm-root .ecrm-stepper { display: flex; align-items: center; gap: 16px; justify-content: center; font-size: 22px; }
-#ecrm-root .ecrm-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
-#ecrm-root .ecrm-tile { display: flex; flex-direction: column; gap: 4px; justify-content: center; min-height: 88px; padding: 12px; border-radius: 14px;
-  border: 1px solid var(--ecrm-line); background: #fff; font: inherit; color: inherit; text-align: left; cursor: pointer; }
-#ecrm-root .ecrm-tile-pay { align-items: center; text-align: center; min-height: 64px; font-weight: 600; }
-#ecrm-root .ecrm-chosen { display: flex; justify-content: space-between; align-items: center; background: var(--ecrm-accent-soft); }
-#ecrm-root .ecrm-done { text-align: center; }
-#ecrm-root .ecrm-done .ecrm-actions { justify-content: center; }
-#ecrm-root .ecrm-bigcheck { width: 64px; height: 64px; border-radius: 50%; background: var(--ecrm-accent); color: #fff; display: grid; place-items: center;
-  font-size: 32px; margin: 8px auto; }
-#ecrm-root .ecrm-danger-zone { justify-content: space-between; margin: 20px 0; }
-#ecrm-root .ecrm-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; margin: 0 auto; z-index: 9999; max-width: 480px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #24211e; color: #fff; padding: 12px 16px; border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.25); font-size: 15px; }
-#ecrm-root .ecrm-toast-error { background: var(--ecrm-danger); }
-#ecrm-root .ecrm-toast button { background: none; border: 0; color: #9fd7bd; font: inherit; font-weight: 700; padding: 8px; min-height: 40px; cursor: pointer; }
+#ecrm-root .ecrm-stepper { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 20px; margin-top: 6px; }
+#ecrm-root .ecrm-more { margin: 18px 0 30px; }
+#ecrm-root .ecrm-more summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 10px 0; }
+/* Kurse */
+#ecrm-root .ecrm-course { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+#ecrm-root .ecrm-date { flex-shrink: 0; width: 46px; text-align: center; border-radius: 12px; background: var(--a-soft); color: var(--a); padding: 5px 0; }
+#ecrm-root .ecrm-date b { display: block; font-size: 18px; line-height: 1.1; }
+#ecrm-root .ecrm-date span { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+#ecrm-root .ecrm-fill { text-align: right; flex-shrink: 0; }
+#ecrm-root .ecrm-fill b { display: block; font-size: 16px; }
+#ecrm-root .ecrm-fill span { font-size: 11px; color: var(--muted); }
+#ecrm-root .ecrm-roster { padding: 8px 4px 8px 12px; }
+#ecrm-root .ecrm-more-btn { width: 44px; min-height: 44px; border: 0; background: none; font-size: 20px; color: var(--muted); cursor: pointer; }
+#ecrm-root .ecrm-menu { position: absolute; right: 8px; top: 52px; z-index: 5; background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden; }
+#ecrm-root .ecrm-menu button { display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; padding: 12px 16px; border: 0; background: #fff; cursor: pointer; }
+#ecrm-root .ecrm-menu button + button { border-top: 1px solid var(--line); }
+#ecrm-root .ecrm-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; margin: 0 auto; max-width: 480px; z-index: 9999; background: #23201d; color: #fff;
+  padding: 12px 16px; border-radius: 12px; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+#ecrm-root .ecrm-toast-error { background: var(--danger); }
 #ecrm-root .ecrm-login { max-width: 420px; margin: 16px auto; }
-@media (max-width: 380px) { #ecrm-root .ecrm-row2 { grid-template-columns: 1fr; } }
+@media (max-width: 400px) {
+  #ecrm-root .ecrm-nav button { font-size: 12px; flex-direction: column; gap: 2px; }
+  #ecrm-root .ecrm-stat b { font-size: 19px; }
+  #ecrm-root .ecrm-row2 { grid-template-columns: 1fr; }
+}
 </style>
 
 <script>
@@ -650,14 +572,14 @@
   var boot = document.getElementById('ecrm-boot');
   if (!root) return;
 
-  // Im Flenski-Seiteneditor nichts laden (sonst stört das Skript den Editor, siehe Skill "flenski-personalized-embed")
+  // Im Flenski-Seiteneditor nichts laden (sonst stört das Skript den Editor)
   function isInsideEditor() {
     try {
       var loc = (window.top && window.top.location) || window.location;
       return /\/theme\/page\//.test((loc.pathname || '') + (loc.href || ''));
     } catch (e) { return false; }
   }
-  if (isInsideEditor()) { boot.textContent = 'CRM-Oberfläche – erscheint nur auf der veröffentlichten Seite.'; return; }
+  if (isInsideEditor()) { boot.textContent = 'CRM – erscheint nur auf der veröffentlichten Seite.'; return; }
 
   function load(src, test) {
     return new Promise(function (resolve, reject) {
@@ -668,14 +590,13 @@
     });
   }
 
-  var PAY_WAYS = [
-    { value: 'bar', label: 'Bar' }, { value: 'ueberweisung', label: 'Überweisung' }, { value: 'app', label: 'In der App' },
-    { value: 'verein', label: 'Verein' }, { value: 'gutschein', label: 'Gutschein' }, { value: 'sonstiges', label: 'Sonstiges' }];
-  var SIGNALS = { droht_abzuspringen: 'lange nicht da', karte_fast_leer: 'Karte fast leer', laeuft_bald_ab: 'läuft bald ab', neu_dabei: 'neu dabei' };
-  var REASONS = { purchase: 'Kauf', visit: 'Besuch', refund: 'Rückbuchung', correction: 'Korrektur', expiry: 'Verfallen', transfer: 'Übertrag' };
-  var pendingUndo = null;
+  var STATUS = { neu: 'neu', dabei: 'dabei', kuehlt_ab: 'kühlt ab', eingeschlafen: 'eingeschlafen' };
+  var APP = { course_enrolled: 'hat sich zum Kurs angemeldet', course_completed: 'hat einen Kurs abgeschlossen', post_created: 'hat etwas gepostet',
+    comment_created: 'hat kommentiert', question_asked: 'hat eine Frage gestellt', file_downloaded: 'hat heruntergeladen',
+    article_read: 'hat gelesen', lockscreen_cta: 'interessiert sich für', other: 'war aktiv' };
+  var NOTICE = { zahlung_fehlgeschlagen: 'Zahlung ist fehlgeschlagen', abo_gekuendigt: 'hat das Abo gekündigt', plan_entzogen: 'Plan wurde entzogen',
+    moegliche_dublette: 'gibt es vielleicht doppelt', mitglied_geloescht: 'hat die App verlassen' };
 
-  // Verständliche Fehlermeldungen (die Datenbank liefert bei eigenen Regeln schon deutsche Texte)
   function message(err) {
     var m = (err && (err.message || err.msg)) || String(err);
     if (/Signups not allowed|not allowed for otp/i.test(m)) return 'Diese E-Mail-Adresse ist nicht freigeschaltet.';
@@ -685,19 +606,20 @@
     if (/row-level security|permission denied/i.test(m)) return 'Dafür fehlt dir die Berechtigung.';
     return m;
   }
+  function days(iso) { return Math.floor((Date.now() - new Date(iso)) / 86400000); }
 
   function component() {
     return {
-      sb: null, view: 'boot', tab: 'checkin', busy: false, loading: false, toast: null, _toastTimer: null,
+      sb: null, view: 'boot', tab: 'uebersicht', busy: false, loading: false, toast: null, _t: null,
       userId: null, userEmail: '', tenant: null, isOwner: false,
       login: { email: '', code: '', codeSent: false },
-      products: [], customers: [], signals: {}, team: [],
-      day: new Date(), sessions: [], suggestions: [], newSession: null,
-      session: null, roster: [], rosterSearch: '',
-      search: '', filterOpen: false, f: { source: '', balance: '', expiring: false, away: 0, archived: false, product: '', tag: '' },
-      customer: null, entitlements: [], history: [], customerForm: null, correctFor: null, correction: { delta: 1, comment: '' },
-      sale: { search: '', customer: null, product: null, price: '', quick: null, done: '', backToSession: null },
-      productForm: null, payWays: PAY_WAYS,
+      people: [], overview: {}, care: [], careLimit: 5, feed: [], lastByPerson: {}, products: [], team: [], categories: [],
+      search: '', filter: '',
+      statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Kühlt ab' }, { value: 'neu', label: 'Neu' },
+                      { value: 'dabei', label: 'Dabei' }, { value: 'eingeschlafen', label: 'Eingeschlafen' }],
+      personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
+      manual: { product: '', paid_via: 'bar', price: '' },
+      sessions: [], showPast: false, course: null, roster: [], setup: {},
 
       async init() {
         boot.style.display = 'none';
@@ -736,7 +658,7 @@
         var member = await this.sb.from('tenant_members').select('role').eq('tenant_id', this.tenant.id).eq('user_id', this.userId).maybeSingle();
         this.isOwner = !!(admin.data || (member.data && member.data.role === 'owner'));
         this.view = 'app';
-        await Promise.all([this.loadProducts(), this.loadCustomers(), this.loadDay()]);
+        await this.loadAll();
       },
       async logout() { await this.sb.auth.signOut(); this.view = 'login'; this.login = { email: '', code: '', codeSent: false }; },
 
@@ -746,439 +668,377 @@
         this.busy = true;
         try { await fn(); } catch (e) { this.notify(message(e), true); } finally { this.busy = false; }
       },
-      // Die Rückgängig-Funktion liegt bewusst NICHT im beobachteten Zustand: Alpine ruft Funktionen,
-      // die in Ausdrücken auftauchen, selbst auf – das hat beim ersten Test eine Check-in-Schleife ausgelöst.
-      notify(text, error, undo) {
-        clearTimeout(this._toastTimer);
-        pendingUndo = undo || null;
-        this.toast = { text: text, error: !!error, hasUndo: !!undo };
+      notify(text, error) {
+        clearTimeout(this._t);
+        this.toast = { text: text, error: !!error };
         var self = this;
-        this._toastTimer = setTimeout(function () { self.toast = null; pendingUndo = null; }, undo ? 6000 : 3500);
+        this._t = setTimeout(function () { self.toast = null; }, 3500);
       },
-      async runUndo() { var u = pendingUndo; pendingUndo = null; this.toast = null; if (u) await u(); },
       async rpc(name, args) { var r = await this.sb.rpc(name, args); if (r.error) throw r.error; return r.data; },
-      // Nach einem Ansichtswechsel nach oben zum CRM springen (die Reiter sollen sichtbar sein)
-      toTop() {
-        this.$nextTick(function () { if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' }); });
+      toTop() { this.$nextTick(function () { if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' }); }); },
+      go(t) {
+        this.tab = t; this.personId = null; this.detail = null; this.form = null; this.course = null; this.toTop();
+        if (t === 'uebersicht' || t === 'menschen') this.loadPeople();
+        if (t === 'kurse') this.loadCourses();
+        if (t === 'einstellungen') { this.loadProducts(); this.loadTeam(); }
       },
-      openTab(t) {
-        this.tab = t;
-        this.toTop();
-        if (t === 'kundinnen') { this.customer = null; this.customerForm = null; this.loadCustomers(); }
-        if (t === 'checkin' && !this.session) this.loadDay();
-        if (t === 'verkauf' && this.sale.done) this.resetSale();
-        if (t === 'mehr') { this.productForm = null; this.loadTeam(); }
-      },
+      openList(status) { this.filter = status; this.go('menschen'); },
 
-      // ---------- Daten laden ----------
+      // ---------- Laden ----------
+      async loadAll() {
+        this.loading = true;
+        await Promise.all([this.loadPeople(), this.loadProducts(), this.loadCategories()]);
+        this.loading = false;
+      },
+      async loadPeople() {
+        var tid = this.tenant.id;
+        var res = await Promise.all([
+          this.sb.from('v_customer_engagement').select('*').eq('tenant_id', tid),
+          this.sb.from('v_customer_overview').select('customer_id,credits_balance,has_unlimited,next_expiry,email,phone').eq('tenant_id', tid),
+          this.sb.rpc('care_list', { p_tenant: tid }),
+          this.sb.rpc('activity_feed', { p_tenant: tid, p_customer: null, p_limit: 300 })
+        ]);
+        var ov = {};
+        (res[1].data || []).forEach(function (o) { ov[o.customer_id] = o; });
+        this.overview = ov;
+        this.people = res[0].data || [];
+        this.care = res[2].data || [];
+        var feed = (res[3].data || []).filter(function (f) { return new Date(f.am) <= new Date(); });
+        this.feed = feed;
+        var last = {};
+        feed.forEach(function (f) { if (!last[f.customer_id] && f.art !== 'angemeldet') last[f.customer_id] = f; });
+        this.lastByPerson = last;
+      },
       async loadProducts() {
-        var r = await this.sb.from('products').select('*').eq('tenant_id', this.tenant.id).order('active', { ascending: false }).order('name');
+        var r = await this.sb.from('products').select('*').eq('tenant_id', this.tenant.id).order('name');
         this.products = r.data || [];
-      },
-      async loadCustomers() {
-        this.loading = true;
-        var r = await this.sb.from('v_customer_overview').select('*').eq('tenant_id', this.tenant.id).is('anonymized_at', null)
-          .order('first_name').order('last_name');
-        this.customers = r.data || [];
-        try {
-          var s = await this.rpc('customer_signals', { p_tenant: this.tenant.id });
-          var map = {};
-          (s || []).forEach(function (x) { (map[x.customer_id] = map[x.customer_id] || []).push(x.signal); });
-          this.signals = map;
-        } catch (e) { /* Signale sind Zusatz */ }
-        this.loading = false;
-      },
-      async loadTeam() {
-        try { this.team = await this.rpc('team_members', { p_tenant: this.tenant.id }); } catch (e) { this.team = []; }
-      },
-
-      // ---------- Check-in: Tag ----------
-      dayStart() { var d = new Date(this.day); d.setHours(0, 0, 0, 0); return d; },
-      isoDay() { var d = this.dayStart(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); },
-      dayLabel() {
-        var today = new Date(); today.setHours(0, 0, 0, 0);
-        var diff = Math.round((this.dayStart() - today) / 86400000);
-        var name = diff === 0 ? 'Heute' : diff === -1 ? 'Gestern' : diff === 1 ? 'Morgen' : this.dayStart().toLocaleDateString('de-DE', { weekday: 'long' });
-        return name + ', ' + this.dayStart().toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
-      },
-      shiftDay(n) { var d = this.dayStart(); d.setDate(d.getDate() + n); this.day = d; this.newSession = null; this.loadDay(); },
-      async loadDay() {
-        if (!this.tenant) return;
-        this.loading = true;
-        var start = this.dayStart(), end = new Date(start); end.setDate(end.getDate() + 1);
-        var r = await this.sb.from('sessions').select('*').eq('tenant_id', this.tenant.id)
-          .gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at');
-        var list = r.data || [];
-        if (list.length) {
-          var a = await this.sb.from('attendances').select('session_id').eq('status', 'present').in('session_id', list.map(function (s) { return s.id; }));
-          var counts = {};
-          (a.data || []).forEach(function (x) { counts[x.session_id] = (counts[x.session_id] || 0) + 1; });
-          list.forEach(function (s) { s.present = counts[s.id] || 0; });
-        }
-        this.sessions = list;
-        try { this.suggestions = await this.rpc('session_suggestions', { p_tenant: this.tenant.id, p_day: this.isoDay() }); }
-        catch (e) { this.suggestions = []; }
-        this.loading = false;
-      },
-      async takeSuggestion(v) {
-        await this.run(async () => {
-          var id = await this.rpc('copy_session', { p_session: v.source_session });
-          await this.loadDay();
-          var s = this.sessions.find(function (x) { return x.id === id; });
-          if (s) await this.openSession(s);
-        });
-      },
-      categories() {
-        var set = {};
-        this.products.forEach(function (p) { if (p.category) set[p.category] = 1; });
-        return Object.keys(set).sort();
-      },
-      startNewSession() { this.newSession = { title: '', time: '18:00', minutes: 75, category: '' }; },
-      async saveSession() {
-        var n = this.newSession;
-        if (!n.title) return this.notify('Bitte gib der Stunde einen Titel.', true);
-        await this.run(async () => {
-          var parts = (n.time || '00:00').split(':');
-          var start = this.dayStart(); start.setHours(+parts[0], +parts[1], 0, 0);
-          var end = new Date(start.getTime() + (n.minutes || 60) * 60000);
-          var r = await this.sb.from('sessions').insert({ tenant_id: this.tenant.id, title: n.title, starts_at: start.toISOString(),
-            ends_at: end.toISOString(), category: n.category || null }).select().single();
-          if (r.error) throw r.error;
-          this.newSession = null;
-          await this.loadDay();
-          await this.openSession(r.data);
-        });
-      },
-
-      // ---------- Check-in: eine Stunde ----------
-      async openSession(s) { this.session = s; this.rosterSearch = ''; this.toTop(); await this.loadRoster(); },
-      closeSession() { this.session = null; this.roster = []; this.loadDay(); },
-      async loadRoster() {
-        this.loading = true;
-        try {
-          var rows = await this.rpc('session_roster', { p_session: this.session.id });
-          this.roster = rows.map(function (r) { r._busy = false; r._menu = false; return r; });
-        } catch (e) { this.notify(message(e), true); }
-        this.loading = false;
-      },
-      presentCount() { return this.roster.filter(function (r) { return r.status === 'present'; }).length; },
-      rosterMatches() {
-        var q = this.rosterSearch.trim().toLowerCase();
-        if (q.length < 2) return [];
-        var on = {}; this.roster.forEach(function (r) { on[r.customer_id] = 1; });
         var self = this;
-        return this.customers.filter(function (c) { return !c.archived_at && !on[c.customer_id] && self.fullName(c).toLowerCase().indexOf(q) > -1; }).slice(0, 6);
-      },
-      async addToRoster(c) {
-        this.rosterSearch = '';
-        var row = { customer_id: c.customer_id, first_name: c.first_name, last_name: c.last_name, status: 'registered',
-          credits_balance: c.credits_balance, has_unlimited: c.has_unlimited, _busy: false, _menu: false };
-        this.roster.push(row);
-        // die beobachtete Fassung aus der Liste nehmen, damit die Anzeige mitzieht
-        await this.toggleCheckin(this.roster[this.roster.length - 1]);
-      },
-      // Gesamtguthaben einer Zeile nach einer Buchung neu holen (sonst zeigt "Guthaben" den alten Stand)
-      async refreshBalance(row) {
-        var r = await this.sb.from('v_customer_overview').select('credits_balance,has_unlimited,next_expiry,last_visit_at')
-          .eq('customer_id', row.customer_id).maybeSingle();
-        if (!r.data) return;
-        Object.assign(row, r.data);
-        var c = this.customers.find(function (x) { return x.customer_id === row.customer_id; });
-        if (c) Object.assign(c, r.data);
-      },
-      applyResult(row, res) {
-        row.status = res.status; row.entitlement_id = res.entitlement_id; row.abgebucht = res.abgebucht;
-        row.unbegrenzt = res.unbegrenzt; row.rest = res.rest; row.von = res.von; row.gueltig_bis = res.gueltig_bis;
-      },
-      async toggleCheckin(row) {
-        if (row._busy) return;
-        row._busy = true; row._menu = false;
-        var wasPresent = row.status === 'present';
-        var before = Object.assign({}, row);
-        row.status = wasPresent ? 'registered' : 'present';   // sofort sichtbar, Datenbank bestätigt gleich
-        try {
-          var res = await this.rpc(wasPresent ? 'undo_checkin' : 'checkin', { p_session: this.session.id, p_customer: row.customer_id });
-          this.applyResult(row, res);
-          await this.refreshBalance(row);
-          var self = this;
-          if (!wasPresent) this.notify(this.fullName(row) + ' ist da' + (res.rest != null && !res.unbegrenzt ? ' · noch ' + res.rest : ''), false,
-            function () { return row.status === 'present' ? self.toggleCheckin(row) : null; });
-        } catch (e) {
-          Object.assign(row, before);
-          this.notify(message(e), true);
-        }
-        row._busy = false;
-      },
-      async cancelRow(row, noShow) {
-        row._menu = false;
-        await this.run(async () => {
-          var res = await this.rpc('cancel_attendance', { p_session: this.session.id, p_customer: row.customer_id, p_no_show: noShow });
-          this.applyResult(row, res);
-          await this.refreshBalance(row);
-          var txt = res.status === 'cancelled_in_time' ? 'rechtzeitig abgesagt – kein Abzug' :
-                    res.status === 'cancelled_late' ? 'zu spät abgesagt' + (res.abgebucht ? ' – 1 Besuch abgezogen' : '') :
-                    'nicht erschienen' + (res.abgebucht ? ' – 1 Besuch abgezogen' : '');
-          this.notify(this.fullName(row) + ': ' + txt);
+        this.products.forEach(function (p) {
+          if (p.needs_setup && !self.setup[p.id]) {
+            var m = (p.name || '').match(/(\d+)\s*er/i);
+            self.setup[p.id] = { type: m ? 'credits' : 'period', credits: m ? +m[1] : 10, validity: null, price: '', category: '' };
+          }
         });
       },
-      // da, aber ohne Karte – und inzwischen ist Guthaben vorhanden (z. B. gerade verkauft)
-      canRebook(r) { return r.status === 'present' && !r.entitlement_id && (r.credits_balance > 0 || r.has_unlimited); },
-      async rebook(r) {
-        if (r._busy) return;
-        r._busy = true;
-        try {
-          var res = await this.rpc('checkin', { p_session: this.session.id, p_customer: r.customer_id });
-          this.applyResult(r, res);
-          await this.refreshBalance(r);
-          this.notify(res.entitlement_id ? this.fullName(r) + ': Besuch abgebucht' + (res.rest != null && !res.unbegrenzt ? ' · noch ' + res.rest : '')
-                                         : 'Keine passende Karte für diese Stunde gefunden.', !res.entitlement_id);
-        } catch (e) { this.notify(message(e), true); }
-        r._busy = false;
+      async loadCategories() {
+        var r = await this.sb.from('sessions').select('category').eq('tenant_id', this.tenant.id).not('category', 'is', null);
+        var set = {};
+        (r.data || []).forEach(function (s) { set[s.category] = 1; });
+        this.categories = Object.keys(set).sort();
       },
-      rowWarn(r) { return (r.status === 'present' && !r.entitlement_id) || (r.status === 'registered' && !r.has_unlimited && !r.credits_balance); },
-      rowText(r) {
-        if (r.status === 'present') {
-          if (!r.entitlement_id) return 'da · ohne Karte';
-          if (r.unbegrenzt) return 'da · Kursblock/Abo' + (r.gueltig_bis ? ' bis ' + this.dateShort(r.gueltig_bis) : '');
-          return 'da · noch ' + r.rest + (r.von ? ' von ' + r.von : '') + (r.gueltig_bis ? ' · gültig bis ' + this.dateShort(r.gueltig_bis) : '');
+      async loadTeam() { try { this.team = await this.rpc('team_members', { p_tenant: this.tenant.id }); } catch (e) { this.team = []; } },
+
+      // ---------- Übersicht ----------
+      greeting() {
+        var h = new Date().getHours();
+        return (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend') + ' · ' + (this.tenant ? this.tenant.name : '');
+      },
+      count(status) { return this.people.filter(function (p) { return p.status === status; }).length; },
+      setupNeeded() { return this.products.filter(function (p) { return p.needs_setup; }); },
+      person(id) { return this.people.find(function (p) { return p.customer_id === id; }) || {}; },
+      personStatus(id) { return this.person(id).status || 'eingeschlafen'; },
+      reasonText(g, id) {
+        var d = g.detail || {};
+        switch (g.art) {
+          case 'kuehlt_ab': return 'seit ' + (d.tage_still != null ? d.tage_still : '?') + ' Tagen still' + this.balanceSuffix(id);
+          case 'droht_abzuspringen': return 'lange nicht da, hat noch Guthaben' + this.balanceSuffix(id);
+          case 'karte_fast_leer': return 'Karte fast leer – Zeit für die nächste';
+          case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ' · noch ' + d.rest : '');
+          case 'neu_dabei': return 'zum ersten Mal da – willkommen heißen';
+          default: return NOTICE[g.art] || g.art;
         }
-        if (r.status === 'cancelled_in_time') return 'rechtzeitig abgesagt';
-        if (r.status === 'cancelled_late') return 'zu spät abgesagt' + (r.abgebucht ? ' · abgezogen' : '');
-        if (r.status === 'no_show') return 'nicht erschienen' + (r.abgebucht ? ' · abgezogen' : '');
-        if (r.has_unlimited) return 'Kursblock/Abo';
-        return r.credits_balance ? 'Guthaben ' + r.credits_balance : 'ohne Karte';
       },
-      sellFor(r) {
-        this.resetSale();
-        var c = this.customers.find(function (x) { return x.customer_id === r.customer_id; }) ||
-                { customer_id: r.customer_id, first_name: r.first_name, last_name: r.last_name };
-        this.sale.customer = c;
-        this.sale.backToSession = this.tab === 'checkin' ? this.session : null;
-        this.tab = 'verkauf';
-        this.toTop();
+      balanceSuffix(id) {
+        var o = this.overview[id];
+        return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : '';
       },
-      async backToSession() {
-        var s = this.sale.backToSession;
-        this.resetSale(); this.tab = 'checkin';
-        if (s) {
-          await this.openSession(s);
-          // nach dem Verkauf: wer schon da war, wird jetzt von der neuen Karte abgebucht
-          var self = this;
-          for (var i = 0; i < this.roster.length; i++) {
-            var r = this.roster[i];
-            if (r.status === 'present' && !r.entitlement_id) {
-              var res = await self.rpc('checkin', { p_session: s.id, p_customer: r.customer_id }).catch(function () { return null; });
-              if (res) self.applyResult(r, res);
-            }
-          }
+      actionLabel(art) { return art === 'neu_dabei' ? 'Willkommen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Nachricht'; },
+      // Vorbefüllte Nachricht – warm, ohne Überwachungssprache (08, Abschnitt 4)
+      messageText(id, art) {
+        var p = this.person(id), o = this.overview[id] || {}, vor = p.first_name || '';
+        var gruss = '\n\nLiebe Grüße\n' + ((this.tenant.settings && this.tenant.settings.signatur) || this.tenant.name);
+        if (art === 'neu_dabei') return 'Hallo ' + vor + ', schön, dass du dabei bist! Wie hat dir die erste Stunde gefallen? Ich freue mich auf das nächste Mal.' + gruss;
+        if (art === 'karte_fast_leer') return 'Hallo ' + vor + ', deine Karte ist fast aufgebraucht. Soll ich dir eine neue zurücklegen?' + gruss;
+        if (art === 'laeuft_bald_ab') return 'Hallo ' + vor + ', kleine Erinnerung: deine Karte läuft bald ab' + (o.credits_balance ? ' und du hast noch ' + o.credits_balance + ' Besuche' : '') + '. Ich freue mich, dich bald zu sehen!' + gruss;
+        if (art === 'zahlung_fehlgeschlagen') return 'Hallo ' + vor + ', bei deiner letzten Zahlung in der App hat etwas nicht geklappt. Magst du kurz nachschauen? Bei Fragen melde dich gern.' + gruss;
+        return 'Hallo ' + vor + ', ich habe an dich gedacht und wollte einfach mal hallo sagen. Ich würde mich freuen, dich bald wieder zu sehen!' + gruss;
+      },
+      messageLink(id, art) {
+        var o = this.overview[id] || {}, text = encodeURIComponent(this.messageText(id, art));
+        var phone = (o.phone || '').replace(/[^\d+]/g, '').replace(/^00/, '+').replace(/^0/, '+49');
+        if (phone) return 'https://wa.me/' + phone.replace('+', '') + '?text=' + text;
+        if (o.email) return 'mailto:' + o.email + '?subject=' + encodeURIComponent('Ich habe an dich gedacht') + '&body=' + text;
+        return '';
+      },
+      feedKind(art) {
+        if (art === 'besuch') return 'besuch';
+        if (art === 'kauf') return 'kauf';
+        if (art === 'angemeldet') return 'angemeldet';
+        if (['nicht_erschienen', 'abgesagt', 'verfallen'].indexOf(art) > -1) return 'warn';
+        return 'app';
+      },
+      feedText(f, ohneName) {
+        var t = f.titel ? '„' + f.titel + '“' : '';
+        var s;
+        switch (f.art) {
+          case 'besuch': s = (ohneName ? 'War da: ' : 'war bei ') + t; break;
+          case 'angemeldet': s = (ohneName ? 'Angemeldet: ' : 'hat sich angemeldet: ') + t; break;
+          case 'abgesagt': s = (ohneName ? 'Abgesagt: ' : 'hat abgesagt: ') + t; break;
+          case 'nicht_erschienen': s = 'Nicht erschienen: ' + t; break;
+          case 'kauf': s = (ohneName ? 'Gekauft: ' : 'hat gekauft: ') + t; break;
+          case 'korrektur': s = 'Korrektur: ' + (f.titel || ''); break;
+          case 'verfallen': s = 'Verfallen: ' + (f.titel || ''); break;
+          default:
+            var v = APP[f.art] || 'war aktiv';
+            s = ohneName ? v.charAt(0).toUpperCase() + v.slice(1).replace(/^Hat /, '') : v;
+            if (t) s += ' ' + t;
         }
+        return s;
       },
 
-      // ---------- Kundinnen ----------
-      fullName(c) { return [c.first_name, c.last_name].filter(Boolean).join(' '); },
-      balanceText(c) { return c.has_unlimited ? 'Kursblock/Abo' : (c.credits_balance ? 'Guthaben ' + c.credits_balance : 'ohne Guthaben'); },
-      balanceShort(c) { return c.has_unlimited ? '∞' : String(c.credits_balance || 0); },
-      balanceClass(c) { return c.has_unlimited ? '' : !c.credits_balance ? 'ecrm-none' : c.credits_balance <= 1 ? 'ecrm-low' : ''; },
-      lastVisitText(c) {
-        if (!c.last_visit_at) return 'noch kein Besuch';
-        var days = Math.floor((Date.now() - new Date(c.last_visit_at)) / 86400000);
-        return days <= 0 ? 'zuletzt heute da' : days === 1 ? 'zuletzt gestern da' : 'zuletzt vor ' + days + ' Tagen da';
+      // ---------- Menschen ----------
+      fullName(p) { return [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Unbekannt'; },
+      initials(p) { return ((p.first_name || '?').charAt(0) + (p.last_name || '').charAt(0)).toUpperCase(); },
+      statusLabel(e) {
+        var s = STATUS[e.status] || e.status;
+        if ((e.status === 'kuehlt_ab' || e.status === 'eingeschlafen') && e.tage_still != null) s += ' · ' + e.tage_still + ' Tage still';
+        return s;
       },
-      signalLabel(s) { return SIGNALS[s] || s; },
-      allTags() {
-        var set = {};
-        this.customers.forEach(function (c) { (c.tags || []).forEach(function (t) { set[t] = 1; }); });
-        return Object.keys(set).sort();
+      filteredPeople() {
+        var q = this.search.trim().toLowerCase(), f = this.filter, ov = this.overview, self = this;
+        var rank = { kuehlt_ab: 0, neu: 1, dabei: 2, eingeschlafen: 3 };
+        return this.people
+          .filter(function (p) { return (!f || p.status === f) && (!q || self.fullName(p).toLowerCase().indexOf(q) > -1); })
+          .sort(function (a, b) {
+            return (rank[a.status] - rank[b.status])
+              || (((ov[b.customer_id] || {}).credits_balance || 0) - ((ov[a.customer_id] || {}).credits_balance || 0))
+              || self.fullName(a).localeCompare(self.fullName(b));
+          });
       },
-      activeFilterCount() {
-        var f = this.f;
-        return [f.source, f.balance, f.expiring, f.away, f.archived, f.product, f.tag].filter(Boolean).length;
+      lastText(p) {
+        var l = this.lastByPerson[p.customer_id];
+        if (!l && p.status === 'neu') return 'neu dabei seit ' + this.dateShort(p.joined_at);
+        if (!l) return 'noch keine Aktivität';
+        return this.ago(l.am) + ' · ' + this.feedText(l, true);
       },
-      resetFilters() { this.f = { source: '', balance: '', expiring: false, away: 0, archived: false, product: '', tag: '' }; },
-      filteredCustomers() {
-        var f = this.f, q = this.search.trim().toLowerCase(), self = this, now = Date.now();
-        return this.customers.filter(function (c) {
-          if (!!c.archived_at !== !!f.archived) return false;
-          if (q && (self.fullName(c) + ' ' + (c.email || '')).toLowerCase().indexOf(q) === -1) return false;
-          if (f.source && c.source !== f.source) return false;
-          if (f.balance === '0' && (c.credits_balance !== 0 || c.has_unlimited)) return false;
-          if (f.balance === '1' && c.credits_balance !== 1) return false;
-          if (f.balance === 'more' && c.credits_balance <= 1) return false;
-          if (f.expiring && !(c.next_expiry && new Date(c.next_expiry) - now <= 14 * 86400000)) return false;
-          if (f.away && c.last_visit_at && now - new Date(c.last_visit_at) <= f.away * 86400000) return false;
-          if (f.away && !c.last_visit_at && now - new Date(c.created_at) <= f.away * 86400000) return false;
-          if (f.product && (c.active_products || []).indexOf(f.product) === -1) return false;
-          if (f.tag && (c.tags || []).indexOf(f.tag) === -1) return false;
-          return true;
-        });
+      barStyle(n, arr, h) {
+        var max = Math.max.apply(null, (arr || []).concat([1]));
+        return 'height:' + Math.max(n ? 12 : 4, Math.round(n / max * 100)) + '%';
       },
-      openCustomer(c) { return this.openCustomerById(c.customer_id); },
-      async openCustomerById(id) {
-        this.tab = 'kundinnen'; this.customerForm = null; this.correctFor = null; this.toTop();
-        var r = await this.sb.from('customers').select('*').eq('id', id).single();
-        if (r.error) return this.notify(message(r.error), true);
-        this.customer = r.data;
-        await this.loadCustomerDetail();
-        if (!this.team.length) this.loadTeam();
+      async openPerson(id) {
+        this.tab = 'menschen'; this.personId = id; this.form = null; this.correctFor = null; this.detail = null; this.toTop();
+        this.manual = { product: '', paid_via: 'bar', price: '' };
+        await this.loadDetail();
       },
-      async loadCustomerDetail() {
-        var id = this.customer.id;
-        var e = await this.sb.from('v_entitlement_balance').select('*').eq('customer_id', id)
-          .order('status').order('expires_at', { ascending: true, nullsFirst: false });
-        this.entitlements = e.data || [];
-        var h = await this.sb.from('v_customer_history').select('*').eq('customer_id', id)
-          .order('occurred_at', { ascending: false }).order('created_at', { ascending: false }).limit(200);
-        this.history = h.data || [];
+      async loadDetail() {
+        var id = this.personId, tid = this.tenant.id;
+        var res = await Promise.all([
+          this.sb.from('customers').select('*').eq('id', id).single(),
+          this.sb.from('v_customer_engagement').select('*').eq('customer_id', id).maybeSingle(),
+          this.sb.from('v_entitlement_balance').select('*').eq('customer_id', id).order('status').order('starts_at', { ascending: false }),
+          this.sb.rpc('activity_feed', { p_tenant: tid, p_customer: id, p_limit: 100 }),
+          this.sb.from('customer_notices').select('*').eq('customer_id', id).is('resolved_at', null).order('created_at', { ascending: false })
+        ]);
+        if (res[0].error) return this.notify(message(res[0].error), true);
+        var c = res[0].data;
+        var eng = res[1].data || { status: 'eingeschlafen', first_name: c.first_name, last_name: c.last_name, events_8w: [0, 0, 0, 0, 0, 0, 0, 0], besuche_gesamt: 0, score_30d: 0 };
+        this.detail = { c: c, eng: eng, ents: res[2].data || [], feed: res[3].data || [], notices: res[4].data || [] };
+      },
+      profileLine() {
+        var c = this.detail.c, e = this.detail.eng;
+        var parts = [c.source === 'flenski' ? 'App-Mitglied seit ' + this.dateShort(e.joined_at || c.joined_at) : 'ohne App'];
+        if (c.is_child) parts.push('Kind' + (c.guardian_name ? ', Eltern: ' + c.guardian_name : ''));
+        return parts.join(' · ');
+      },
+      contactMail(c) { return c.is_child ? c.guardian_email : c.email; },
+      contactPhone(c) { return c.is_child ? c.guardian_phone : c.phone; },
+      waLink(c) {
+        var p = (this.contactPhone(c) || '').replace(/[^\d+]/g, '').replace(/^00/, '+').replace(/^0/, '+49');
+        return p ? 'https://wa.me/' + p.replace('+', '') : '';
+      },
+      balanceShort() {
+        var o = this.overview[this.personId] || {};
+        if (o.has_unlimited) return 'Block';
+        var hasCard = this.detail.ents.some(function (e) { return !e.unlimited; });
+        return hasCard ? String(o.credits_balance || 0) : '–';
       },
       entText(e) {
         var st = { active: '', used_up: 'aufgebraucht', expired: 'abgelaufen', cancelled: 'storniert' }[e.status];
         var parts = [];
         if (st) parts.push(st);
-        if (!e.unlimited && e.product_credits) parts.push('noch ' + e.balance + ' von ' + e.product_credits);
-        if (e.expires_at) parts.push((e.status === 'expired' ? 'war gültig bis ' : 'gültig bis ') + this.dateShort(e.expires_at));
-        parts.push('gekauft ' + this.dateShort(e.starts_at) + (e.paid_via ? ' · ' + (PAY_WAYS.find(function (w) { return w.value === e.paid_via; }) || {}).label : ''));
+        var prod = this.products.find(function (p) { return p.id === e.product_id; });
+        if (prod && prod.needs_setup) parts.push('noch nicht eingerichtet');
+        else if (!e.unlimited && e.product_credits) parts.push('noch ' + e.balance + ' von ' + e.product_credits);
+        if (e.expires_at) parts.push('gültig bis ' + this.dateShort(e.expires_at));
+        parts.push((e.paid_via === 'app' ? 'in der App' : 'von Hand') + ' am ' + this.dateShort(e.starts_at));
         return parts.join(' · ');
       },
-      historyText(h) {
-        var t = REASONS[h.reason] || h.reason;
-        if (h.session_title) t += ' · ' + h.session_title;
-        if (h.comment) t += ' – ' + h.comment;
-        return t;
+      noticeText(n) {
+        var d = n.detail || {};
+        var t = NOTICE[n.kind] || n.kind;
+        if (d.plan) t += ': ' + d.plan;
+        if (d.produkt) t += ': ' + d.produkt;
+        return t.charAt(0).toUpperCase() + t.slice(1);
       },
-      who(id) {
-        if (!id) return 'automatisch';
-        if (id === this.userId) return 'du';
-        var m = this.team.find(function (x) { return x.user_id === id; });
-        return m ? m.email.split('@')[0] : 'Team';
+      async resolveNotice(n) {
+        await this.run(async () => {
+          var r = await this.sb.from('customer_notices').update({ resolved_at: new Date().toISOString(), resolved_by: this.userId }).eq('id', n.id);
+          if (r.error) throw r.error;
+          this.detail.notices = this.detail.notices.filter(function (x) { return x.id !== n.id; });
+          this.loadPeople();
+        });
       },
       async saveCorrection(e) {
         await this.run(async () => {
           var rest = await this.rpc('correct', { p_entitlement: e.entitlement_id, p_delta: this.correction.delta, p_comment: this.correction.comment });
           this.correctFor = null;
           this.notify('Korrektur gebucht – neues Guthaben ' + rest);
-          await this.loadCustomerDetail();
+          await Promise.all([this.loadDetail(), this.loadPeople()]);
         });
       },
-      openCustomerForm(c) {
-        this.toTop();
-        this.customerForm = c ? Object.assign({}, c, { tagsText: (c.tags || []).join(', ') })
-          : { first_name: this.search.trim(), last_name: '', email: '', phone: '', is_child: false, guardian_name: '', guardian_email: '', guardian_phone: '', tagsText: '', note: '' };
-      },
-      async saveCustomer() {
-        var c = this.customerForm;
-        if (!c.first_name) return this.notify('Bitte gib mindestens einen Vornamen ein.', true);
+      async saveManual() {
         await this.run(async () => {
-          var data = {
-            first_name: c.first_name, last_name: c.last_name || null, is_child: !!c.is_child,
-            email: c.is_child ? null : (c.email || null), phone: c.is_child ? null : (c.phone || null),
-            guardian_name: c.is_child ? (c.guardian_name || null) : null, guardian_email: c.is_child ? (c.guardian_email || null) : null,
-            guardian_phone: c.is_child ? (c.guardian_phone || null) : null,
-            tags: (c.tagsText || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean), note: c.note || null };
-          var r = c.id
-            ? await this.sb.from('customers').update(data).eq('id', c.id).select().single()
+          var price = this.manual.price === '' ? null : Math.round(parseFloat(String(this.manual.price).replace(',', '.')) * 100);
+          await this.rpc('sell', { p_customer: this.personId, p_product: this.manual.product, p_paid_via: this.manual.paid_via, p_price_cents: price });
+          this.manual = { product: '', paid_via: 'bar', price: '' };
+          this.notify('Eingetragen.');
+          await Promise.all([this.loadDetail(), this.loadPeople()]);
+        });
+      },
+      openForm(c) {
+        this.toTop();
+        this.form = c ? Object.assign({}, c) : { source: 'extern', first_name: this.search.trim(), last_name: '', email: '', phone: '', is_child: false,
+          guardian_name: '', guardian_email: '', guardian_phone: '', note: '' };
+      },
+      async saveForm() {
+        var f = this.form;
+        if (f.source !== 'flenski' && !f.first_name) return this.notify('Bitte gib mindestens einen Vornamen ein.', true);
+        await this.run(async () => {
+          var data = { is_child: !!f.is_child, phone: f.phone || null, note: f.note || null,
+            guardian_name: f.is_child ? (f.guardian_name || null) : null, guardian_email: f.is_child ? (f.guardian_email || null) : null,
+            guardian_phone: f.is_child ? (f.guardian_phone || null) : null };
+          if (f.source !== 'flenski') Object.assign(data, { first_name: f.first_name, last_name: f.last_name || null, email: f.email || null });
+          var r = f.id
+            ? await this.sb.from('customers').update(data).eq('id', f.id).select().single()
             : await this.sb.from('customers').insert(Object.assign({ tenant_id: this.tenant.id, source: 'extern' }, data)).select().single();
           if (r.error) throw r.error;
-          this.customerForm = null;
-          await this.loadCustomers();
-          await this.openCustomerById(r.data.id);
+          this.form = null;
+          await this.loadPeople();
+          await this.openPerson(r.data.id);
           this.notify('Gespeichert.');
         });
       },
       async toggleArchive() {
         await this.run(async () => {
-          var r = await this.sb.from('customers').update({ archived_at: this.customer.archived_at ? null : new Date().toISOString() })
-            .eq('id', this.customer.id).select().single();
+          var r = await this.sb.from('customers').update({ archived_at: this.detail.c.archived_at ? null : new Date().toISOString() })
+            .eq('id', this.personId).select().single();
           if (r.error) throw r.error;
-          this.customer = r.data;
-          this.notify(r.data.archived_at ? 'Archiviert.' : 'Wieder aktiv.');
-          this.loadCustomers();
+          this.notify(r.data.archived_at ? 'Ausgeblendet – die Person erscheint nicht mehr in den Listen.' : 'Wieder aufgenommen.');
+          this.personId = null; await this.loadPeople();
         });
       },
       async anonymize() {
-        if (!confirm(this.fullName(this.customer) + ' wirklich löschen?\n\nName und Kontaktdaten werden entfernt. Die Buchungen bleiben anonym erhalten. Das lässt sich nicht rückgängig machen.')) return;
+        if (!confirm(this.fullName(this.detail.c) + ' wirklich löschen?\n\nName und Kontaktdaten werden entfernt. Buchungen bleiben anonym erhalten. Das lässt sich nicht rückgängig machen.')) return;
         await this.run(async () => {
-          await this.rpc('anonymize_customer', { p_customer: this.customer.id });
-          this.customer = null;
-          await this.loadCustomers();
-          this.notify('Kundin gelöscht.');
+          await this.rpc('anonymize_customer', { p_customer: this.personId });
+          this.personId = null;
+          await this.loadPeople();
+          this.notify('Gelöscht.');
         });
       },
 
-      // ---------- Verkauf ----------
-      saleMatches() {
-        var q = this.sale.search.trim().toLowerCase(), self = this;
-        if (q.length < 2) return [];
-        return this.customers.filter(function (c) { return !c.archived_at && self.fullName(c).toLowerCase().indexOf(q) > -1; }).slice(0, 8);
+      // ---------- Kurse ----------
+      async loadCourses() {
+        var from = new Date(); from.setHours(0, 0, 0, 0);
+        if (this.showPast) from.setDate(from.getDate() - 60);
+        var q = this.sb.from('sessions').select('*').eq('tenant_id', this.tenant.id).gte('starts_at', from.toISOString()).order('starts_at').limit(80);
+        var r = await q;
+        var list = r.data || [];
+        if (list.length) {
+          var a = await this.sb.from('attendances').select('session_id,status').in('status', ['registered', 'present']).in('session_id', list.map(function (s) { return s.id; }));
+          var n = {};
+          (a.data || []).forEach(function (x) { n[x.session_id] = (n[x.session_id] || 0) + 1; });
+          list.forEach(function (s) { s.n = n[s.id] || 0; });
+        }
+        this.sessions = list;
       },
-      async quickCustomer() {
-        var q = this.sale.quick;
-        if (!q.first_name) return this.notify('Bitte gib mindestens einen Vornamen ein.', true);
+      courseGroups() {
+        var groups = [], map = {}, self = this;
+        this.sessions.forEach(function (s) {
+          var d = new Date(s.starts_at), label = self.weekLabel(d);
+          if (!map[label]) { map[label] = { label: label, items: [] }; groups.push(map[label]); }
+          map[label].items.push(s);
+        });
+        return groups;
+      },
+      weekLabel(d) {
+        var today = new Date(); today.setHours(0, 0, 0, 0);
+        var monday = function (x) { var m = new Date(x); m.setHours(0, 0, 0, 0); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
+        var diff = Math.round((monday(d) - monday(today)) / (7 * 86400000));
+        if (diff === 0) return 'Diese Woche';
+        if (diff === 1) return 'Nächste Woche';
+        if (diff === -1) return 'Letzte Woche';
+        return 'Woche ab ' + monday(d).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+      },
+      async openCourse(s) {
+        this.course = s; this.toTop();
+        try {
+          var rows = await this.rpc('session_roster', { p_session: s.id });
+          this.roster = rows.filter(function (r) { return true; }).map(function (r) { r._menu = false; return r; });
+        } catch (e) { this.notify(message(e), true); }
+      },
+      rosterText(r) {
+        if (r.status === 'present') return 'war da' + (r.abgebucht && r.rest != null ? ' · noch ' + r.rest + (r.von ? ' von ' + r.von : '') : '');
+        if (r.status === 'registered') return 'angemeldet' + (r.credits_balance ? ' · Guthaben ' + r.credits_balance : '');
+        if (r.status === 'cancelled_in_time') return 'abgesagt';
+        if (r.status === 'cancelled_late') return 'zu spät abgesagt' + (r.abgebucht ? ' · abgezogen' : '');
+        return 'nicht erschienen' + (r.abgebucht ? ' · abgezogen' : '');
+      },
+      async cancelRow(r, noShow) {
+        r._menu = false;
         await this.run(async () => {
-          var r = await this.sb.from('customers').insert({ tenant_id: this.tenant.id, first_name: q.first_name, last_name: q.last_name || null, source: 'extern' })
-            .select().single();
-          if (r.error) throw r.error;
-          this.sale.customer = { customer_id: r.data.id, first_name: r.data.first_name, last_name: r.data.last_name };
-          this.sale.quick = null;
-          this.loadCustomers();
+          await this.rpc('cancel_attendance', { p_session: this.course.id, p_customer: r.customer_id, p_no_show: noShow });
+          this.notify(this.fullName(r) + (noShow ? ': nicht erschienen' : ': abgesagt'));
+          await this.openCourse(this.course);
+        });
+      },
+
+      // ---------- Einstellungen ----------
+      async saveSetup(p) {
+        var s = this.setup[p.id];
+        if (s.type === 'credits' && !(s.credits > 0)) return this.notify('Bitte gib an, wie viele Besuche drin sind.', true);
+        await this.run(async () => {
+          var price = s.price === '' || s.price == null ? null : Math.round(parseFloat(String(s.price).replace(',', '.')) * 100);
+          var n = await this.rpc('setup_product', { p_product: p.id, p_type: s.type, p_credits: s.type === 'credits' ? s.credits : null,
+            p_validity_days: s.validity || null, p_price_cents: price, p_category: s.category || null });
+          this.notify(p.name + ' eingerichtet' + (n ? ' – ' + n + (n === 1 ? ' Karte' : ' Karten') + ' nachgezogen' : '') + '.');
+          await Promise.all([this.loadProducts(), this.loadPeople()]);
         });
       },
       productText(p) {
-        var t = { credits: p.credits + ' Besuche', single: 'Einzelstunde', period: 'Kursblock', subscription: 'Abo unbegrenzt' }[p.type];
-        if (p.validity_days) t += ' · ' + p.validity_days + ' Tage gültig';
-        if (p.price_cents != null) t += ' · ' + this.euro(p.price_cents);
+        var t = { credits: p.credits + ' Besuche', single: 'Einzelstunde', period: 'Kursblock', subscription: 'Abo' }[p.type];
+        if (p.validity_days) t += ' · ' + p.validity_days + ' Tage';
+        if (p.price_cents != null) t += ' · ' + (p.price_cents / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
         if (p.category) t += ' · ' + p.category;
         return t;
       },
-      async doSell(paidVia) {
-        await this.run(async () => {
-          var price = this.sale.price === '' || this.sale.price == null ? null : Math.round(parseFloat(String(this.sale.price).replace(',', '.')) * 100);
-          var id = await this.rpc('sell', { p_customer: this.sale.customer.customer_id, p_product: this.sale.product.id, p_paid_via: paidVia, p_price_cents: price });
-          var e = await this.sb.from('v_entitlement_balance').select('*').eq('entitlement_id', id).single();
-          var o = await this.sb.from('v_customer_overview').select('credits_balance').eq('customer_id', this.sale.customer.customer_id).maybeSingle();
-          var name = this.fullName(this.sale.customer);
-          var d = e.data, total = o.data ? o.data.credits_balance : null;
-          var neu = d && d.expires_at ? ' · gültig bis ' + this.dateShort(d.expires_at) : '';
-          this.sale.done = d && !d.unlimited
-            ? (total != null && total !== d.balance
-                ? name + ' hat jetzt insgesamt ' + total + ' Besuche (neue Karte: ' + d.balance + neu + ')'
-                : name + ' hat jetzt ' + d.balance + ' Besuche' + neu)
-            : name + ' hat jetzt ' + this.sale.product.name + (d && d.expires_at ? ' bis ' + this.dateShort(d.expires_at) : '');
-          this.loadCustomers();
-        });
-      },
-      resetSale() { this.sale = { search: '', customer: null, product: null, price: '', quick: null, done: '', backToSession: null }; },
-
-      // ---------- Produkte ----------
-      openProductForm(p) {
-        this.productForm = p ? Object.assign({}, p, { price: p.price_cents != null ? p.price_cents / 100 : '' })
-          : { name: '', type: 'credits', credits: 10, validity_days: null, price: '', category: '', active: true };
-      },
-      async saveProduct() {
-        var p = this.productForm;
-        if (!p.name) return this.notify('Bitte gib dem Produkt einen Namen.', true);
-        await this.run(async () => {
-          var data = { name: p.name, validity_days: p.validity_days || null, category: p.category || null, active: !!p.active,
-            price_cents: p.price === '' || p.price == null ? null : Math.round(parseFloat(String(p.price).replace(',', '.')) * 100) };
-          var r;
-          if (p.id) r = await this.sb.from('products').update(data).eq('id', p.id);
-          else r = await this.sb.from('products').insert(Object.assign({ tenant_id: this.tenant.id, type: p.type,
-            credits: p.type === 'credits' ? p.credits : p.type === 'single' ? 1 : null }, data));
-          if (r.error) throw r.error;
-          this.productForm = null;
-          await this.loadProducts();
-          this.notify('Produkt gespeichert.');
-        });
-      },
 
       // ---------- Formatierung ----------
+      ago(iso) {
+        var d = days(iso);
+        if (d <= 0) return 'heute';
+        if (d === 1) return 'gestern';
+        if (d < 30) return 'vor ' + d + ' Tagen';
+        return this.dateShort(iso);
+      },
       time(iso) { return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'; },
       dateShort(iso) { return iso ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : ''; },
       dateLong(iso) { return new Date(iso).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
-      euro(cents) { return (cents / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }); }
+      dayNum(iso) { return new Date(iso).getDate(); },
+      weekday(iso) { return new Date(iso).toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', ''); }
     };
   }
 
-  // Bibliotheken laden, dann Alpine starten (läuft auch, wenn Flenski die Seite ohne Neuladen erneut anzeigt)
   document.addEventListener('alpine:init', function () { window.Alpine.data('ecrm', component); });
   load(LIB_SUPABASE, function () { return !!window.supabase; })
     .then(function () {
