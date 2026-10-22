@@ -471,6 +471,9 @@
                 <template x-for="m in team" :key="m.user_id">
                   <div class="ecrm-hrow"><span x-text="m.email"></span><span class="ecrm-muted" x-text="m.role === 'owner' ? 'Inhaberin' : 'Vertretung'"></span></div>
                 </template>
+                <template x-if="!team.length">
+                  <p class="ecrm-muted ecrm-small">Noch niemand eingeladen. Neue Personen lädt Systemsafari ein.</p>
+                </template>
               </div>
 
               <div class="ecrm-card">
@@ -754,8 +757,13 @@
       },
       async runUndo() { var u = pendingUndo; pendingUndo = null; this.toast = null; if (u) await u(); },
       async rpc(name, args) { var r = await this.sb.rpc(name, args); if (r.error) throw r.error; return r.data; },
+      // Nach einem Ansichtswechsel nach oben zum CRM springen (die Reiter sollen sichtbar sein)
+      toTop() {
+        this.$nextTick(function () { if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' }); });
+      },
       openTab(t) {
         this.tab = t;
+        this.toTop();
         if (t === 'kundinnen') { this.customer = null; this.customerForm = null; this.loadCustomers(); }
         if (t === 'checkin' && !this.session) this.loadDay();
         if (t === 'verkauf' && this.sale.done) this.resetSale();
@@ -843,7 +851,7 @@
       },
 
       // ---------- Check-in: eine Stunde ----------
-      async openSession(s) { this.session = s; this.rosterSearch = ''; await this.loadRoster(); },
+      async openSession(s) { this.session = s; this.rosterSearch = ''; this.toTop(); await this.loadRoster(); },
       closeSession() { this.session = null; this.roster = []; this.loadDay(); },
       async loadRoster() {
         this.loading = true;
@@ -947,6 +955,7 @@
         this.sale.customer = c;
         this.sale.backToSession = this.tab === 'checkin' ? this.session : null;
         this.tab = 'verkauf';
+        this.toTop();
       },
       async backToSession() {
         var s = this.sale.backToSession;
@@ -1005,7 +1014,7 @@
       },
       openCustomer(c) { return this.openCustomerById(c.customer_id); },
       async openCustomerById(id) {
-        this.tab = 'kundinnen'; this.customerForm = null; this.correctFor = null;
+        this.tab = 'kundinnen'; this.customerForm = null; this.correctFor = null; this.toTop();
         var r = await this.sb.from('customers').select('*').eq('id', id).single();
         if (r.error) return this.notify(message(r.error), true);
         this.customer = r.data;
@@ -1051,6 +1060,7 @@
         });
       },
       openCustomerForm(c) {
+        this.toTop();
         this.customerForm = c ? Object.assign({}, c, { tagsText: (c.tags || []).join(', ') })
           : { first_name: this.search.trim(), last_name: '', email: '', phone: '', is_child: false, guardian_name: '', guardian_email: '', guardian_phone: '', tagsText: '', note: '' };
       },
@@ -1124,10 +1134,14 @@
           var price = this.sale.price === '' || this.sale.price == null ? null : Math.round(parseFloat(String(this.sale.price).replace(',', '.')) * 100);
           var id = await this.rpc('sell', { p_customer: this.sale.customer.customer_id, p_product: this.sale.product.id, p_paid_via: paidVia, p_price_cents: price });
           var e = await this.sb.from('v_entitlement_balance').select('*').eq('entitlement_id', id).single();
+          var o = await this.sb.from('v_customer_overview').select('credits_balance').eq('customer_id', this.sale.customer.customer_id).maybeSingle();
           var name = this.fullName(this.sale.customer);
-          var d = e.data;
+          var d = e.data, total = o.data ? o.data.credits_balance : null;
+          var neu = d && d.expires_at ? ' · gültig bis ' + this.dateShort(d.expires_at) : '';
           this.sale.done = d && !d.unlimited
-            ? name + ' hat jetzt ' + d.balance + ' Besuche' + (d.expires_at ? ' · gültig bis ' + this.dateShort(d.expires_at) : '')
+            ? (total != null && total !== d.balance
+                ? name + ' hat jetzt insgesamt ' + total + ' Besuche (neue Karte: ' + d.balance + neu + ')'
+                : name + ' hat jetzt ' + d.balance + ' Besuche' + neu)
             : name + ' hat jetzt ' + this.sale.product.name + (d && d.expires_at ? ' bis ' + this.dateShort(d.expires_at) : '');
           this.loadCustomers();
         });

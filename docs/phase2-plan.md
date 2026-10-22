@@ -1,6 +1,6 @@
 # Plan Phase 2 – Oberfläche
 
-Stand: 22.10.2026 · Status: **Entscheidungen getroffen, wartet auf Go**
+Stand: 22.10.2026 · Status: **gebaut und lokal getestet am 22.10.2026, wartet auf Test in Flenski + Abnahme**
 Grundlage: `05-phasen.md` (Phase 2), Entscheidung 0001 (läuft im Flenski-Embed-Widget), CLAUDE.md Regel 6 und 7.
 
 ## In einem Satz
@@ -74,3 +74,14 @@ Kundin wählen oder neu anlegen → **Produkt** (große Kacheln) → **Zahlweg**
 | Farbschema | **Hell, passend zu Flenski** | weiße Karten, dunkle Schrift, Akzent #38725b, Warnung orange; kein Dunkelmodus im Widget |
 | Stunden anlegen | **Vorschlag aus der Vorwoche** + kurzes Formular | Funktion `create_session_like_last_week` |
 | Rechte Staff | **Verkaufen + einchecken**, Korrektur und Löschen nur owner | `correct()` wird auf owner beschränkt (+ Test) |
+
+## Teststand (22.10.2026, Vorschau 375 px, Demo-Mandantin)
+Getestet und funktionsfähig: Anmeldung (Marcel), Stunden des Tages, Stunde anlegen, Kundin per Suche hinzufügen, Antippen = da, Rückgängig (Antippen und Meldung), „Karte verkaufen“ aus der Stunde + „Jetzt abbuchen“, Kundinnenliste mit Signalen und Filtern, Detail mit Karten und Verlauf, Korrektur (ohne Grund abgelehnt), neue Kundin (Kind mit Eltern), Löschen (anonymisiert, Protokoll ohne Personendaten), Verkauf in 3 Taps, Produkt anlegen und bearbeiten.
+
+Unterwegs gefunden und behoben:
+- Check-in-Schleife (Alpine rief die Rückgängig-Funktion selbst auf) – über 500 Hin-und-Her-Buchungen in der Demo. Demo neu angelegt, alte Demo stillgelegt (`yoga-by-lana-demo-alt-1`, Status deleted). Regel 11 in CLAUDE.md.
+- „ohne Karte“ eingecheckt + danach Karte verkauft → wurde nicht nachgebucht (DB-Korrektur + Test).
+- Verlauf zeigte das Anlagedatum statt Kauf-/Stundendatum.
+- Guthaben nach Rückgängig veraltet, Meldung verrutscht, doppelter Punkt im Datum, „Was kauft sie?“ bei Jungen, Verkaufsmeldung zeigte nur die neue Karte statt Gesamtguthaben, Ansicht sprang nicht nach oben.
+
+Abweichung vom Plan: Reiter stehen **oben** im CRM-Bereich statt fest am unteren Rand (Flenski hat am Handy eigene feste Leisten).
