@@ -1,5 +1,5 @@
 <!--
-  Emotional CRM – Oberfläche (Neuausrichtung, Entscheidung 0005)
+  Emotional CRM – Oberfläche (Entwurf v2, freigegeben von Marcel am 22.10.2026)
   Komplett in ein EMBED-WIDGET einer Flenski-Custom-Page einfügen (Widget-Titel aus, Sichtbarkeit "nur Team").
   Nicht ins Fußzeilen-Feld – dort läuft kein Skript (Entscheidung 0001).
   Pro Mandantin nur die Zeile CRM_CONFIG anpassen. Supabase-Adresse und "anon key" sind öffentlich und dürfen hier stehen.
@@ -15,10 +15,10 @@
     <!-- ===== Anmeldung ===== -->
     <template x-if="view === 'login'">
       <div class="ecrm-card ecrm-login">
-        <h2 class="ecrm-title">Anmelden</h2>
+        <div class="ecrm-serif ecrm-login-title">Willkommen</div>
         <template x-if="!login.codeSent">
           <div>
-            <p class="ecrm-muted">Gib deine E-Mail-Adresse ein. Du bekommst einen 6-stelligen Code.</p>
+            <p class="ecrm-text">Gib deine E-Mail-Adresse ein. Du bekommst einen 6-stelligen Code.</p>
             <input class="ecrm-input" type="email" inputmode="email" autocomplete="email" placeholder="name@beispiel.de"
                    x-model.trim="login.email" @keydown.enter="sendCode()">
             <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="sendCode()" :disabled="busy">Code senden</button>
@@ -26,7 +26,7 @@
         </template>
         <template x-if="login.codeSent">
           <div>
-            <p class="ecrm-muted">Der Code ist unterwegs an <b x-text="login.email"></b>. Schau auch im Spam-Ordner.</p>
+            <p class="ecrm-text">Der Code ist unterwegs an <b x-text="login.email"></b>. Schau auch im Spam-Ordner.</p>
             <input class="ecrm-input ecrm-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
                    placeholder="6-stelliger Code" x-model.trim="login.code" @keydown.enter="verifyCode()">
             <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="verifyCode()" :disabled="busy">Anmelden</button>
@@ -38,143 +38,183 @@
 
     <template x-if="view === 'nozugang'">
       <div class="ecrm-card">
-        <h2 class="ecrm-title">Kein Zugang</h2>
-        <p>Du bist angemeldet als <b x-text="userEmail"></b>, aber für diese App noch nicht freigeschaltet.</p>
-        <p class="ecrm-muted">Bitte melde dich bei Systemsafari, dann wirst du eingeladen.</p>
+        <div class="ecrm-serif ecrm-login-title">Kein Zugang</div>
+        <p class="ecrm-text">Du bist angemeldet als <b x-text="userEmail"></b>, aber für diese App noch nicht freigeschaltet. Bitte melde dich bei Systemsafari.</p>
         <button class="ecrm-btn" @click="logout()">Abmelden</button>
       </div>
     </template>
 
     <!-- ===== App ===== -->
     <template x-if="view === 'app'">
-      <div class="ecrm-shell">
+      <div>
         <nav class="ecrm-nav">
-          <button :class="tab === 'uebersicht' && 'ecrm-on'" @click="go('uebersicht')">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Übersicht</button>
+          <button :class="tab === 'heute' && 'ecrm-on'" @click="go('heute')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Übersicht</span></button>
           <button :class="tab === 'menschen' && 'ecrm-on'" @click="go('menschen')">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.8.2 4.8 1.9 5.4 5.4"/></svg>Menschen</button>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.8.2 4.8 1.9 5.4 5.4"/></svg><span>Menschen</span></button>
           <button :class="tab === 'kurse' && 'ecrm-on'" @click="go('kurse')">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Kurse</button>
-          <button class="ecrm-gear" :class="tab === 'einstellungen' && 'ecrm-on'" @click="go('einstellungen')" aria-label="Einstellungen">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Kurse</span></button>
+          <button :class="tab === 'angebote' && 'ecrm-on'" @click="go('angebote')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2M4 12h16"/></svg><span>Angebote</span>
+            <i class="ecrm-badge" x-show="setupNeeded().length" x-text="setupNeeded().length"></i></button>
         </nav>
 
         <!-- ================= ÜBERSICHT ================= -->
-        <section x-show="tab === 'uebersicht'">
-          <div class="ecrm-hello">
-            <div class="ecrm-muted" x-text="greeting()"></div>
-            <h2 class="ecrm-title">Deine Menschen</h2>
+        <section x-show="tab === 'heute'">
+          <div class="ecrm-hero">
+            <div class="ecrm-hero-date" x-text="todayLong()"></div>
+            <div class="ecrm-serif ecrm-hero-hello" x-text="greeting()"></div>
+            <div class="ecrm-hero-line" x-text="heroLine()"></div>
+            <div class="ecrm-hero-stats">
+              <button @click="openList('')"><b x-text="people.length"></b><span>Menschen</span></button>
+              <button @click="go('kurse')"><b x-text="upcomingRegistrations()"></b><span>Anmeldungen</span></button>
+              <button @click="openList('')"><b x-text="purchases7()"></b><span>Käufe/Woche</span></button>
+            </div>
           </div>
 
-          <div class="ecrm-stats">
-            <button class="ecrm-stat" @click="openList('')"><span>Alle</span><b x-text="people.length"></b></button>
-            <button class="ecrm-stat ecrm-st-dabei" @click="openList('dabei')"><span>Dabei</span><b x-text="count('dabei')"></b></button>
-            <button class="ecrm-stat ecrm-st-kuehlt_ab" @click="openList('kuehlt_ab')"><span>Kühlt ab</span><b x-text="count('kuehlt_ab')"></b></button>
-            <button class="ecrm-stat ecrm-st-neu" @click="openList('neu')"><span>Neu</span><b x-text="count('neu')"></b></button>
+          <div class="ecrm-states">
+            <button class="ecrm-state ecrm-st-dabei" @click="openList('dabei')"><span>Dabei</span><b x-text="count('dabei')"></b></button>
+            <button class="ecrm-state ecrm-st-kuehlt_ab" @click="openList('kuehlt_ab')"><span>Werden still</span><b x-text="count('kuehlt_ab')"></b></button>
+            <button class="ecrm-state ecrm-st-neu" @click="openList('neu')"><span>Neu</span><b x-text="count('neu')"></b></button>
           </div>
+          <p class="ecrm-legend"><span class="ecrm-i">i</span> <b>Dabei</b> = in den letzten 14 Tagen in der App oder im Kurs aktiv. <b>Werden still</b> = seit 15 bis 30 Tagen nichts. <b>Neu</b> = seit höchstens 14 Tagen in deiner App.
+            <template x-if="count('eingeschlafen')"><span x-text="' ' + count('eingeschlafen') + ' länger weg (über 30 Tage).'"></span></template></p>
 
           <template x-if="isOwner && setupNeeded().length">
-            <button class="ecrm-banner" @click="go('einstellungen')">
-              <b x-text="setupNeeded().length + (setupNeeded().length === 1 ? ' Plan' : ' Pläne') + ' aus deiner App noch einrichten'"></b>
-              <span>Sag einmal, wie viele Besuche drin sind – dann zählt das CRM die Guthaben automatisch.</span>
+            <button class="ecrm-banner" @click="go('angebote')">
+              <b x-text="setupNeeded().length + (setupNeeded().length === 1 ? ' Angebot' : ' Angebote') + ' aus deiner App verbinden'"></b>
+              <span>Ein Tipp pro Angebot – dann zählt das CRM die Besuche auf Karten automatisch.</span>
             </button>
           </template>
 
-          <h3 class="ecrm-h3">Um diese Menschen kümmerst du dich jetzt</h3>
-          <template x-for="c in care.slice(0, careLimit)" :key="c.customer_id">
-            <div class="ecrm-card ecrm-care">
-              <button class="ecrm-care-main" @click="openPerson(c.customer_id)">
-                <span class="ecrm-avatar" :class="'ecrm-st-' + personStatus(c.customer_id)" x-text="initials(person(c.customer_id))"></span>
-                <span class="ecrm-grow">
-                  <span class="ecrm-name" x-text="fullName(person(c.customer_id))"></span>
-                  <span class="ecrm-sub" x-text="reasonText(c.gruende[0], c.customer_id)"></span>
-                </span>
-              </button>
-              <a class="ecrm-btn ecrm-btn-small" :href="messageLink(c.customer_id, c.gruende[0].art)" target="_blank" rel="noopener"
-                 x-show="messageLink(c.customer_id, c.gruende[0].art)" x-text="actionLabel(c.gruende[0].art)"></a>
+          <div class="ecrm-card ecrm-section">
+            <div class="ecrm-section-head">
+              <div class="ecrm-h">Heute für dich</div>
+              <div class="ecrm-text-s">Menschen, bei denen eine kurze Nachricht gerade viel bewirkt.</div>
             </div>
-          </template>
-          <template x-if="!care.length && !loading">
-            <p class="ecrm-empty">Gerade braucht niemand besondere Aufmerksamkeit. Schön!</p>
-          </template>
-          <button class="ecrm-link" x-show="care.length > careLimit" @click="careLimit = 50" x-text="'Alle ' + care.length + ' anzeigen'"></button>
+            <template x-for="c in care.slice(0, careLimit)" :key="c.customer_id">
+              <div class="ecrm-item">
+                <button class="ecrm-item-main" @click="openPerson(c.customer_id)">
+                  <span class="ecrm-ava" :class="'ecrm-st-' + personStatus(c.customer_id)">
+                    <span x-text="initials(person(c.customer_id))"></span>
+                    <img x-show="person(c.customer_id).avatar_url" :src="person(c.customer_id).avatar_url" alt="" loading="lazy">
+                  </span>
+                  <span class="ecrm-grow">
+                    <span class="ecrm-name" x-text="fullName(person(c.customer_id))"></span>
+                    <span class="ecrm-text-s" x-text="careText(c)"></span>
+                  </span>
+                </button>
+                <a class="ecrm-btn ecrm-btn-soft" x-show="profileUrl(c.customer_id)" :href="profileUrl(c.customer_id)" target="_top"
+                   x-text="actionLabel(c.gruende[0].art)"></a>
+              </div>
+            </template>
+            <template x-if="!care.length && !loading">
+              <p class="ecrm-empty">Gerade braucht niemand besondere Aufmerksamkeit. Schön!</p>
+            </template>
+            <button class="ecrm-link" x-show="care.length > careLimit" @click="careLimit = 50" x-text="'Alle ' + care.length + ' anzeigen'"></button>
+          </div>
 
-          <h3 class="ecrm-h3">Gerade passiert</h3>
-          <div class="ecrm-card ecrm-feed">
+          <div class="ecrm-card ecrm-section" x-show="nextSessions().length">
+            <div class="ecrm-section-head">
+              <div class="ecrm-h">Deine nächsten Kurse</div>
+              <div class="ecrm-text-s">Wie voll deine kommenden Termine schon sind.</div>
+            </div>
+            <template x-for="s in nextSessions()" :key="s.id">
+              <button class="ecrm-item ecrm-item-btn" @click="openCourse(s)">
+                <span class="ecrm-date-s" x-text="dateShort(s.starts_at)"></span>
+                <span class="ecrm-grow ecrm-name ecrm-name-n" x-text="s.title"></span>
+                <span class="ecrm-fillbar"><i :style="'width:' + fillPct(s) + '%'"></i></span>
+                <span class="ecrm-text-s ecrm-nowrap" x-text="(s.n || 0) + (s.capacity ? ' von ' + s.capacity : '')"></span>
+              </button>
+            </template>
+          </div>
+
+          <div class="ecrm-card ecrm-section">
+            <div class="ecrm-section-head">
+              <div class="ecrm-h">Gerade passiert</div>
+              <div class="ecrm-text-s">Was deine Menschen zuletzt in der App und in deinen Kursen gemacht haben.</div>
+            </div>
             <template x-for="(f, i) in feed.slice(0, 8)" :key="i">
-              <button class="ecrm-feed-row" @click="openPerson(f.customer_id)">
-                <span class="ecrm-dot" :class="'ecrm-k-' + feedKind(f.art)"></span>
-                <span class="ecrm-grow"><b x-text="f.first_name"></b> <span x-text="feedText(f)"></span></span>
+              <button class="ecrm-item ecrm-item-btn" @click="openPerson(f.customer_id)">
+                <span class="ecrm-ava ecrm-ava-s" :class="'ecrm-st-' + personStatus(f.customer_id)">
+                  <span x-text="initials(person(f.customer_id))"></span>
+                  <img x-show="person(f.customer_id).avatar_url" :src="person(f.customer_id).avatar_url" alt="" loading="lazy">
+                </span>
+                <span class="ecrm-grow ecrm-feedtext"><b x-text="f.first_name"></b> <span x-text="feedText(f)"></span></span>
                 <span class="ecrm-when" x-text="ago(f.am)"></span>
               </button>
             </template>
-            <template x-if="!feed.length && !loading"><p class="ecrm-empty">Noch nichts passiert – sobald jemand in der App aktiv ist, siehst du es hier.</p></template>
+            <template x-if="!feed.length && !loading"><p class="ecrm-empty">Noch nichts passiert. Sobald jemand in der App aktiv ist, siehst du es hier.</p></template>
           </div>
         </section>
 
-        <!-- ================= MENSCHEN: Liste ================= -->
+        <!-- ================= MENSCHEN ================= -->
         <section x-show="tab === 'menschen' && !personId && !form">
-          <div class="ecrm-searchrow">
-            <input class="ecrm-input" type="search" placeholder="Name suchen" x-model="search">
+          <div class="ecrm-page-head">
+            <div class="ecrm-serif ecrm-page-title">Menschen</div>
+            <div class="ecrm-text-s">Alle aus deiner App – oben, wer still wird, dann die Neuen, dann wer dabei ist.</div>
           </div>
+          <input class="ecrm-input" type="search" placeholder="Name suchen" x-model="search">
           <div class="ecrm-chips">
             <template x-for="s in statusFilters" :key="s.value">
-              <button :class="filter === s.value && 'ecrm-on'" @click="filter = s.value"
-                      x-text="s.label + ' ' + (s.value ? count(s.value) : people.length)"></button>
+              <button :class="filter === s.value && 'ecrm-on'" @click="filter = s.value" x-text="s.label + ' · ' + (s.value ? count(s.value) : people.length)"></button>
             </template>
           </div>
-          <template x-for="p in filteredPeople()" :key="p.customer_id">
-            <button class="ecrm-card ecrm-person" @click="openPerson(p.customer_id)">
-              <span class="ecrm-avatar" :class="'ecrm-st-' + p.status" x-text="initials(p)"></span>
-              <span class="ecrm-grow">
-                <span class="ecrm-name"><span x-text="fullName(p)"></span>
-                  <span class="ecrm-tag" x-show="p.source !== 'flenski'">ohne App</span><span class="ecrm-tag" x-show="p.is_child">Kind</span></span>
-                <span class="ecrm-sub" x-text="lastText(p)"></span>
-              </span>
-              <span class="ecrm-spark" aria-hidden="true">
-                <template x-for="(n, i) in (p.events_8w || [])" :key="i"><i :style="barStyle(n, p.events_8w)" :class="'ecrm-st-' + p.status"></i></template>
-              </span>
-            </button>
-          </template>
-          <template x-if="!filteredPeople().length && !loading">
-            <p class="ecrm-empty" x-text="people.length ? 'Niemand passt zu diesem Filter.' : 'Noch niemand da. Sobald sich jemand in deiner App registriert, erscheint die Person hier automatisch.'"></p>
-          </template>
-          <button class="ecrm-btn ecrm-block ecrm-quiet" @click="openForm(null)">+ Person ohne App anlegen</button>
+          <div class="ecrm-card ecrm-section">
+            <template x-for="p in filteredPeople()" :key="p.customer_id">
+              <button class="ecrm-item ecrm-item-btn" @click="openPerson(p.customer_id)">
+                <span class="ecrm-ava" :class="'ecrm-st-' + p.status">
+                  <span x-text="initials(p)"></span><img x-show="p.avatar_url" :src="p.avatar_url" alt="" loading="lazy">
+                </span>
+                <span class="ecrm-grow">
+                  <span class="ecrm-name"><span x-text="fullName(p)"></span>
+                    <i class="ecrm-chip" :class="'ecrm-st-' + p.status" x-text="statusShort(p.status)"></i></span>
+                  <span class="ecrm-text-s" x-text="lastText(p)"></span>
+                </span>
+                <span class="ecrm-spark" aria-hidden="true">
+                  <template x-for="(n, i) in (p.events_8w || [])" :key="i"><i :style="barStyle(n, p.events_8w)" :class="'ecrm-st-' + p.status"></i></template>
+                </span>
+              </button>
+            </template>
+            <template x-if="!filteredPeople().length && !loading">
+              <p class="ecrm-empty" x-text="people.length ? 'Niemand passt zu diesem Filter.' : 'Noch niemand da. Sobald sich jemand in deiner App registriert, erscheint die Person hier automatisch.'"></p>
+            </template>
+          </div>
+          <p class="ecrm-legend">Die kleinen Balken zeigen die Aktivität der letzten 8 Wochen – App und Kurse zusammen, rechts ist die aktuelle Woche.</p>
         </section>
 
         <!-- ================= MENSCH: Detail ================= -->
         <section x-show="tab === 'menschen' && personId && !form">
           <template x-if="detail">
             <div>
-              <button class="ecrm-link" @click="personId = null">‹ Menschen</button>
-              <div class="ecrm-profile">
-                <span class="ecrm-avatar ecrm-avatar-l" :class="'ecrm-st-' + detail.eng.status" x-text="initials(detail.eng)"></span>
-                <div class="ecrm-grow">
-                  <h2 class="ecrm-title" x-text="fullName(detail.eng)"></h2>
-                  <div class="ecrm-sub" x-text="profileLine()"></div>
+              <button class="ecrm-back" @click="personId = null">‹ Alle Menschen</button>
+              <div class="ecrm-card ecrm-profile">
+                <span class="ecrm-ava ecrm-ava-l" :class="'ecrm-st-' + detail.eng.status">
+                  <span x-text="initials(detail.eng)"></span><img x-show="detail.c.avatar_url" :src="detail.c.avatar_url" alt="">
+                </span>
+                <div class="ecrm-serif ecrm-profile-name" x-text="fullName(detail.eng)"></div>
+                <span class="ecrm-chip ecrm-chip-l" :class="'ecrm-st-' + detail.eng.status" x-text="statusLong(detail.eng)"></span>
+                <p class="ecrm-text ecrm-center ecrm-summary" x-text="summary()"></p>
+                <div class="ecrm-profile-actions">
+                  <a class="ecrm-btn ecrm-btn-primary" x-show="profileUrl(personId)" :href="profileUrl(personId)" target="_top">Profil &amp; Nachricht in der App</a>
                 </div>
               </div>
-              <div class="ecrm-pills">
-                <span class="ecrm-pill" :class="'ecrm-st-' + detail.eng.status" x-text="statusLabel(detail.eng)"></span>
-                <template x-for="t in (detail.c.tags || [])" :key="t"><span class="ecrm-pill" x-text="t"></span></template>
-              </div>
-              <div class="ecrm-contact">
-                <a class="ecrm-btn ecrm-btn-small" x-show="waLink(detail.c)" :href="waLink(detail.c)" target="_blank" rel="noopener">WhatsApp</a>
-                <a class="ecrm-btn ecrm-btn-small" x-show="contactMail(detail.c)" :href="'mailto:' + contactMail(detail.c)">E-Mail</a>
-                <a class="ecrm-btn ecrm-btn-small" x-show="contactPhone(detail.c)" :href="'tel:' + contactPhone(detail.c)">Anrufen</a>
-              </div>
 
-              <div class="ecrm-stats ecrm-stats-3">
-                <div class="ecrm-stat"><span>Kursbesuche</span><b x-text="detail.eng.besuche_gesamt"></b></div>
-                <div class="ecrm-stat"><span>Guthaben</span><b x-text="balanceShort()"></b></div>
-                <div class="ecrm-stat"><span>Aktiv, 30 Tage</span><b x-text="detail.eng.score_30d"></b></div>
+              <div class="ecrm-kpis">
+                <div><b x-text="detail.eng.besuche_gesamt"></b><span>Kursbesuche</span></div>
+                <div><b x-text="balanceShort()"></b><span x-text="balanceLabel()"></span></div>
+                <div><b x-text="detail.eng.score_30d"></b><span>Aktivität, 30 Tage</span></div>
               </div>
+              <p class="ecrm-legend">Aktivität, 30 Tage: Punkte für Kursbesuche (3), Kurse, Beiträge und Kommentare (2), Lesen und Downloads (1).</p>
 
-              <div class="ecrm-card">
-                <div class="ecrm-sub">Aktivität, letzte 8 Wochen</div>
+              <div class="ecrm-card ecrm-section">
+                <div class="ecrm-section-head">
+                  <div class="ecrm-h">Aktivität der letzten 8 Wochen</div>
+                  <div class="ecrm-text-s">App und Kurse zusammen. Rechts ist die aktuelle Woche.</div>
+                </div>
                 <div class="ecrm-bars">
                   <template x-for="(n, i) in detail.eng.events_8w" :key="i">
-                    <i :style="barStyle(n, detail.eng.events_8w, 56)" :class="i >= 6 ? 'ecrm-st-' + detail.eng.status : 'ecrm-st-dabei'"></i>
+                    <span class="ecrm-bar"><i :style="barStyle(n, detail.eng.events_8w)" :class="'ecrm-st-' + detail.eng.status"></i><small x-text="i === 7 ? 'jetzt' : (i === 0 ? 'vor 8 W.' : '')"></small></span>
                   </template>
                 </div>
               </div>
@@ -182,32 +222,35 @@
               <template x-for="n in detail.notices" :key="n.id">
                 <div class="ecrm-card ecrm-notice">
                   <span class="ecrm-grow" x-text="noticeText(n)"></span>
-                  <button class="ecrm-btn ecrm-btn-small" @click="resolveNotice(n)">Erledigt</button>
+                  <button class="ecrm-btn ecrm-btn-soft" @click="resolveNotice(n)">Erledigt</button>
                 </div>
               </template>
 
               <template x-if="detail.ents.length">
-                <div>
-                  <h3 class="ecrm-h3">Karten und Pläne</h3>
+                <div class="ecrm-card ecrm-section">
+                  <div class="ecrm-section-head">
+                    <div class="ecrm-h">Gekaufte Angebote</div>
+                    <div class="ecrm-text-s">Aus der App übernommen. Bei Karten siehst du, wie viele Besuche noch übrig sind.</div>
+                  </div>
                   <template x-for="e in detail.ents" :key="e.entitlement_id">
-                    <div class="ecrm-card ecrm-ent" :class="e.status !== 'active' && 'ecrm-off'">
-                      <div class="ecrm-row">
-                        <div class="ecrm-grow">
-                          <div class="ecrm-name" x-text="e.product_name"></div>
-                          <div class="ecrm-sub" x-text="entText(e)"></div>
-                        </div>
-                        <span class="ecrm-num" x-text="e.unlimited ? '–' : e.balance"></span>
+                    <div class="ecrm-item ecrm-item-col" :class="e.status !== 'active' && 'ecrm-off'">
+                      <div class="ecrm-item-row">
+                        <span class="ecrm-grow">
+                          <span class="ecrm-name" x-text="e.product_name"></span>
+                          <span class="ecrm-text-s" x-text="entText(e)"></span>
+                        </span>
+                        <span class="ecrm-num" x-text="entNumber(e)"></span>
                       </div>
-                      <template x-if="isOwner && !e.unlimited && e.status !== 'cancelled'">
+                      <template x-if="isOwner && !e.unlimited && e.status !== 'cancelled' && !entOpen(e)">
                         <div>
-                          <button class="ecrm-link ecrm-small" x-show="correctFor !== e.entitlement_id" @click="correctFor = e.entitlement_id; correction = { delta: 1, comment: '' }">Korrigieren</button>
-                          <div x-show="correctFor === e.entitlement_id">
+                          <button class="ecrm-link ecrm-link-s" x-show="correctFor !== e.entitlement_id" @click="correctFor = e.entitlement_id; correction = { delta: 1, comment: '' }">Besuche korrigieren</button>
+                          <div x-show="correctFor === e.entitlement_id" class="ecrm-correct">
                             <div class="ecrm-stepper">
-                              <button class="ecrm-btn ecrm-btn-small" @click="correction.delta--">−</button>
+                              <button class="ecrm-btn ecrm-btn-soft" @click="correction.delta--">−</button>
                               <b x-text="(correction.delta > 0 ? '+' : '') + correction.delta"></b>
-                              <button class="ecrm-btn ecrm-btn-small" @click="correction.delta++">+</button>
+                              <button class="ecrm-btn ecrm-btn-soft" @click="correction.delta++">+</button>
                             </div>
-                            <input class="ecrm-input" placeholder="Grund (Pflicht), z. B. Kulanz" x-model="correction.comment">
+                            <input class="ecrm-input" placeholder="Warum? (Pflicht), z. B. Kulanz" x-model="correction.comment">
                             <div class="ecrm-actions">
                               <button class="ecrm-btn" @click="correctFor = null">Abbrechen</button>
                               <button class="ecrm-btn ecrm-btn-primary" @click="saveCorrection(e)" :disabled="busy">Buchen</button>
@@ -220,14 +263,13 @@
                 </div>
               </template>
 
-              <h3 class="ecrm-h3">Verlauf</h3>
-              <div class="ecrm-card ecrm-feed">
+              <div class="ecrm-card ecrm-section">
+                <div class="ecrm-section-head"><div class="ecrm-h">Verlauf</div><div class="ecrm-text-s">Alles, was diese Person in App und Kursen gemacht hat.</div></div>
                 <template x-for="(f, i) in detail.feed" :key="i">
-                  <div class="ecrm-feed-row">
+                  <div class="ecrm-item">
                     <span class="ecrm-dot" :class="'ecrm-k-' + feedKind(f.art)"></span>
-                    <span class="ecrm-grow" x-text="feedText(f, true)"></span>
+                    <span class="ecrm-grow ecrm-feedtext" x-text="feedText(f, true)"></span>
                     <span class="ecrm-when" x-text="dateShort(f.am)"></span>
-                    <span class="ecrm-delta" x-show="f.delta" x-text="(f.delta > 0 ? '+' : '') + f.delta"></span>
                   </div>
                 </template>
                 <template x-if="!detail.feed.length"><p class="ecrm-empty">Noch keine Aktivität.</p></template>
@@ -235,59 +277,31 @@
 
               <details class="ecrm-more">
                 <summary>Weitere Aktionen</summary>
-                <div class="ecrm-card">
-                  <h3 class="ecrm-h3 ecrm-h3-tight">Zahlung von Hand nachtragen</h3>
-                  <p class="ecrm-sub">Nur für Zahlungen außerhalb der App (bar, Überweisung …). App-Käufe kommen automatisch.</p>
-                  <select class="ecrm-input" x-model="manual.product">
-                    <option value="">Produkt wählen …</option>
-                    <template x-for="p in products.filter(p => p.active && !p.needs_setup)" :key="p.id"><option :value="p.id" x-text="p.name"></option></template>
-                  </select>
-                  <div class="ecrm-row2">
-                    <select class="ecrm-input" x-model="manual.paid_via">
-                      <option value="bar">bar</option><option value="ueberweisung">Überweisung</option><option value="verein">Verein</option>
-                      <option value="gutschein">Gutschein</option><option value="sonstiges">sonstiges</option>
-                    </select>
-                    <input class="ecrm-input" type="number" inputmode="decimal" step="0.01" placeholder="Preis € (optional)" x-model="manual.price">
-                  </div>
-                  <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="saveManual()" :disabled="busy || !manual.product">Eintragen</button>
-                  <p class="ecrm-sub" x-show="!products.some(p => p.active && !p.needs_setup)">Erst ein Produkt einrichten (Einstellungen).</p>
-                </div>
-                <div class="ecrm-actions ecrm-spread">
-                  <button class="ecrm-btn" @click="openForm(detail.c)">Bearbeiten</button>
-                  <button class="ecrm-btn" @click="toggleArchive()" x-text="detail.c.archived_at ? 'Wieder aufnehmen' : 'Ausblenden'"></button>
+                <div class="ecrm-actions ecrm-actions-l">
+                  <button class="ecrm-btn" @click="openForm(detail.c)">Notiz &amp; Kontakt</button>
+                  <button class="ecrm-btn" @click="toggleArchive()" x-text="detail.c.archived_at ? 'Wieder anzeigen' : 'Ausblenden'"></button>
                   <template x-if="isOwner"><button class="ecrm-btn ecrm-danger" @click="anonymize()">Löschen</button></template>
                 </div>
+                <p class="ecrm-legend">Ausblenden: Die Person erscheint nicht mehr in den Listen, alles bleibt gespeichert. Löschen: Name und Kontakt werden entfernt (Datenschutz), Buchungen bleiben anonym.</p>
               </details>
             </div>
           </template>
         </section>
 
-        <!-- ================= MENSCH: anlegen / bearbeiten ================= -->
+        <!-- ================= MENSCH: Notiz & Kontakt ================= -->
         <section x-show="tab === 'menschen' && form">
           <template x-if="form">
-            <div class="ecrm-card">
-              <h3 class="ecrm-h3 ecrm-h3-tight" x-text="form.id ? 'Bearbeiten' : 'Person ohne App'"></h3>
-              <template x-if="form.source === 'flenski'"><p class="ecrm-sub">Name und E-Mail kommen aus der App und werden dort gepflegt.</p></template>
-              <template x-if="form.source !== 'flenski'">
-                <div class="ecrm-row2">
-                  <label class="ecrm-label">Vorname *<input class="ecrm-input" x-model.trim="form.first_name"></label>
-                  <label class="ecrm-label">Nachname<input class="ecrm-input" x-model.trim="form.last_name"></label>
-                </div>
-              </template>
+            <div class="ecrm-card ecrm-section">
+              <div class="ecrm-section-head"><div class="ecrm-h">Notiz &amp; Kontakt</div>
+                <div class="ecrm-text-s">Name und E-Mail kommen aus der App. Hier ergänzt du, was nur du brauchst.</div></div>
               <label class="ecrm-check"><input type="checkbox" x-model="form.is_child"> Kind (Kontakt über die Eltern)</label>
               <template x-if="form.is_child">
                 <div>
                   <label class="ecrm-label">Name Elternteil<input class="ecrm-input" x-model.trim="form.guardian_name"></label>
-                  <div class="ecrm-row2">
-                    <label class="ecrm-label">Telefon Eltern<input class="ecrm-input" type="tel" x-model.trim="form.guardian_phone"></label>
-                    <label class="ecrm-label">E-Mail Eltern<input class="ecrm-input" type="email" x-model.trim="form.guardian_email"></label>
-                  </div>
+                  <label class="ecrm-label">Telefon Eltern<input class="ecrm-input" type="tel" x-model.trim="form.guardian_phone"></label>
                 </div>
               </template>
-              <div class="ecrm-row2">
-                <label class="ecrm-label">Telefon<input class="ecrm-input" type="tel" x-model.trim="form.phone"></label>
-                <label class="ecrm-label" x-show="form.source !== 'flenski'">E-Mail<input class="ecrm-input" type="email" x-model.trim="form.email"></label>
-              </div>
+              <label class="ecrm-label">Telefon<input class="ecrm-input" type="tel" x-model.trim="form.phone"></label>
               <label class="ecrm-label">Notiz (nur Organisatorisches)<textarea class="ecrm-input" rows="3" x-model="form.note"></textarea></label>
               <p class="ecrm-hint">Bitte keine Gesundheitsangaben (Verletzungen, Beschwerden) eintragen.</p>
               <div class="ecrm-actions">
@@ -300,124 +314,133 @@
 
         <!-- ================= KURSE ================= -->
         <section x-show="tab === 'kurse' && !course">
-          <h2 class="ecrm-title">Kurse</h2>
-          <div class="ecrm-sub">Termine aus deiner App, mit Anmeldungen.</div>
+          <div class="ecrm-page-head">
+            <div class="ecrm-serif ecrm-page-title">Kurse</div>
+            <div class="ecrm-text-s">Genau die Termine, die es in deiner App gibt – mit Anmeldungen. Neue Termine erscheinen beim nächsten Abgleich.</div>
+          </div>
           <template x-for="g in courseGroups()" :key="g.label">
-            <div>
-              <h3 class="ecrm-h3" x-text="g.label"></h3>
+            <div class="ecrm-card ecrm-section">
+              <div class="ecrm-h-group" x-text="g.label"></div>
               <template x-for="s in g.items" :key="s.id">
-                <button class="ecrm-card ecrm-course" @click="openCourse(s)">
+                <button class="ecrm-item ecrm-item-btn" @click="openCourse(s)">
                   <span class="ecrm-date"><b x-text="dayNum(s.starts_at)"></b><span x-text="weekday(s.starts_at)"></span></span>
                   <span class="ecrm-grow">
                     <span class="ecrm-name" x-text="s.title"></span>
-                    <span class="ecrm-sub" x-text="time(s.starts_at) + (s.category ? ' · ' + s.category : '')"></span>
+                    <span class="ecrm-text-s" x-text="time(s.starts_at) + (s.category ? ' · ' + s.category : '')"></span>
                   </span>
-                  <span class="ecrm-fill">
-                    <b x-text="(s.n || 0) + (s.capacity ? '/' + s.capacity : '')"></b>
-                    <span x-text="new Date(s.starts_at) < new Date() ? 'da' : 'angemeldet'"></span>
-                  </span>
+                  <span class="ecrm-fill"><b x-text="(s.n || 0) + (s.capacity ? '/' + s.capacity : '')"></b>
+                    <span x-text="new Date(s.starts_at) < new Date() ? 'waren da' : 'angemeldet'"></span></span>
                 </button>
               </template>
             </div>
           </template>
-          <template x-if="!sessions.length && !loading"><p class="ecrm-empty">Noch keine Termine. Kurse und Events aus deiner App erscheinen hier automatisch.</p></template>
-          <button class="ecrm-link" @click="showPast = !showPast; loadCourses()" x-text="showPast ? 'Nur kommende Termine' : 'Vergangene Termine zeigen'"></button>
+          <template x-if="!sessions.length && !loading"><p class="ecrm-empty">Noch keine Termine. Kurse aus deiner App erscheinen hier automatisch.</p></template>
+          <button class="ecrm-link" @click="showPast = !showPast; loadCourses()" x-text="showPast ? 'Nur kommende Termine' : 'Auch vergangene Termine zeigen'"></button>
         </section>
 
         <section x-show="tab === 'kurse' && course">
           <template x-if="course">
             <div>
-              <button class="ecrm-link" @click="course = null">‹ Kurse</button>
-              <h2 class="ecrm-title" x-text="course.title"></h2>
-              <div class="ecrm-sub" x-text="dateLong(course.starts_at) + ', ' + time(course.starts_at) + (course.category ? ' · ' + course.category : '')"></div>
-              <div class="ecrm-stats ecrm-stats-3">
-                <div class="ecrm-stat"><span>Angemeldet</span><b x-text="roster.filter(r => r.status === 'registered').length"></b></div>
-                <div class="ecrm-stat ecrm-st-dabei"><span>Da</span><b x-text="roster.filter(r => r.status === 'present').length"></b></div>
-                <div class="ecrm-stat"><span>Plätze</span><b x-text="course.capacity || '–'"></b></div>
+              <button class="ecrm-back" @click="course = null">‹ Alle Kurse</button>
+              <div class="ecrm-page-head">
+                <div class="ecrm-serif ecrm-page-title" x-text="course.title"></div>
+                <div class="ecrm-text-s" x-text="dateLong(course.starts_at) + ', ' + time(course.starts_at) + (course.category ? ' · ' + course.category : '')"></div>
               </div>
-              <template x-for="r in roster" :key="r.customer_id">
-                <div class="ecrm-card ecrm-person ecrm-roster">
-                  <button class="ecrm-care-main" @click="openPerson(r.customer_id)">
-                    <span class="ecrm-avatar" :class="'ecrm-st-' + personStatus(r.customer_id)" x-text="initials(r)"></span>
-                    <span class="ecrm-grow">
-                      <span class="ecrm-name" x-text="fullName(r)"></span>
-                      <span class="ecrm-sub" x-text="rosterText(r)"></span>
-                    </span>
-                  </button>
-                  <button class="ecrm-more-btn" @click="r._menu = !r._menu" aria-label="Weitere Aktionen">⋯</button>
-                  <div class="ecrm-menu" x-show="r._menu" @click.outside="r._menu = false">
-                    <button @click="cancelRow(r, false)">Hat abgesagt</button>
-                    <button @click="cancelRow(r, true)">Nicht erschienen</button>
+              <div class="ecrm-kpis">
+                <div><b x-text="roster.filter(r => r.status === 'registered').length"></b><span>angemeldet</span></div>
+                <div><b x-text="roster.filter(r => r.status === 'present').length"></b><span>waren da</span></div>
+                <div><b x-text="course.capacity || '–'"></b><span>Plätze</span></div>
+              </div>
+              <p class="ecrm-legend">Wer sich in der App anmeldet, steht hier als „angemeldet“. Nach Beginn des Termins zählt das CRM die Person automatisch als „war da“ und bucht – wenn sie eine Karte hat – einen Besuch ab.</p>
+              <div class="ecrm-card ecrm-section">
+                <template x-for="r in roster" :key="r.customer_id">
+                  <div class="ecrm-item ecrm-item-col">
+                    <div class="ecrm-item-row">
+                      <button class="ecrm-item-main" @click="openPerson(r.customer_id)">
+                        <span class="ecrm-ava" :class="'ecrm-st-' + personStatus(r.customer_id)">
+                          <span x-text="initials(r)"></span><img x-show="person(r.customer_id).avatar_url" :src="person(r.customer_id).avatar_url" alt="">
+                        </span>
+                        <span class="ecrm-grow"><span class="ecrm-name" x-text="fullName(r)"></span><span class="ecrm-text-s" x-text="rosterText(r)"></span></span>
+                      </button>
+                      <button class="ecrm-btn ecrm-btn-soft" @click="r._open = !r._open" x-text="r._open ? 'Schließen' : 'Ändern'"></button>
+                    </div>
+                    <div class="ecrm-inline" x-show="r._open">
+                      <button class="ecrm-btn" @click="cancelRow(r, false)">Hat abgesagt</button>
+                      <button class="ecrm-btn" @click="cancelRow(r, true)">Nicht erschienen</button>
+                    </div>
                   </div>
-                </div>
-              </template>
-              <template x-if="!roster.length"><p class="ecrm-empty">Noch niemand angemeldet.</p></template>
+                </template>
+                <template x-if="!roster.length"><p class="ecrm-empty">Noch niemand angemeldet.</p></template>
+              </div>
+              <a class="ecrm-link" x-show="course.app_url" :href="course.app_url" target="_top">Termin in der App öffnen ›</a>
             </div>
           </template>
         </section>
 
-        <!-- ================= EINSTELLUNGEN ================= -->
-        <section x-show="tab === 'einstellungen'">
-          <h2 class="ecrm-title">Einstellungen</h2>
+        <!-- ================= ANGEBOTE ================= -->
+        <section x-show="tab === 'angebote'">
+          <div class="ecrm-page-head">
+            <div class="ecrm-serif ecrm-page-title">Deine Angebote</div>
+            <div class="ecrm-text-s">Die Pläne aus deiner App. Damit das CRM Besuche zählen kann, sag einmal, was in jedem Angebot steckt.</div>
+          </div>
 
-          <template x-if="setupNeeded().length">
-            <div>
-              <h3 class="ecrm-h3">Pläne aus deiner App einrichten</h3>
-              <p class="ecrm-sub">Flenski weiß nicht, wie viele Besuche in einem Plan stecken. Sag es einmal – danach zählt das CRM alles automatisch, auch rückwirkend.</p>
-              <template x-for="p in setupNeeded()" :key="p.id">
-                <div class="ecrm-card">
-                  <div class="ecrm-name" x-text="p.name"></div>
-                  <template x-if="!isOwner"><p class="ecrm-sub">Das richtet die Inhaberin ein.</p></template>
-                  <template x-if="isOwner">
+          <template x-for="p in setupNeeded()" :key="p.id">
+            <div class="ecrm-card ecrm-section ecrm-offer">
+              <div class="ecrm-name ecrm-name-l" x-text="p.name"></div>
+              <template x-if="!isOwner"><p class="ecrm-text-s">Das verbindet die Inhaberin.</p></template>
+              <template x-if="isOwner">
+                <div>
+                  <div class="ecrm-q">Was steckt drin?</div>
+                  <div class="ecrm-pick">
+                    <button :class="setup[p.id].kind === 'n4' && 'ecrm-on'" @click="pickKind(p, 'n4')">4 Besuche</button>
+                    <button :class="setup[p.id].kind === 'n10' && 'ecrm-on'" @click="pickKind(p, 'n10')">10 Besuche</button>
+                    <button :class="setup[p.id].kind === 'n' && 'ecrm-on'" @click="pickKind(p, 'n')">andere Anzahl</button>
+                    <button :class="setup[p.id].kind === 'frei' && 'ecrm-on'" @click="pickKind(p, 'frei')">ohne Zählen (Block / Abo)</button>
+                  </div>
+                  <input class="ecrm-input ecrm-input-s" type="number" inputmode="numeric" min="1" placeholder="Anzahl Besuche" x-show="setup[p.id].kind === 'n'" x-model.number="setup[p.id].credits">
+                  <div class="ecrm-q">Wie lange gültig ab Kauf?</div>
+                  <div class="ecrm-pick">
+                    <button :class="setup[p.id].validity === 90 && 'ecrm-on'" @click="setup[p.id].validity = 90">3 Monate</button>
+                    <button :class="setup[p.id].validity === 180 && 'ecrm-on'" @click="setup[p.id].validity = 180">6 Monate</button>
+                    <button :class="setup[p.id].validity === 365 && 'ecrm-on'" @click="setup[p.id].validity = 365">1 Jahr</button>
+                    <button :class="setup[p.id].validity === 0 && 'ecrm-on'" @click="setup[p.id].validity = 0">unbegrenzt</button>
+                  </div>
+                  <template x-if="categories.length > 1">
                     <div>
-                      <label class="ecrm-label">Was ist das?
-                        <select class="ecrm-input" x-model="setup[p.id].type">
-                          <option value="credits">Karte mit Besuchen (z. B. 4er, 10er)</option>
-                          <option value="period">Kursblock / Zeitraum (ohne Zählen)</option>
-                          <option value="subscription">Abo (unbegrenzt)</option>
-                          <option value="single">Einzelstunde</option>
-                        </select>
-                      </label>
-                      <div class="ecrm-row2">
-                        <label class="ecrm-label" x-show="setup[p.id].type === 'credits'">Besuche<input class="ecrm-input" type="number" inputmode="numeric" x-model.number="setup[p.id].credits"></label>
-                        <label class="ecrm-label">Gültig (Tage)<input class="ecrm-input" type="number" inputmode="numeric" placeholder="leer = unbegrenzt" x-model.number="setup[p.id].validity"></label>
+                      <div class="ecrm-q">Für welche Kurse gilt es?</div>
+                      <div class="ecrm-pick">
+                        <button :class="!setup[p.id].category && 'ecrm-on'" @click="setup[p.id].category = ''">alle Kurse</button>
+                        <template x-for="c in categories" :key="c">
+                          <button :class="setup[p.id].category === c && 'ecrm-on'" @click="setup[p.id].category = c" x-text="'nur ' + c"></button>
+                        </template>
                       </div>
-                      <div class="ecrm-row2">
-                        <label class="ecrm-label">Preis €<input class="ecrm-input" type="number" inputmode="decimal" step="0.01" x-model="setup[p.id].price"></label>
-                        <label class="ecrm-label">Gilt für
-                          <select class="ecrm-input" x-model="setup[p.id].category">
-                            <option value="">alle Kurse</option>
-                            <template x-for="c in categories" :key="c"><option :value="c" x-text="c"></option></template>
-                          </select>
-                        </label>
-                      </div>
-                      <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="saveSetup(p)" :disabled="busy">Einrichten</button>
                     </div>
                   </template>
+                  <button class="ecrm-btn ecrm-btn-primary ecrm-block" @click="saveSetup(p)" :disabled="busy">Verbinden</button>
                 </div>
               </template>
             </div>
           </template>
 
-          <h3 class="ecrm-h3">Produkte</h3>
-          <div class="ecrm-card ecrm-feed">
-            <template x-for="p in products.filter(p => !p.needs_setup)" :key="p.id">
-              <div class="ecrm-feed-row"><span class="ecrm-grow"><b x-text="p.name"></b> <span class="ecrm-sub" x-text="productText(p)"></span></span></div>
-            </template>
-            <template x-if="!products.filter(p => !p.needs_setup).length"><p class="ecrm-empty">Noch keine eingerichteten Produkte.</p></template>
+          <template x-if="connected().length">
+            <div class="ecrm-card ecrm-section">
+              <div class="ecrm-section-head"><div class="ecrm-h">Verbunden</div></div>
+              <template x-for="p in connected()" :key="p.id">
+                <div class="ecrm-item"><span class="ecrm-grow"><span class="ecrm-name" x-text="p.name"></span><span class="ecrm-text-s" x-text="productText(p)"></span></span>
+                  <i class="ecrm-chip ecrm-st-dabei">verbunden</i></div>
+              </template>
+            </div>
+          </template>
+
+          <div class="ecrm-explain">
+            <b>Wie hängt das mit Flenski zusammen?</b>
+            <p>Der Plan in Flenski regelt, ob jemand Zugang hat. Das CRM zählt, wie viele Besuche auf einer Karte noch übrig sind. Kauft jemand in der App, legt das CRM die Karte automatisch an. Ist sie leer, siehst du die Person unter „Heute für dich“. Den Plan in Flenski entziehst du selbst oder bietest eine neue Karte an – automatisch kann das CRM das nicht, weil Flenski dafür (noch) keine Schnittstelle anbietet.</p>
           </div>
 
-          <h3 class="ecrm-h3">Team</h3>
-          <div class="ecrm-card ecrm-feed">
-            <template x-for="m in team" :key="m.user_id">
-              <div class="ecrm-feed-row"><span class="ecrm-grow" x-text="m.email"></span><span class="ecrm-sub" x-text="m.role === 'owner' ? 'Inhaberin' : 'Vertretung'"></span></div>
-            </template>
-            <template x-if="!team.length"><p class="ecrm-empty">Neue Personen lädt Systemsafari ein.</p></template>
-          </div>
-
-          <div class="ecrm-card">
-            <p class="ecrm-sub">Angemeldet als <b x-text="userEmail"></b> · <span x-text="tenant && tenant.name"></span></p>
-            <button class="ecrm-btn" @click="logout()">Abmelden</button>
+          <div class="ecrm-card ecrm-section">
+            <div class="ecrm-section-head"><div class="ecrm-h">Konto</div>
+              <p class="ecrm-text-s">Angemeldet als <b x-text="userEmail"></b> · <span x-text="tenant && tenant.name"></span></p></div>
+            <button class="ecrm-btn ecrm-mb" @click="logout()">Abmelden</button>
           </div>
         </section>
       </div>
@@ -428,136 +451,217 @@
 </div>
 
 <style>
-#ecrm-root { --a: #38725b; --a-soft: #e9f2ed; --ink: #23201d; --muted: #77716a; --line: #ece5da; --card: #fff; --danger: #b3261e;
+/* Eigene Fläche mit gleichmäßigem Innenabstand – unabhängig vom weißen Flenski-Kasten drumherum */
+#ecrm-root { --a: #38725b; --a-d: #24513f; --a-soft: #e6f0ea; --ink: #1f1d1a; --muted: #736d66; --line: #ebe4d8; --card: #fff; --danger: #b3261e;
+  --page: #f6f1e9;
   --neu-bg: #E1F5EE; --neu: #0F6E56; --dabei-bg: #EAF3DE; --dabei: #3B6D11; --kuehlt-bg: #FAEEDA; --kuehlt: #854F0B; --schlaf-bg: #F1EFE8; --schlaf: #5F5E5A;
-  font-family: inherit; color: var(--ink); max-width: 680px; margin: 0 auto; font-size: 16px; line-height: 1.45; }
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  font-family: inherit; color: var(--ink); max-width: 720px; margin: 0 auto; padding: 20px; background: var(--page); border-radius: 28px;
+  font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 #ecrm-root *, #ecrm-root *::before, #ecrm-root *::after { box-sizing: border-box; }
 #ecrm-root [x-cloak] { display: none !important; }
-#ecrm-root .ecrm-boot { padding: 32px; text-align: center; color: var(--muted); }
-#ecrm-root .ecrm-card { display: block; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px;
-  margin: 10px 0; text-align: left; font: inherit; color: inherit; }
-#ecrm-root button.ecrm-card { cursor: pointer; }
-#ecrm-root .ecrm-title { font-size: 22px; font-weight: 600; margin: 2px 0 4px; letter-spacing: -.01em; }
-#ecrm-root .ecrm-h3 { font-size: 15px; font-weight: 600; margin: 22px 0 6px; color: var(--ink); }
-#ecrm-root .ecrm-h3-tight { margin-top: 0; }
-#ecrm-root .ecrm-muted, #ecrm-root .ecrm-sub { color: var(--muted); }
-#ecrm-root .ecrm-sub { display: block; font-size: 13px; }
-#ecrm-root .ecrm-small { font-size: 13px; }
-#ecrm-root .ecrm-empty { color: var(--muted); text-align: center; padding: 14px 8px; margin: 0; font-size: 14px; }
+#ecrm-root .ecrm-boot { padding: 40px 16px; text-align: center; color: var(--muted); }
+#ecrm-root .ecrm-serif { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; }
+#ecrm-root .ecrm-card { display: block; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin: 0 0 14px;
+  box-shadow: 0 1px 2px rgba(40, 30, 10, .04), 0 10px 26px -18px rgba(40, 30, 10, .18); text-align: left; font: inherit; color: inherit; }
+#ecrm-root .ecrm-text { color: var(--ink); margin: 8px 0; }
+#ecrm-root .ecrm-text-s { display: block; color: var(--muted); font-size: 13px; line-height: 1.45; margin: 0; }
+#ecrm-root .ecrm-center { text-align: center; }
+#ecrm-root .ecrm-nowrap { white-space: nowrap; }
+#ecrm-root .ecrm-mb { margin-bottom: 16px; }
+#ecrm-root .ecrm-h { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+#ecrm-root .ecrm-h-group { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 16px 0 6px; }
+#ecrm-root .ecrm-section { padding: 0 20px 6px; }
+#ecrm-root .ecrm-section-head { padding: 18px 0 10px; }
+#ecrm-root .ecrm-empty { color: var(--muted); text-align: center; padding: 18px 8px 22px; margin: 0; font-size: 14px; }
+#ecrm-root .ecrm-legend { font-size: 12px; color: var(--muted); margin: -4px 6px 16px; line-height: 1.55; }
+#ecrm-root .ecrm-legend b { color: var(--ink); font-weight: 600; }
+#ecrm-root .ecrm-i { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--muted); font-size: 10px; font-style: italic; }
 #ecrm-root .ecrm-hint { font-size: 13px; color: var(--kuehlt); margin: 4px 0 10px; }
 #ecrm-root .ecrm-grow { flex: 1; min-width: 0; }
-#ecrm-root .ecrm-name { display: block; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#ecrm-root .ecrm-row { display: flex; align-items: center; gap: 12px; }
-#ecrm-root .ecrm-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-#ecrm-root .ecrm-input { width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid #d9d1c5; border-radius: 12px; background: #fff;
-  color: var(--ink); margin: 6px 0; }
+#ecrm-root .ecrm-name { display: block; font-weight: 600; font-size: 15px; line-height: 1.35; }
+#ecrm-root .ecrm-name-n { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ecrm-root .ecrm-name-l { font-size: 17px; padding-top: 18px; }
+#ecrm-root .ecrm-input { width: 100%; font: inherit; font-size: 16px; padding: 12px 16px; border: 1px solid #ddd5c8; border-radius: 16px; background: #fff; color: var(--ink); margin: 0 0 10px; }
+#ecrm-root .ecrm-input-s { max-width: 200px; margin-top: 10px; }
 #ecrm-root .ecrm-input:focus { outline: 2px solid var(--a); outline-offset: 0; border-color: var(--a); }
 #ecrm-root .ecrm-code { font-size: 22px; letter-spacing: 6px; text-align: center; }
-#ecrm-root .ecrm-label { display: block; font-size: 13px; color: var(--muted); margin: 6px 0; }
+#ecrm-root .ecrm-label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+#ecrm-root .ecrm-label .ecrm-input { margin-top: 4px; }
 #ecrm-root .ecrm-check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-size: 15px; }
 #ecrm-root .ecrm-check input { width: 20px; height: 20px; accent-color: var(--a); }
-#ecrm-root .ecrm-btn { display: inline-flex; align-items: center; justify-content: center; font: inherit; font-size: 15px; min-height: 44px; padding: 10px 16px;
-  border-radius: 12px; border: 1px solid #d9d1c5; background: #fff; color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; }
+#ecrm-root .ecrm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 14px; font-weight: 500; min-height: 42px;
+  padding: 9px 18px; border-radius: 999px; border: 1px solid #ddd5c8; background: #fff; color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; }
 #ecrm-root .ecrm-btn:disabled { opacity: .5; cursor: default; }
 #ecrm-root .ecrm-btn-primary { background: var(--a); border-color: var(--a); color: #fff; }
-#ecrm-root .ecrm-btn-small { min-height: 36px; padding: 6px 12px; font-size: 13px; border-radius: 10px; }
-#ecrm-root .ecrm-block { width: 100%; margin: 10px 0; }
-#ecrm-root .ecrm-quiet { color: var(--muted); border-style: dashed; background: transparent; }
+#ecrm-root .ecrm-btn-soft { background: var(--a-soft); border-color: transparent; color: var(--a-d); min-height: 36px; padding: 6px 16px; font-size: 13px; flex-shrink: 0; }
+#ecrm-root .ecrm-block { width: 100%; margin: 18px 0 20px; }
 #ecrm-root .ecrm-danger { color: var(--danger); border-color: #ebc0bd; }
-#ecrm-root .ecrm-link { background: none; border: 0; color: var(--a); font: inherit; font-size: 15px; padding: 10px 0; cursor: pointer; }
-#ecrm-root .ecrm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 10px; }
-#ecrm-root .ecrm-spread { justify-content: space-between; }
+#ecrm-root .ecrm-link { background: none; border: 0; color: var(--a); font: inherit; font-size: 14px; font-weight: 500; padding: 4px 6px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+#ecrm-root .ecrm-link-s { font-size: 13px; padding: 2px 0 4px; }
+#ecrm-root .ecrm-back { background: none; border: 0; color: var(--a); font: inherit; font-size: 14px; padding: 0 6px 12px; cursor: pointer; }
+#ecrm-root .ecrm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin: 10px 0 16px; }
+#ecrm-root .ecrm-actions-l { justify-content: flex-start; }
 /* Navigation */
-#ecrm-root .ecrm-nav { display: flex; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 5px; margin: 0 0 14px; }
-#ecrm-root .ecrm-nav button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: inherit; font-size: 14px; min-height: 44px;
-  border: 0; border-radius: 13px; background: transparent; color: var(--muted); cursor: pointer; }
-#ecrm-root .ecrm-nav button.ecrm-gear { flex: 0 0 48px; }
-#ecrm-root .ecrm-nav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-#ecrm-root .ecrm-nav button.ecrm-on { background: var(--a-soft); color: var(--a); font-weight: 600; }
+#ecrm-root .ecrm-nav { display: flex; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 6px; margin: 0 0 18px;
+  box-shadow: 0 8px 22px -16px rgba(40, 30, 10, .3); }
+#ecrm-root .ecrm-nav button { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font: inherit; font-size: 14px; min-height: 46px;
+  border: 0; border-radius: 18px; background: transparent; color: var(--muted); cursor: pointer; }
+#ecrm-root .ecrm-nav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+#ecrm-root .ecrm-nav button.ecrm-on { background: var(--a); color: #fff; font-weight: 600; }
+#ecrm-root .ecrm-badge { position: absolute; top: 5px; right: 8px; min-width: 17px; height: 17px; border-radius: 9px; background: #d9822b; color: #fff; font-size: 11px;
+  font-style: normal; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
 /* Übersicht */
-#ecrm-root .ecrm-hello { margin: 4px 2px 10px; }
-#ecrm-root .ecrm-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
-#ecrm-root .ecrm-stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-#ecrm-root .ecrm-stat { display: flex; flex-direction: column; gap: 2px; text-align: left; font: inherit; border: 0; border-radius: 14px; padding: 10px 12px;
-  background: #f4f0e9; color: var(--ink); cursor: pointer; }
-#ecrm-root div.ecrm-stat { cursor: default; }
-#ecrm-root .ecrm-stat span { font-size: 12px; color: var(--muted); }
-#ecrm-root .ecrm-stat b { font-size: 22px; font-weight: 600; line-height: 1.1; }
-#ecrm-root .ecrm-banner { display: block; width: 100%; text-align: left; font: inherit; border: 1px solid #ecd9b5; background: #fbf4e6; border-radius: 16px;
-  padding: 12px 16px; margin: 10px 0; color: var(--kuehlt); cursor: pointer; }
-#ecrm-root .ecrm-banner b { display: block; font-size: 15px; }
+#ecrm-root .ecrm-hero { border-radius: 26px; padding: 24px 22px 20px; margin-bottom: 14px; color: #e3f2ea;
+  background: linear-gradient(140deg, #2f6852 0%, #1d4636 70%, #173a2d 100%); box-shadow: 0 16px 34px -20px rgba(23, 58, 45, .75); }
+#ecrm-root .ecrm-hero-date { font-size: 12px; color: #a8d4bf; letter-spacing: .03em; }
+#ecrm-root .ecrm-hero-hello { font-size: 32px; line-height: 1.15; color: #fff; margin: 6px 0 8px; }
+#ecrm-root .ecrm-hero-line { font-size: 14px; color: #cfe8dc; max-width: 460px; }
+#ecrm-root .ecrm-hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+#ecrm-root .ecrm-hero-stats button { text-align: left; font: inherit; border: 0; border-radius: 16px; padding: 12px 14px; background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; }
+#ecrm-root .ecrm-hero-stats b { display: block; font-size: 24px; font-weight: 600; line-height: 1.1; }
+#ecrm-root .ecrm-hero-stats span { font-size: 12px; color: #a8d4bf; }
+#ecrm-root .ecrm-states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+#ecrm-root .ecrm-state { display: flex; flex-direction: column; gap: 2px; text-align: left; font: inherit; border: 0; border-radius: 18px; padding: 12px 14px; cursor: pointer; }
+#ecrm-root .ecrm-state span { font-size: 12px; }
+#ecrm-root .ecrm-state b { font-size: 24px; font-weight: 600; line-height: 1.15; }
+#ecrm-root .ecrm-banner { display: block; width: 100%; text-align: left; font: inherit; border: 1px solid #efdcb8; background: #fcf5e7; border-radius: 20px; padding: 14px 18px;
+  margin: 0 0 14px; color: var(--kuehlt); cursor: pointer; }
+#ecrm-root .ecrm-banner b { display: block; font-size: 15px; margin-bottom: 2px; }
 #ecrm-root .ecrm-banner span { font-size: 13px; }
-#ecrm-root .ecrm-care, #ecrm-root .ecrm-notice { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
-#ecrm-root .ecrm-care-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; background: none; font: inherit; color: inherit;
-  text-align: left; cursor: pointer; padding: 2px 0; }
-#ecrm-root .ecrm-feed { padding: 4px 14px; }
-#ecrm-root .ecrm-feed-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 0; border: 0;
-  border-bottom: 1px solid var(--line); background: none; font: inherit; font-size: 14px; color: inherit; text-align: left; }
-#ecrm-root button.ecrm-feed-row { cursor: pointer; }
-#ecrm-root .ecrm-feed-row:last-child { border-bottom: 0; }
+#ecrm-root .ecrm-item { display: flex; align-items: center; gap: 14px; width: 100%; padding: 13px 0; border: 0; border-top: 1px solid var(--line);
+  background: none; font: inherit; color: inherit; text-align: left; }
+#ecrm-root .ecrm-item:last-child { padding-bottom: 16px; }
+#ecrm-root .ecrm-section-head + .ecrm-item, #ecrm-root .ecrm-h-group + .ecrm-item, #ecrm-root .ecrm-section > .ecrm-item:first-child { border-top-color: transparent; }
+#ecrm-root .ecrm-item-btn { cursor: pointer; }
+#ecrm-root .ecrm-item-col { flex-direction: column; align-items: stretch; gap: 8px; }
+#ecrm-root .ecrm-item-row { display: flex; align-items: center; gap: 14px; }
+#ecrm-root .ecrm-item-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 0; }
+#ecrm-root .ecrm-feedtext { font-size: 14px; line-height: 1.45; }
 #ecrm-root .ecrm-when { font-size: 12px; color: var(--muted); white-space: nowrap; }
-#ecrm-root .ecrm-delta { font-weight: 600; min-width: 28px; text-align: right; }
-#ecrm-root .ecrm-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #c9c1b4; }
+#ecrm-root .ecrm-date-s { font-size: 13px; color: var(--muted); width: 44px; flex-shrink: 0; }
+#ecrm-root .ecrm-fillbar { width: 60px; height: 6px; border-radius: 3px; background: #efe9df; overflow: hidden; flex-shrink: 0; }
+#ecrm-root .ecrm-fillbar i { display: block; height: 100%; background: var(--a); border-radius: 3px; }
+#ecrm-root .ecrm-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: #c9c1b4; }
 #ecrm-root .ecrm-k-besuch { background: var(--dabei); }
 #ecrm-root .ecrm-k-app { background: #378ADD; }
 #ecrm-root .ecrm-k-kauf { background: var(--a); }
 #ecrm-root .ecrm-k-angemeldet { background: var(--neu); }
 #ecrm-root .ecrm-k-warn { background: var(--kuehlt); }
-/* Avatare und Status */
-#ecrm-root .ecrm-avatar { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; }
-#ecrm-root .ecrm-avatar-l { width: 56px; height: 56px; font-size: 18px; }
+/* Avatare und Status (Initialen liegen unter dem Foto – fehlt das Foto, bleiben sie sichtbar) */
+#ecrm-root .ecrm-ava { position: relative; flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 600; overflow: hidden; }
+#ecrm-root .ecrm-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#ecrm-root .ecrm-ava-s { width: 34px; height: 34px; font-size: 11px; }
+#ecrm-root .ecrm-ava-l { width: 92px; height: 92px; font-size: 28px; margin: 4px auto 12px; box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--line); }
 #ecrm-root .ecrm-st-neu { background: var(--neu-bg); color: var(--neu); }
 #ecrm-root .ecrm-st-dabei { background: var(--dabei-bg); color: var(--dabei); }
 #ecrm-root .ecrm-st-kuehlt_ab { background: var(--kuehlt-bg); color: var(--kuehlt); }
 #ecrm-root .ecrm-st-eingeschlafen { background: var(--schlaf-bg); color: var(--schlaf); }
-#ecrm-root .ecrm-stat.ecrm-st-dabei span, #ecrm-root .ecrm-stat.ecrm-st-neu span, #ecrm-root .ecrm-stat.ecrm-st-kuehlt_ab span { color: inherit; opacity: .85; }
-/* Menschen */
-#ecrm-root .ecrm-searchrow { display: flex; gap: 8px; }
-#ecrm-root .ecrm-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 6px; scrollbar-width: none; }
-#ecrm-root .ecrm-chips button { flex-shrink: 0; font: inherit; font-size: 13px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d9d1c5;
+#ecrm-root .ecrm-chip { display: inline-block; font-style: normal; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+#ecrm-root .ecrm-chip-l { font-size: 13px; padding: 5px 14px; margin: 0; }
+/* Seitenköpfe, Menschen */
+#ecrm-root .ecrm-page-head { margin: 2px 6px 16px; }
+#ecrm-root .ecrm-page-title { font-size: 30px; line-height: 1.15; margin-bottom: 6px; }
+#ecrm-root .ecrm-chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 14px; scrollbar-width: none; }
+#ecrm-root .ecrm-chips button { flex-shrink: 0; font: inherit; font-size: 13px; min-height: 38px; padding: 6px 16px; border-radius: 999px; border: 1px solid #ddd5c8;
   background: #fff; color: var(--ink); cursor: pointer; }
 #ecrm-root .ecrm-chips button.ecrm-on { background: var(--a); border-color: var(--a); color: #fff; }
-#ecrm-root .ecrm-person { display: flex; align-items: center; gap: 12px; padding: 10px 12px; position: relative; }
-#ecrm-root .ecrm-tag { font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 6px; background: #f1ece4; color: var(--muted); margin-left: 6px; }
-#ecrm-root .ecrm-spark { display: flex; align-items: flex-end; gap: 2px; height: 26px; width: 52px; flex-shrink: 0; }
-#ecrm-root .ecrm-spark i { flex: 1; border-radius: 2px; min-height: 2px; }
-#ecrm-root .ecrm-bars { display: flex; align-items: flex-end; gap: 6px; height: 60px; margin-top: 8px; }
-#ecrm-root .ecrm-bars i { flex: 1; border-radius: 4px; min-height: 3px; }
-#ecrm-root .ecrm-spark i.ecrm-st-dabei, #ecrm-root .ecrm-bars i.ecrm-st-dabei { background: #97C459; }
-#ecrm-root .ecrm-spark i.ecrm-st-neu, #ecrm-root .ecrm-bars i.ecrm-st-neu { background: #5DCAA5; }
-#ecrm-root .ecrm-spark i.ecrm-st-kuehlt_ab, #ecrm-root .ecrm-bars i.ecrm-st-kuehlt_ab { background: #FAC775; }
-#ecrm-root .ecrm-spark i.ecrm-st-eingeschlafen, #ecrm-root .ecrm-bars i.ecrm-st-eingeschlafen { background: #D3D1C7; }
-#ecrm-root .ecrm-profile { display: flex; align-items: center; gap: 14px; margin: 6px 0 10px; }
-#ecrm-root .ecrm-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-#ecrm-root .ecrm-pill { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: #f1ece4; color: var(--muted); }
-#ecrm-root .ecrm-contact { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+#ecrm-root .ecrm-spark { display: flex; align-items: flex-end; gap: 2px; height: 28px; width: 58px; flex-shrink: 0; }
+#ecrm-root .ecrm-spark i { flex: 1; border-radius: 2px; min-height: 3px; }
+#ecrm-root .ecrm-spark i.ecrm-st-dabei, #ecrm-root .ecrm-bar i.ecrm-st-dabei { background: #97C459; }
+#ecrm-root .ecrm-spark i.ecrm-st-neu, #ecrm-root .ecrm-bar i.ecrm-st-neu { background: #5DCAA5; }
+#ecrm-root .ecrm-spark i.ecrm-st-kuehlt_ab, #ecrm-root .ecrm-bar i.ecrm-st-kuehlt_ab { background: #EF9F27; }
+#ecrm-root .ecrm-spark i.ecrm-st-eingeschlafen, #ecrm-root .ecrm-bar i.ecrm-st-eingeschlafen { background: #B4B2A9; }
+#ecrm-root .ecrm-bars { display: flex; align-items: flex-end; gap: 10px; height: 100px; padding: 4px 0 18px; }
+#ecrm-root .ecrm-bar { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 6px; }
+#ecrm-root .ecrm-bar i { display: block; border-radius: 7px; min-height: 4px; }
+#ecrm-root .ecrm-bar small { font-size: 10px; color: var(--muted); text-align: center; height: 12px; white-space: nowrap; }
+#ecrm-root .ecrm-profile { text-align: center; padding: 26px 22px 22px; }
+#ecrm-root .ecrm-profile-name { font-size: 28px; margin-bottom: 10px; }
+#ecrm-root .ecrm-summary { max-width: 440px; margin: 12px auto 0; color: var(--muted); font-size: 14px; }
+#ecrm-root .ecrm-profile-actions { display: flex; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+#ecrm-root .ecrm-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+#ecrm-root .ecrm-kpis div { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+#ecrm-root .ecrm-kpis b { display: block; font-size: 24px; font-weight: 600; line-height: 1.15; }
+#ecrm-root .ecrm-kpis span { font-size: 12px; color: var(--muted); }
 #ecrm-root .ecrm-num { font-size: 22px; font-weight: 600; min-width: 36px; text-align: right; }
-#ecrm-root .ecrm-off { opacity: .6; }
-#ecrm-root .ecrm-stepper { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 20px; margin-top: 6px; }
-#ecrm-root .ecrm-more { margin: 18px 0 30px; }
-#ecrm-root .ecrm-more summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 10px 0; }
+#ecrm-root .ecrm-off { opacity: .55; }
+#ecrm-root .ecrm-notice { display: flex; align-items: center; gap: 12px; background: #fcf5e7; border-color: #efdcb8; color: var(--kuehlt); }
+#ecrm-root .ecrm-correct { padding: 4px 0 8px; }
+#ecrm-root .ecrm-stepper { display: flex; align-items: center; justify-content: center; gap: 18px; font-size: 20px; margin-bottom: 10px; }
+#ecrm-root .ecrm-more { margin: 4px 6px 10px; }
+#ecrm-root .ecrm-more summary { cursor: pointer; color: var(--muted); font-size: 14px; padding: 8px 0; }
 /* Kurse */
-#ecrm-root .ecrm-course { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
-#ecrm-root .ecrm-date { flex-shrink: 0; width: 46px; text-align: center; border-radius: 12px; background: var(--a-soft); color: var(--a); padding: 5px 0; }
-#ecrm-root .ecrm-date b { display: block; font-size: 18px; line-height: 1.1; }
-#ecrm-root .ecrm-date span { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+#ecrm-root .ecrm-date { flex-shrink: 0; width: 50px; text-align: center; border-radius: 16px; background: var(--a-soft); color: var(--a-d); padding: 7px 0; }
+#ecrm-root .ecrm-date b { display: block; font-size: 19px; line-height: 1.1; }
+#ecrm-root .ecrm-date span { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
 #ecrm-root .ecrm-fill { text-align: right; flex-shrink: 0; }
 #ecrm-root .ecrm-fill b { display: block; font-size: 16px; }
 #ecrm-root .ecrm-fill span { font-size: 11px; color: var(--muted); }
-#ecrm-root .ecrm-roster { padding: 8px 4px 8px 12px; }
-#ecrm-root .ecrm-more-btn { width: 44px; min-height: 44px; border: 0; background: none; font-size: 20px; color: var(--muted); cursor: pointer; }
-#ecrm-root .ecrm-menu { position: absolute; right: 8px; top: 52px; z-index: 5; background: #fff; border: 1px solid var(--line); border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden; }
-#ecrm-root .ecrm-menu button { display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; padding: 12px 16px; border: 0; background: #fff; cursor: pointer; }
-#ecrm-root .ecrm-menu button + button { border-top: 1px solid var(--line); }
-#ecrm-root .ecrm-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; margin: 0 auto; max-width: 480px; z-index: 9999; background: #23201d; color: #fff;
-  padding: 12px 16px; border-radius: 12px; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+#ecrm-root .ecrm-inline { display: flex; gap: 8px; flex-wrap: wrap; padding: 2px 0 4px 60px; }
+/* Angebote */
+#ecrm-root .ecrm-q { font-size: 13px; color: var(--muted); margin: 16px 0 8px; }
+#ecrm-root .ecrm-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+#ecrm-root .ecrm-pick button { font: inherit; font-size: 14px; min-height: 40px; padding: 7px 16px; border-radius: 999px; border: 1px solid #ddd5c8; background: #fff; color: var(--ink); cursor: pointer; }
+#ecrm-root .ecrm-pick button.ecrm-on { background: var(--a-d); border-color: var(--a-d); color: #fff; }
+#ecrm-root .ecrm-explain { background: #fcf5e7; border: 1px solid #efdcb8; border-radius: 20px; padding: 16px 18px; margin: 0 0 14px; color: #633806; font-size: 13px; }
+#ecrm-root .ecrm-explain p { margin: 6px 0 0; line-height: 1.55; }
+#ecrm-root .ecrm-toast { position: fixed; left: 16px; right: 16px; bottom: 24px; margin: 0 auto; max-width: 480px; z-index: 9999; background: #1f1d1a; color: #fff;
+  padding: 12px 16px; border-radius: 14px; font-size: 15px; box-shadow: 0 8px 28px rgba(0,0,0,.25); }
 #ecrm-root .ecrm-toast-error { background: var(--danger); }
-#ecrm-root .ecrm-login { max-width: 420px; margin: 16px auto; }
-@media (max-width: 400px) {
-  #ecrm-root .ecrm-nav button { font-size: 12px; flex-direction: column; gap: 2px; }
-  #ecrm-root .ecrm-stat b { font-size: 19px; }
-  #ecrm-root .ecrm-row2 { grid-template-columns: 1fr; }
+#ecrm-root .ecrm-login { max-width: 420px; margin: 8px auto; padding: 26px; }
+#ecrm-root .ecrm-login-title { font-size: 30px; margin-bottom: 6px; }
+/* ===== Glanzoptik (Marcel, 22.10.2026): Glas-Karten, Lichtkante oben, weiche Tiefe ===== */
+#ecrm-root { background: radial-gradient(120% 60% at 0% 0%, #fbf8f2 0%, rgba(251, 248, 242, 0) 60%), radial-gradient(90% 50% at 100% 100%, #efe6d6 0%, rgba(239, 230, 214, 0) 70%), var(--page); }
+#ecrm-root .ecrm-card, #ecrm-root .ecrm-kpis div, #ecrm-root .ecrm-nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .96) 0%, rgba(255, 255, 255, .82) 100%);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(120, 100, 70, .07), 0 2px 4px rgba(60, 45, 20, .04), 0 18px 36px -22px rgba(60, 45, 20, .32);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); }
+#ecrm-root .ecrm-nav button.ecrm-on, #ecrm-root .ecrm-btn-primary, #ecrm-root .ecrm-chips button.ecrm-on {
+  background: linear-gradient(180deg, #4a8a70 0%, #38725b 55%, #2e604c 100%); border-color: #2e604c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 6px 14px -6px rgba(36, 81, 63, .6); }
+#ecrm-root .ecrm-pick button.ecrm-on { background: linear-gradient(180deg, #33705a 0%, #24513f 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25); }
+#ecrm-root .ecrm-btn, #ecrm-root .ecrm-chips button, #ecrm-root .ecrm-pick button { box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(60, 45, 20, .06); }
+#ecrm-root .ecrm-btn-soft { background: linear-gradient(180deg, #f0f7f3 0%, #dcebe2 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9); }
+/* Hero: Glanzlicht oben links, gläserne Zahlenfelder */
+#ecrm-root .ecrm-hero { position: relative; overflow: hidden;
+  background: radial-gradient(80% 90% at 0% 0%, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 55%), linear-gradient(140deg, #3a7a60 0%, #24553f 55%, #173a2d 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 22px 40px -22px rgba(23, 58, 45, .85); }
+#ecrm-root .ecrm-hero::after { content: ""; position: absolute; right: -60px; top: -80px; width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 212, 191, .28) 0%, rgba(168, 212, 191, 0) 70%); pointer-events: none; }
+#ecrm-root .ecrm-hero > * { position: relative; z-index: 1; }
+#ecrm-root .ecrm-hero-stats button { background: linear-gradient(180deg, rgba(255, 255, 255, .18) 0%, rgba(255, 255, 255, .06) 100%);
+  border: 1px solid rgba(255, 255, 255, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+/* Status-Kacheln: Farbverlauf + Glanzstreifen */
+#ecrm-root .ecrm-state { position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 10px 22px -16px rgba(60, 45, 20, .45); }
+#ecrm-root .ecrm-state::before { content: ""; position: absolute; inset: 0 0 50% 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 100%); }
+#ecrm-root .ecrm-state > * { position: relative; }
+#ecrm-root .ecrm-state.ecrm-st-dabei { background: linear-gradient(160deg, #f3f9ea 0%, #dcecc6 100%); }
+#ecrm-root .ecrm-state.ecrm-st-kuehlt_ab { background: linear-gradient(160deg, #fdf5e7 0%, #f5dfb8 100%); }
+#ecrm-root .ecrm-state.ecrm-st-neu { background: linear-gradient(160deg, #ecf9f4 0%, #c9ecdf 100%); }
+#ecrm-root .ecrm-banner, #ecrm-root .ecrm-explain, #ecrm-root .ecrm-notice { background: linear-gradient(160deg, #fffaf0 0%, #f8ebd2 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 10px 22px -18px rgba(133, 79, 11, .45); }
+#ecrm-root .ecrm-date { background: linear-gradient(180deg, #f0f7f3 0%, #d8e9df 100%); box-shadow: inset 0 1px 0 #fff; }
+#ecrm-root .ecrm-ava { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 2px 6px -2px rgba(60, 45, 20, .25); }
+#ecrm-root .ecrm-ava-l { box-shadow: 0 0 0 4px #fff, 0 0 0 5px var(--line), 0 14px 28px -14px rgba(60, 45, 20, .45); }
+#ecrm-root .ecrm-fillbar i, #ecrm-root .ecrm-bar i { background-image: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, 0)); }
+#ecrm-root .ecrm-item-btn:hover, #ecrm-root .ecrm-state:hover, #ecrm-root .ecrm-hero-stats button:hover { filter: brightness(1.02); }
+
+@media (max-width: 480px) {
+  #ecrm-root { padding: 12px; border-radius: 22px; }
+  #ecrm-root .ecrm-nav button { font-size: 11px; flex-direction: column; gap: 2px; min-height: 54px; }
+  #ecrm-root .ecrm-section { padding: 0 16px 4px; }
+  #ecrm-root .ecrm-hero { padding: 20px 18px 16px; }
+  #ecrm-root .ecrm-hero-hello { font-size: 27px; }
+  #ecrm-root .ecrm-hero-stats { gap: 8px; }
+  #ecrm-root .ecrm-hero-stats button, #ecrm-root .ecrm-state, #ecrm-root .ecrm-kpis div { padding: 10px 12px; }
+  #ecrm-root .ecrm-hero-stats b, #ecrm-root .ecrm-state b, #ecrm-root .ecrm-kpis b { font-size: 20px; }
+  #ecrm-root .ecrm-fillbar { display: none; }
+  #ecrm-root .ecrm-item { gap: 12px; }
 }
 </style>
 
@@ -590,12 +694,12 @@
     });
   }
 
-  var STATUS = { neu: 'neu', dabei: 'dabei', kuehlt_ab: 'kühlt ab', eingeschlafen: 'eingeschlafen' };
-  var APP = { course_enrolled: 'hat sich zum Kurs angemeldet', course_completed: 'hat einen Kurs abgeschlossen', post_created: 'hat etwas gepostet',
+  var STATUS_SHORT = { neu: 'neu', dabei: 'dabei', kuehlt_ab: 'wird still', eingeschlafen: 'länger weg' };
+  var APP = { course_enrolled: 'hat sich zum Kurs angemeldet', course_completed: 'hat einen Kurs abgeschlossen', post_created: 'hat etwas gepostet in',
     comment_created: 'hat kommentiert', question_asked: 'hat eine Frage gestellt', file_downloaded: 'hat heruntergeladen',
     article_read: 'hat gelesen', lockscreen_cta: 'interessiert sich für', other: 'war aktiv' };
-  var NOTICE = { zahlung_fehlgeschlagen: 'Zahlung ist fehlgeschlagen', abo_gekuendigt: 'hat das Abo gekündigt', plan_entzogen: 'Plan wurde entzogen',
-    moegliche_dublette: 'gibt es vielleicht doppelt', mitglied_geloescht: 'hat die App verlassen' };
+  var NOTICE = { zahlung_fehlgeschlagen: 'Zahlung ist fehlgeschlagen', abo_gekuendigt: 'Abo wurde gekündigt', plan_entzogen: 'Plan wurde entzogen',
+    moegliche_dublette: 'Gibt es vielleicht doppelt', mitglied_geloescht: 'Hat die App verlassen' };
 
   function message(err) {
     var m = (err && (err.message || err.msg)) || String(err);
@@ -610,16 +714,15 @@
 
   function component() {
     return {
-      sb: null, view: 'boot', tab: 'uebersicht', busy: false, loading: false, toast: null, _t: null,
+      sb: null, view: 'boot', tab: 'heute', busy: false, loading: false, toast: null, _t: null,
       userId: null, userEmail: '', tenant: null, isOwner: false,
       login: { email: '', code: '', codeSent: false },
-      people: [], overview: {}, care: [], careLimit: 5, feed: [], lastByPerson: {}, products: [], team: [], categories: [],
+      people: [], overview: {}, care: [], careLimit: 5, feed: [], lastByPerson: {}, products: [], categories: [], sessions: [],
       search: '', filter: '',
-      statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Kühlt ab' }, { value: 'neu', label: 'Neu' },
-                      { value: 'dabei', label: 'Dabei' }, { value: 'eingeschlafen', label: 'Eingeschlafen' }],
+      statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Werden still' }, { value: 'neu', label: 'Neu' },
+                      { value: 'dabei', label: 'Dabei' }, { value: 'eingeschlafen', label: 'Länger weg' }],
       personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
-      manual: { product: '', paid_via: 'bar', price: '' },
-      sessions: [], showPast: false, course: null, roster: [], setup: {},
+      showPast: false, course: null, roster: [], setup: {},
 
       async init() {
         boot.style.display = 'none';
@@ -651,14 +754,17 @@
       async afterLogin(user) {
         this.userId = user.id; this.userEmail = user.email;
         var slug = (window.CRM_CONFIG && window.CRM_CONFIG.tenant) || '';
-        var t = await this.sb.from('tenants').select('id,name,timezone,settings,status').eq('slug', slug).maybeSingle();
+        var t = await this.sb.from('tenants').select('id,name,timezone,settings,status,flenski_app_url').eq('slug', slug).maybeSingle();
         if (t.error || !t.data) { this.view = 'nozugang'; return; }
         this.tenant = t.data;
         var admin = await this.sb.from('platform_admins').select('user_id').maybeSingle();
         var member = await this.sb.from('tenant_members').select('role').eq('tenant_id', this.tenant.id).eq('user_id', this.userId).maybeSingle();
         this.isOwner = !!(admin.data || (member.data && member.data.role === 'owner'));
         this.view = 'app';
-        await this.loadAll();
+        this.loading = true;
+        await Promise.all([this.loadPeople(), this.loadCategories(), this.loadCourses()]);
+        await this.loadProducts();
+        this.loading = false;
       },
       async logout() { await this.sb.auth.signOut(); this.view = 'login'; this.login = { email: '', code: '', codeSent: false }; },
 
@@ -678,23 +784,18 @@
       toTop() { this.$nextTick(function () { if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' }); }); },
       go(t) {
         this.tab = t; this.personId = null; this.detail = null; this.form = null; this.course = null; this.toTop();
-        if (t === 'uebersicht' || t === 'menschen') this.loadPeople();
-        if (t === 'kurse') this.loadCourses();
-        if (t === 'einstellungen') { this.loadProducts(); this.loadTeam(); }
+        if (t === 'heute' || t === 'menschen') this.loadPeople();
+        if (t === 'kurse' || t === 'heute') this.loadCourses();
+        if (t === 'angebote') this.loadProducts();
       },
       openList(status) { this.filter = status; this.go('menschen'); },
 
       // ---------- Laden ----------
-      async loadAll() {
-        this.loading = true;
-        await Promise.all([this.loadPeople(), this.loadProducts(), this.loadCategories()]);
-        this.loading = false;
-      },
       async loadPeople() {
         var tid = this.tenant.id;
         var res = await Promise.all([
           this.sb.from('v_customer_engagement').select('*').eq('tenant_id', tid),
-          this.sb.from('v_customer_overview').select('customer_id,credits_balance,has_unlimited,next_expiry,email,phone').eq('tenant_id', tid),
+          this.sb.from('v_customer_overview').select('customer_id,credits_balance,has_unlimited,next_expiry').eq('tenant_id', tid),
           this.sb.rpc('care_list', { p_tenant: tid }),
           this.sb.rpc('activity_feed', { p_tenant: tid, p_customer: null, p_limit: 300 })
         ]);
@@ -703,7 +804,8 @@
         this.overview = ov;
         this.people = res[0].data || [];
         this.care = res[2].data || [];
-        var feed = (res[3].data || []).filter(function (f) { return new Date(f.am) <= new Date(); });
+        var now = new Date();
+        var feed = (res[3].data || []).filter(function (f) { return new Date(f.am) <= now; });
         this.feed = feed;
         var last = {};
         feed.forEach(function (f) { if (!last[f.customer_id] && f.art !== 'angemeldet') last[f.customer_id] = f; });
@@ -715,10 +817,15 @@
         var self = this;
         this.products.forEach(function (p) {
           if (p.needs_setup && !self.setup[p.id]) {
-            var m = (p.name || '').match(/(\d+)\s*er/i);
-            self.setup[p.id] = { type: m ? 'credits' : 'period', credits: m ? +m[1] : 10, validity: null, price: '', category: '' };
+            var m = (p.name || '').match(/(\d+)\s*er/i), n = m ? +m[1] : null;
+            self.setup[p.id] = { kind: n === 4 ? 'n4' : n === 10 ? 'n10' : n ? 'n' : '', credits: n || null, validity: null,
+              category: self.guessCategory(p.name) };
           }
         });
+      },
+      guessCategory(name) {
+        var hit = this.categories.find(function (c) { return (name || '').toLowerCase().indexOf(c.toLowerCase().split(' ')[0]) > -1; });
+        return hit || '';
       },
       async loadCategories() {
         var r = await this.sb.from('sessions').select('category').eq('tenant_id', this.tenant.id).not('category', 'is', null);
@@ -726,54 +833,65 @@
         (r.data || []).forEach(function (s) { set[s.category] = 1; });
         this.categories = Object.keys(set).sort();
       },
-      async loadTeam() { try { this.team = await this.rpc('team_members', { p_tenant: this.tenant.id }); } catch (e) { this.team = []; } },
+      async loadCourses() {
+        var from = new Date(); from.setHours(0, 0, 0, 0);
+        if (this.showPast) from.setDate(from.getDate() - 60);
+        var r = await this.sb.from('sessions').select('*').eq('tenant_id', this.tenant.id).gte('starts_at', from.toISOString()).order('starts_at').limit(80);
+        var list = r.data || [];
+        if (list.length) {
+          var a = await this.sb.from('attendances').select('session_id,status').in('status', ['registered', 'present']).in('session_id', list.map(function (s) { return s.id; }));
+          var n = {};
+          (a.data || []).forEach(function (x) { n[x.session_id] = (n[x.session_id] || 0) + 1; });
+          list.forEach(function (s) { s.n = n[s.id] || 0; });
+        }
+        this.sessions = list;
+      },
 
       // ---------- Übersicht ----------
+      todayLong() { return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
+      ownerName() { return (this.tenant.settings && this.tenant.settings.signatur) || ''; },
       greeting() {
         var h = new Date().getHours();
-        return (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend') + ' · ' + (this.tenant ? this.tenant.name : '');
+        return (h < 11 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend') + (this.ownerName() ? ', ' + this.ownerName() : '');
       },
+      heroLine() {
+        var neu = this.count('neu'), still = this.count('kuehlt_ab');
+        if (still) return still + (still === 1 ? ' Mensch wird' : ' Menschen werden') + ' gerade still. Eine kurze Nachricht hilft.';
+        if (neu) return neu + (neu === 1 ? ' Mensch ist' : ' Menschen sind') + ' neu in deiner App. Begrüße sie heute.';
+        if (this.care.length) return 'Unter „Heute für dich“ wartet jemand auf dich.';
+        return 'Alles ruhig. Deine Menschen sind gut versorgt.';
+      },
+      upcomingRegistrations() { var now = new Date(); return this.sessions.filter(function (s) { return new Date(s.starts_at) >= now; }).reduce(function (a, s) { return a + (s.n || 0); }, 0); },
+      purchases7() { var lim = Date.now() - 7 * 86400000; return this.feed.filter(function (f) { return f.art === 'kauf' && new Date(f.am) >= lim; }).length; },
+      nextSessions() { var now = new Date(); return this.sessions.filter(function (s) { return new Date(s.starts_at) >= now; }).slice(0, 3); },
+      fillPct(s) { return s.capacity ? Math.min(100, Math.round((s.n || 0) / s.capacity * 100)) : ((s.n || 0) ? 30 : 0); },
       count(status) { return this.people.filter(function (p) { return p.status === status; }).length; },
       setupNeeded() { return this.products.filter(function (p) { return p.needs_setup; }); },
+      connected() { return this.products.filter(function (p) { return !p.needs_setup && p.flenski_plan_id; }); },
       person(id) { return this.people.find(function (p) { return p.customer_id === id; }) || {}; },
       personStatus(id) { return this.person(id).status || 'eingeschlafen'; },
-      reasonText(g, id) {
-        var d = g.detail || {};
+      profileUrl(id) {
+        var p = this.person(id), s = this.tenant.settings || {};
+        if (!p.flenski_profile_id) return '';
+        if (s.profil_url) return s.profil_url.replace('{id}', p.flenski_profile_id);
+        return this.tenant.flenski_app_url ? this.tenant.flenski_app_url.replace(/\/$/, '') + '/m/' + p.flenski_profile_id + '/' : '';
+      },
+      careText(c) {
+        var g = c.gruende[0], d = g.detail || {}, id = c.customer_id, last = this.lastByPerson[id];
+        var spur = last ? ' · ' + this.feedText(last, true).replace(/^./, function (x) { return x.toLowerCase(); }) : '';
         switch (g.art) {
-          case 'kuehlt_ab': return 'seit ' + (d.tage_still != null ? d.tage_still : '?') + ' Tagen still' + this.balanceSuffix(id);
-          case 'droht_abzuspringen': return 'lange nicht da, hat noch Guthaben' + this.balanceSuffix(id);
-          case 'karte_fast_leer': return 'Karte fast leer – Zeit für die nächste';
-          case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ' · noch ' + d.rest : '');
-          case 'neu_dabei': return 'zum ersten Mal da – willkommen heißen';
-          case 'neu_in_app': return 'neu in der App seit ' + this.dateShort(d.seit) + ' – willkommen heißen';
+          case 'neu_in_app': return 'Neu seit ' + this.sinceText(d.seit) + spur;
+          case 'neu_dabei': return 'War zum ersten Mal im Kurs' + spur;
+          case 'kuehlt_ab': return 'Seit ' + (d.tage_still != null ? d.tage_still : '?') + ' Tagen nichts mehr' + this.balanceSuffix(id);
+          case 'droht_abzuspringen': return 'Lange nicht da, hat aber noch Besuche übrig' + this.balanceSuffix(id);
+          case 'karte_fast_leer': return 'Karte fast aufgebraucht – guter Moment für die nächste';
+          case 'laeuft_bald_ab': return (d.produkt || 'Karte') + ' läuft am ' + this.dateShort(d.gueltig_bis) + ' ab' + (d.rest ? ', noch ' + d.rest + ' Besuche' : '');
           default: return NOTICE[g.art] || g.art;
         }
       },
-      balanceSuffix(id) {
-        var o = this.overview[id];
-        return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : '';
-      },
-      actionLabel(art) { return art === 'neu_dabei' || art === 'neu_in_app' ? 'Willkommen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Nachricht'; },
-      // Vorbefüllte Nachricht – warm, ohne Überwachungssprache (08, Abschnitt 4)
-      messageText(id, art) {
-        var p = this.person(id), o = this.overview[id] || {}, vor = p.first_name || '';
-        var gruss = '\n\nLiebe Grüße\n' + ((this.tenant.settings && this.tenant.settings.signatur) || this.tenant.name);
-        if (art === 'neu_dabei') return 'Hallo ' + vor + ', schön, dass du dabei bist! Wie hat dir die erste Stunde gefallen? Ich freue mich auf das nächste Mal.' + gruss;
-        if (art === 'neu_in_app') return 'Hallo ' + vor + ', herzlich willkommen in meiner App! Schön, dass du da bist. Wenn du Fragen hast oder nicht weißt, welcher Kurs zu dir passt, schreib mir einfach.' + gruss;
-        if (art === 'karte_fast_leer') return 'Hallo ' + vor + ', deine Karte ist fast aufgebraucht. Soll ich dir eine neue zurücklegen?' + gruss;
-        if (art === 'laeuft_bald_ab') return 'Hallo ' + vor + ', kleine Erinnerung: deine Karte läuft bald ab' + (o.credits_balance ? ' und du hast noch ' + o.credits_balance + ' Besuche' : '') + '. Ich freue mich, dich bald zu sehen!' + gruss;
-        if (art === 'zahlung_fehlgeschlagen') return 'Hallo ' + vor + ', bei deiner letzten Zahlung in der App hat etwas nicht geklappt. Magst du kurz nachschauen? Bei Fragen melde dich gern.' + gruss;
-        return 'Hallo ' + vor + ', ich habe an dich gedacht und wollte einfach mal hallo sagen. Ich würde mich freuen, dich bald wieder zu sehen!' + gruss;
-      },
-      messageLink(id, art) {
-        var o = this.overview[id] || {}, text = encodeURIComponent(this.messageText(id, art));
-        var phone = (o.phone || '').replace(/[^\d+]/g, '').replace(/^00/, '+').replace(/^0/, '+49');
-        if (phone) return 'https://wa.me/' + phone.replace('+', '') + '?text=' + text;
-        var betreff = { neu_in_app: 'Herzlich willkommen', neu_dabei: 'Schön, dass du da warst', karte_fast_leer: 'Deine Karte',
-          laeuft_bald_ab: 'Deine Karte', zahlung_fehlgeschlagen: 'Deine Zahlung' }[art] || 'Ich habe an dich gedacht';
-        if (o.email) return 'mailto:' + o.email + '?subject=' + encodeURIComponent(betreff) + '&body=' + text;
-        return '';
-      },
+      sinceText(iso) { var d = days(iso); return d <= 0 ? 'heute' : d === 1 ? 'gestern' : d + ' Tagen'; },
+      balanceSuffix(id) { var o = this.overview[id]; return o && o.credits_balance ? ' · noch ' + o.credits_balance + ' Besuche' : ''; },
+      actionLabel(art) { return art === 'neu_dabei' || art === 'neu_in_app' ? 'Begrüßen' : art === 'zahlung_fehlgeschlagen' ? 'Nachfragen' : 'Schreiben'; },
       feedKind(art) {
         if (art === 'besuch') return 'besuch';
         if (art === 'kauf') return 'kauf';
@@ -783,30 +901,39 @@
       },
       feedText(f, ohneName) {
         var t = f.titel ? '„' + f.titel + '“' : '';
-        var s;
         switch (f.art) {
-          case 'besuch': s = (ohneName ? 'War da: ' : 'war bei ') + t; break;
-          case 'angemeldet': s = (ohneName ? 'Angemeldet: ' : 'hat sich angemeldet: ') + t; break;
-          case 'abgesagt': s = (ohneName ? 'Abgesagt: ' : 'hat abgesagt: ') + t; break;
-          case 'nicht_erschienen': s = 'Nicht erschienen: ' + t; break;
-          case 'kauf': s = (ohneName ? 'Gekauft: ' : 'hat gekauft: ') + t; break;
-          case 'korrektur': s = 'Korrektur: ' + (f.titel || ''); break;
-          case 'verfallen': s = 'Verfallen: ' + (f.titel || ''); break;
+          case 'besuch': return (ohneName ? 'War im Kurs ' : 'war im Kurs ') + t;
+          case 'angemeldet': return (ohneName ? 'Angemeldet für ' : 'hat sich angemeldet für ') + t;
+          case 'abgesagt': return (ohneName ? 'Abgesagt: ' : 'hat abgesagt: ') + t;
+          case 'nicht_erschienen': return (ohneName ? 'Nicht erschienen: ' : 'ist nicht erschienen: ') + t;
+          case 'kauf': return (ohneName ? 'Gekauft: ' : 'hat gekauft: ') + t;
+          case 'korrektur': return 'Korrektur: ' + (f.titel || '');
+          case 'verfallen': return 'Verfallen: ' + (f.titel || '');
           default:
             var v = APP[f.art] || 'war aktiv';
-            s = ohneName ? v.charAt(0).toUpperCase() + v.slice(1).replace(/^Hat /, '') : v;
-            if (t) s += ' ' + t;
+            if (ohneName) v = v.replace(/^hat /, '');
+            v = v.charAt(0)[ohneName ? 'toUpperCase' : 'toLowerCase']() + v.slice(1);
+            return v + (t ? ' ' + t : '');
         }
-        return s;
       },
 
       // ---------- Menschen ----------
       fullName(p) { return [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Unbekannt'; },
       initials(p) { return ((p.first_name || '?').charAt(0) + (p.last_name || '').charAt(0)).toUpperCase(); },
-      statusLabel(e) {
-        var s = STATUS[e.status] || e.status;
-        if ((e.status === 'kuehlt_ab' || e.status === 'eingeschlafen') && e.tage_still != null) s += ' · ' + e.tage_still + ' Tage still';
-        return s;
+      statusShort(s) { return STATUS_SHORT[s] || s; },
+      statusLong(e) {
+        if (e.status === 'neu') return 'Neu in deiner App';
+        if (e.status === 'dabei') return 'Dabei';
+        if (e.status === 'kuehlt_ab') return 'Wird still · seit ' + e.tage_still + ' Tagen nichts';
+        return 'Länger weg' + (e.tage_still != null ? ' · seit ' + e.tage_still + ' Tagen' : '');
+      },
+      summary() {
+        var e = this.detail.eng, c = this.detail.c, vor = c.first_name;
+        var seit = this.dateShort(e.joined_at || c.joined_at);
+        var last = this.detail.feed.find(function (f) { return f.art !== 'angemeldet'; });
+        var spur = last ? ' Zuletzt: ' + this.feedText(last, true).replace(/^./, function (x) { return x.toLowerCase(); }) + ' (' + this.ago(last.am) + ').' : ' Bisher noch keine Aktivität.';
+        if (c.source !== 'flenski') return vor + ' ist ohne App-Konto im CRM.' + spur;
+        return vor + ' ist seit ' + seit + ' in deiner App.' + spur;
       },
       filteredPeople() {
         var q = this.search.trim().toLowerCase(), f = this.filter, ov = this.overview, self = this;
@@ -821,17 +948,15 @@
       },
       lastText(p) {
         var l = this.lastByPerson[p.customer_id];
-        if (!l && p.status === 'neu') return 'neu dabei seit ' + this.dateShort(p.joined_at);
-        if (!l) return 'noch keine Aktivität';
-        return this.ago(l.am) + ' · ' + this.feedText(l, true);
+        if (!l) return p.status === 'neu' ? 'Neu seit ' + this.sinceText(p.joined_at) + ' · noch keine Aktivität' : 'Noch keine Aktivität';
+        return this.ago(l.am).replace(/^./, function (x) { return x.toUpperCase(); }) + ' · ' + this.feedText(l, true);
       },
-      barStyle(n, arr, h) {
+      barStyle(n, arr) {
         var max = Math.max.apply(null, (arr || []).concat([1]));
-        return 'height:' + Math.max(n ? 12 : 4, Math.round(n / max * 100)) + '%';
+        return 'height:' + (n ? Math.max(14, Math.round(n / max * 100)) : 5) + '%;' + (n ? '' : 'opacity:.35');
       },
       async openPerson(id) {
         this.tab = 'menschen'; this.personId = id; this.form = null; this.correctFor = null; this.detail = null; this.toTop();
-        this.manual = { product: '', paid_via: 'bar', price: '' };
         await this.loadDetail();
       },
       async loadDetail() {
@@ -848,44 +973,38 @@
         var eng = res[1].data || { status: 'eingeschlafen', first_name: c.first_name, last_name: c.last_name, events_8w: [0, 0, 0, 0, 0, 0, 0, 0], besuche_gesamt: 0, score_30d: 0 };
         this.detail = { c: c, eng: eng, ents: res[2].data || [], feed: res[3].data || [], notices: res[4].data || [] };
       },
-      profileLine() {
-        var c = this.detail.c, e = this.detail.eng;
-        var parts = [c.source === 'flenski' ? 'App-Mitglied seit ' + this.dateShort(e.joined_at || c.joined_at) : 'ohne App'];
-        if (c.is_child) parts.push('Kind' + (c.guardian_name ? ', Eltern: ' + c.guardian_name : ''));
-        return parts.join(' · ');
-      },
-      contactMail(c) { return c.is_child ? c.guardian_email : c.email; },
-      contactPhone(c) { return c.is_child ? c.guardian_phone : c.phone; },
-      waLink(c) {
-        var p = (this.contactPhone(c) || '').replace(/[^\d+]/g, '').replace(/^00/, '+').replace(/^0/, '+49');
-        return p ? 'https://wa.me/' + p.replace('+', '') : '';
-      },
+      entOpen(e) { var p = this.products.find(function (x) { return x.id === e.product_id; }); return !!(p && p.needs_setup); },
       balanceShort() {
-        var o = this.overview[this.personId] || {}, products = this.products;
-        // Pläne, die noch nicht eingerichtet sind, zählen noch nicht – sonst stünde dort fälschlich "Block"
-        var offen = function (e) { var p = products.find(function (x) { return x.id === e.product_id; }); return p && p.needs_setup; };
-        var aktiv = this.detail.ents.filter(function (e) { return e.status === 'active' && !offen(e); });
-        if (aktiv.some(function (e) { return e.unlimited; })) return 'Block';
-        var hasCard = aktiv.some(function (e) { return !e.unlimited; });
-        return hasCard ? String(o.credits_balance || 0) : '–';
+        var o = this.overview[this.personId] || {}, self = this;
+        var aktiv = this.detail.ents.filter(function (e) { return e.status === 'active' && !self.entOpen(e); });
+        if (aktiv.some(function (e) { return !e.unlimited; })) return String(o.credits_balance || 0);
+        if (aktiv.length) return '✓';
+        return '–';
       },
+      balanceLabel() {
+        var self = this, ents = this.detail.ents.filter(function (e) { return e.status === 'active'; });
+        var b = this.balanceShort();
+        if (b === '–' && ents.some(function (e) { return self.entOpen(e); })) return 'Angebot noch nicht verbunden';
+        if (b === '✓') return 'Block / Abo aktiv';
+        return b === '–' ? 'keine Karte' : 'Besuche übrig';
+      },
+      entNumber(e) { return this.entOpen(e) ? '' : e.unlimited ? '✓' : e.balance; },
       entText(e) {
-        var st = { active: '', used_up: 'aufgebraucht', expired: 'abgelaufen', cancelled: 'storniert' }[e.status];
+        if (this.entOpen(e)) return 'Gekauft am ' + this.dateShort(e.starts_at) + ' · Angebot noch nicht verbunden – unter „Angebote“ einmal einrichten';
+        var st = { used_up: 'aufgebraucht', expired: 'abgelaufen', cancelled: 'storniert' }[e.status];
         var parts = [];
         if (st) parts.push(st);
-        var prod = this.products.find(function (p) { return p.id === e.product_id; });
-        if (prod && prod.needs_setup) parts.push('noch nicht eingerichtet');
-        else if (!e.unlimited && e.product_credits) parts.push('noch ' + e.balance + ' von ' + e.product_credits);
+        if (!e.unlimited && e.product_credits) parts.push('noch ' + e.balance + ' von ' + e.product_credits + ' Besuchen');
+        if (e.unlimited) parts.push('ohne Zählen');
         if (e.expires_at) parts.push('gültig bis ' + this.dateShort(e.expires_at));
-        parts.push((e.paid_via === 'app' ? 'in der App' : 'von Hand') + ' am ' + this.dateShort(e.starts_at));
+        parts.push('gekauft am ' + this.dateShort(e.starts_at));
         return parts.join(' · ');
       },
       noticeText(n) {
-        var d = n.detail || {};
-        var t = NOTICE[n.kind] || n.kind;
+        var d = n.detail || {}, t = NOTICE[n.kind] || n.kind;
         if (d.plan) t += ': ' + d.plan;
         if (d.produkt) t += ': ' + d.produkt;
-        return t.charAt(0).toUpperCase() + t.slice(1);
+        return t;
       },
       async resolveNotice(n) {
         await this.run(async () => {
@@ -899,39 +1018,20 @@
         await this.run(async () => {
           var rest = await this.rpc('correct', { p_entitlement: e.entitlement_id, p_delta: this.correction.delta, p_comment: this.correction.comment });
           this.correctFor = null;
-          this.notify('Korrektur gebucht – neues Guthaben ' + rest);
+          this.notify('Gebucht – jetzt noch ' + rest + ' Besuche.');
           await Promise.all([this.loadDetail(), this.loadPeople()]);
         });
       },
-      async saveManual() {
-        await this.run(async () => {
-          var price = this.manual.price === '' ? null : Math.round(parseFloat(String(this.manual.price).replace(',', '.')) * 100);
-          await this.rpc('sell', { p_customer: this.personId, p_product: this.manual.product, p_paid_via: this.manual.paid_via, p_price_cents: price });
-          this.manual = { product: '', paid_via: 'bar', price: '' };
-          this.notify('Eingetragen.');
-          await Promise.all([this.loadDetail(), this.loadPeople()]);
-        });
-      },
-      openForm(c) {
-        this.toTop();
-        this.form = c ? Object.assign({}, c) : { source: 'extern', first_name: this.search.trim(), last_name: '', email: '', phone: '', is_child: false,
-          guardian_name: '', guardian_email: '', guardian_phone: '', note: '' };
-      },
+      openForm(c) { this.toTop(); this.form = Object.assign({}, c); },
       async saveForm() {
         var f = this.form;
-        if (f.source !== 'flenski' && !f.first_name) return this.notify('Bitte gib mindestens einen Vornamen ein.', true);
         await this.run(async () => {
-          var data = { is_child: !!f.is_child, phone: f.phone || null, note: f.note || null,
-            guardian_name: f.is_child ? (f.guardian_name || null) : null, guardian_email: f.is_child ? (f.guardian_email || null) : null,
-            guardian_phone: f.is_child ? (f.guardian_phone || null) : null };
-          if (f.source !== 'flenski') Object.assign(data, { first_name: f.first_name, last_name: f.last_name || null, email: f.email || null });
-          var r = f.id
-            ? await this.sb.from('customers').update(data).eq('id', f.id).select().single()
-            : await this.sb.from('customers').insert(Object.assign({ tenant_id: this.tenant.id, source: 'extern' }, data)).select().single();
+          var r = await this.sb.from('customers').update({ is_child: !!f.is_child, phone: f.phone || null, note: f.note || null,
+            guardian_name: f.is_child ? (f.guardian_name || null) : null, guardian_phone: f.is_child ? (f.guardian_phone || null) : null })
+            .eq('id', f.id).select().single();
           if (r.error) throw r.error;
           this.form = null;
-          await this.loadPeople();
-          await this.openPerson(r.data.id);
+          await this.loadDetail();
           this.notify('Gespeichert.');
         });
       },
@@ -940,7 +1040,7 @@
           var r = await this.sb.from('customers').update({ archived_at: this.detail.c.archived_at ? null : new Date().toISOString() })
             .eq('id', this.personId).select().single();
           if (r.error) throw r.error;
-          this.notify(r.data.archived_at ? 'Ausgeblendet – die Person erscheint nicht mehr in den Listen.' : 'Wieder aufgenommen.');
+          this.notify(r.data.archived_at ? 'Ausgeblendet.' : 'Wird wieder angezeigt.');
           this.personId = null; await this.loadPeople();
         });
       },
@@ -955,54 +1055,38 @@
       },
 
       // ---------- Kurse ----------
-      async loadCourses() {
-        var from = new Date(); from.setHours(0, 0, 0, 0);
-        if (this.showPast) from.setDate(from.getDate() - 60);
-        var q = this.sb.from('sessions').select('*').eq('tenant_id', this.tenant.id).gte('starts_at', from.toISOString()).order('starts_at').limit(80);
-        var r = await q;
-        var list = r.data || [];
-        if (list.length) {
-          var a = await this.sb.from('attendances').select('session_id,status').in('status', ['registered', 'present']).in('session_id', list.map(function (s) { return s.id; }));
-          var n = {};
-          (a.data || []).forEach(function (x) { n[x.session_id] = (n[x.session_id] || 0) + 1; });
-          list.forEach(function (s) { s.n = n[s.id] || 0; });
-        }
-        this.sessions = list;
-      },
       courseGroups() {
         var groups = [], map = {}, self = this;
         this.sessions.forEach(function (s) {
-          var d = new Date(s.starts_at), label = self.weekLabel(d);
+          var label = self.weekLabel(new Date(s.starts_at));
           if (!map[label]) { map[label] = { label: label, items: [] }; groups.push(map[label]); }
           map[label].items.push(s);
         });
         return groups;
       },
       weekLabel(d) {
-        var today = new Date(); today.setHours(0, 0, 0, 0);
         var monday = function (x) { var m = new Date(x); m.setHours(0, 0, 0, 0); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
-        var diff = Math.round((monday(d) - monday(today)) / (7 * 86400000));
+        var diff = Math.round((monday(d) - monday(new Date())) / (7 * 86400000));
         if (diff === 0) return 'Diese Woche';
         if (diff === 1) return 'Nächste Woche';
         if (diff === -1) return 'Letzte Woche';
         return 'Woche ab ' + monday(d).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
       },
       async openCourse(s) {
-        this.course = s; this.toTop();
+        this.tab = 'kurse'; this.course = s; this.roster = []; this.toTop();
         try {
           var rows = await this.rpc('session_roster', { p_session: s.id });
-          this.roster = rows.filter(function (r) { return true; }).map(function (r) { r._menu = false; return r; });
+          this.roster = rows.map(function (r) { r._open = false; return r; });
         } catch (e) { this.notify(message(e), true); }
       },
       rosterText(r) {
-        if (r.status === 'present') return 'war da' + (r.abgebucht && r.rest != null ? ' · noch ' + r.rest + (r.von ? ' von ' + r.von : '') : '');
-        if (r.status === 'registered') return 'angemeldet' + (r.credits_balance ? ' · Guthaben ' + r.credits_balance : '');
-        if (r.status === 'cancelled_in_time') return 'abgesagt';
-        if (r.status === 'cancelled_late') return 'zu spät abgesagt' + (r.abgebucht ? ' · abgezogen' : '');
-        return 'nicht erschienen' + (r.abgebucht ? ' · abgezogen' : '');
+        if (r.status === 'present') return 'War da' + (r.abgebucht && r.rest != null ? ' · noch ' + r.rest + ' Besuche' : '');
+        if (r.status === 'registered') return 'Angemeldet' + (r.credits_balance ? ' · ' + r.credits_balance + ' Besuche auf der Karte' : '');
+        if (r.status === 'cancelled_in_time') return 'Hat rechtzeitig abgesagt';
+        if (r.status === 'cancelled_late') return 'Zu spät abgesagt' + (r.abgebucht ? ' · Besuch abgezogen' : '');
+        return 'Nicht erschienen' + (r.abgebucht ? ' · Besuch abgezogen' : '');
       },
       async cancelRow(r, noShow) {
-        r._menu = false;
         await this.run(async () => {
           await this.rpc('cancel_attendance', { p_session: this.course.id, p_customer: r.customer_id, p_no_show: noShow });
           this.notify(this.fullName(r) + (noShow ? ': nicht erschienen' : ': abgesagt'));
@@ -1010,23 +1094,29 @@
         });
       },
 
-      // ---------- Einstellungen ----------
+      // ---------- Angebote ----------
+      pickKind(p, kind) {
+        var s = this.setup[p.id];
+        s.kind = kind;
+        if (kind === 'n4') s.credits = 4;
+        if (kind === 'n10') s.credits = 10;
+      },
       async saveSetup(p) {
         var s = this.setup[p.id];
-        if (s.type === 'credits' && !(s.credits > 0)) return this.notify('Bitte gib an, wie viele Besuche drin sind.', true);
+        if (!s.kind) return this.notify('Bitte wähle, was in „' + p.name + '“ steckt.', true);
+        if (s.kind === 'n' && !(s.credits > 0)) return this.notify('Bitte gib die Anzahl Besuche an.', true);
+        if (s.validity === null) return this.notify('Bitte wähle, wie lange es gültig ist.', true);
         await this.run(async () => {
-          var price = s.price === '' || s.price == null ? null : Math.round(parseFloat(String(s.price).replace(',', '.')) * 100);
-          var n = await this.rpc('setup_product', { p_product: p.id, p_type: s.type, p_credits: s.type === 'credits' ? s.credits : null,
-            p_validity_days: s.validity || null, p_price_cents: price, p_category: s.category || null });
-          this.notify(p.name + ' eingerichtet' + (n ? ' – ' + n + (n === 1 ? ' Karte' : ' Karten') + ' nachgezogen' : '') + '.');
+          var n = await this.rpc('setup_product', { p_product: p.id, p_type: s.kind === 'frei' ? 'period' : 'credits',
+            p_credits: s.kind === 'frei' ? null : s.credits, p_validity_days: s.validity || null, p_price_cents: null, p_category: s.category || null });
+          this.notify('„' + p.name + '“ ist verbunden' + (n ? ' – ' + n + (n === 1 ? ' Kauf' : ' Käufe') + ' übernommen.' : '.'));
           await Promise.all([this.loadProducts(), this.loadPeople()]);
         });
       },
       productText(p) {
-        var t = { credits: p.credits + ' Besuche', single: 'Einzelstunde', period: 'Kursblock', subscription: 'Abo' }[p.type];
-        if (p.validity_days) t += ' · ' + p.validity_days + ' Tage';
-        if (p.price_cents != null) t += ' · ' + (p.price_cents / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-        if (p.category) t += ' · ' + p.category;
+        var t = p.type === 'credits' ? p.credits + ' Besuche' : p.type === 'single' ? 'Einzelstunde' : 'ohne Zählen';
+        t += p.validity_days ? ' · ' + (p.validity_days % 30 === 0 ? p.validity_days / 30 + ' Monate' : p.validity_days + ' Tage') + ' gültig' : ' · unbegrenzt gültig';
+        if (p.category) t += ' · nur ' + p.category;
         return t;
       },
 
@@ -1036,10 +1126,10 @@
         if (d <= 0) return 'heute';
         if (d === 1) return 'gestern';
         if (d < 30) return 'vor ' + d + ' Tagen';
-        return this.dateShort(iso);
+        return 'am ' + this.dateShort(iso);
       },
       time(iso) { return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'; },
-      dateShort(iso) { return iso ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : ''; },
+      dateShort(iso) { return iso ? new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' }).replace(/.?$/, '.') : ''; },
       dateLong(iso) { return new Date(iso).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
       dayNum(iso) { return new Date(iso).getDate(); },
       weekday(iso) { return new Date(iso).toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', ''); }

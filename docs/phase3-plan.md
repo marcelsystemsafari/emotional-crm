@@ -59,3 +59,8 @@ Datenbank-Regeln aus Phase 1 (Buchungsprotokoll, FEFO, Storno, Signale) – sie 
 - Neue Oberfläche `ui/crm.html`: Übersicht · Menschen · Kurse · Einstellungen (Zahnrad). Mit Lanas echten Daten in der Vorschau geprüft (Martina, Sarah, 44 Termine, 3 Pläne zum Einrichten); Schreibwege (Zahlung von Hand) in der Demo geprüft, Buchungen gezählt.
 - Gefunden und behoben: Neue Mitglieder fehlten in der Kümmern-Liste; Guthaben zeigte „Block“ bei nicht eingerichtetem Plan; E-Mail-Betreff passte nicht zum Anlass; Demo-Personen waren alle „neu“ (Beitrittsdatum).
 - Offen: Lanas Pläne einrichten (macht Lana), Test in Flenski am iPhone, Abnahme.
+
+
+## Oberfläche v2 (22.10.2026)
+
+Nach Marcels Feedback: hochwertiger (Glas- und Glanzoptik, eigene beige Fläche mit gleichmäßigem Innenabstand), selbsterklärend (Erklärtexte unter jeder Kachel), Knopf „Begrüßen/Schreiben“ öffnet das Flenski-Profil (`settings.profil_url`, die Chat-ID lässt sich nicht ableiten), „Zahlung von Hand“ entfernt, Kurse-Menü als Knöpfe statt Ausklappmenü, Reiter „Angebote“ mit Chips zum Verbinden der Flenski-Pläne und Erklärung der Kopplung, Kurse nur echte Flenski-Termine (Migration 240000), Profilfotos (Migration 250000).
