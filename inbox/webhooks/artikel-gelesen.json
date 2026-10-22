@@ -1,6 +1,6 @@
 {
   "member": {
-    "id": "72f8bf20-79da-4883-9cfa-e95d2e8069d7",
+    "id": "e47965ee-4a4c-4a1a-81b3-cdf9ca903000",
     "bio": null,
     "tags": null,
     "cover": null,
@@ -8,7 +8,7 @@
     "phone": null,
     "plans": null,
     "avatar": {
-      "id": "6ca3dd64-6c49-43ba-80f6-521dc72e0e0c",
+      "id": "567a1fd2-db71-47e8-8493-958a7d14b5ca",
       "url": "https://cdn.flenski.io/beispiel.jpg",
       "meta": {
         "duration": null,
@@ -18,32 +18,32 @@
       "status": "uploaded",
       "formats": [
         {
-          "id": "f5027ec3-4b0c-454c-89fb-040ac29a0d11",
+          "id": "3e82c05d-1c52-4651-af6a-5ee3002531e7",
           "url": "https://cdn.flenski.io/beispiel.jpg",
           "format": "thumb_800x800",
           "status": "uploaded",
           "fileInfo": {
-            "name": "6ad49952af1a4698312626.jpg",
-            "size": 54254,
-            "width": 720,
-            "height": 720,
+            "name": "6ad4f0dbbbe49779141806.jpg",
+            "size": 42080,
+            "width": 400,
+            "height": 400,
             "mimeType": "image/jpeg",
             "dimensions": [
-              "720",
-              "720"
+              "400",
+              "400"
             ],
             "originalName": "beispiel.jpg",
-            "htmlDimensions": "width=\"720\" height=\"720\""
+            "htmlDimensions": "width=\"400\" height=\"400\""
           }
         },
         {
-          "id": "6eef3396-70d1-4730-8121-133db5ce1b59",
+          "id": "8b5c6b2a-b289-4e56-86f2-ec88ab553c8b",
           "url": "https://cdn.flenski.io/beispiel.jpg",
           "format": "thumb_webp_800x800",
           "status": "uploaded",
           "fileInfo": {
-            "name": "6ad499533d453640168723.webp",
-            "size": 29106,
+            "name": "6ad4f0dc6478a298222150.webp",
+            "size": 37846,
             "width": 800,
             "height": 800,
             "mimeType": "image/webp",
@@ -57,26 +57,26 @@
         }
       ],
       "fileInfo": {
-        "name": "6ad49952af1a4698312626.jpg",
-        "size": 54254,
-        "width": 720,
-        "height": 720,
+        "name": "6ad4f0dbbbe49779141806.jpg",
+        "size": 42080,
+        "width": 400,
+        "height": 400,
         "mimeType": "image/jpeg",
         "dimensions": [
-          "720",
-          "720"
+          "400",
+          "400"
         ],
         "originalName": "beispiel.jpg",
-        "htmlDimensions": "width=\"720\" height=\"720\""
+        "htmlDimensions": "width=\"400\" height=\"400\""
       },
-      "createdAt": "2026-10-18T10:02:58+00:00",
+      "createdAt": "2026-10-18T16:16:27+00:00",
       "isDeleted": false,
       "timeCodes": [],
-      "updatedAt": "2026-10-18T10:02:58+00:00",
+      "updatedAt": "2026-10-18T16:16:27+00:00",
       "transcript": null,
       "trimSource": null,
       "permissions": {
-        "id": "6ca3dd64-6c49-43ba-80f6-521dc72e0e0c",
+        "id": "567a1fd2-db71-47e8-8493-958a7d14b5ca",
         "can": [
           "view",
           "edit",
@@ -109,7 +109,7 @@
     "headline": null,
     "language": "de",
     "lastName": "Muster",
-    "createdAt": "2026-10-16T11:29:19+00:00",
+    "createdAt": "2026-10-18T16:12:36+00:00",
     "firstName": "Erika",
     "isBlocked": false,
     "isFlagged": false,
@@ -121,13 +121,13 @@
     "linkedinUrl": null,
     "instagramUrl": null,
     "commentsCount": 1,
-    "isMemberOfTeam": true
+    "isMemberOfTeam": false
   },
   "article": {
-    "id": "9b8cb36e-39a7-4acd-b226-f78f687e4571",
-    "url": "https://appdemo.systemsafari.de/yoga-by-lana/articles/default/demo-article",
-    "title": "Demo article",
-    "createdAt": "2026-10-16T11:29:23+00:00"
+    "id": "2756a486-8084-42f7-ad18-a8bcf32e1f1f",
+    "url": "https://appdemo.systemsafari.de/yoga-by-lana/articles/default/neuer-artikel",
+    "title": "neuer Artikel",
+    "createdAt": "2026-10-22T09:45:45+00:00"
   },
   "category": {
     "id": "fca1a162-9b28-46d9-96a9-0ab1c6d4f605",
@@ -138,6 +138,6 @@
     "event": "article_viewed",
     "appName": "Yoga.by.Lana",
     "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
-    "occurredAt": "2026-10-22T06:47:50+00:00"
+    "occurredAt": "2026-10-22T09:46:15+00:00"
   }
 }

@@ -8,10 +8,10 @@
   "email": "erika.muster@example.com",
   "phone": "+49 151 00000000",
   "contact": {
-    "id": "7dd36d70-721f-4107-a240-f9fd2e5488af",
+    "id": "18c2044a-686e-4db5-a885-127be0c207d5",
     "source": "agent_lead",
     "status": "lead",
-    "createdAt": "2026-10-22T06:42:15+00:00"
+    "createdAt": "2026-10-22T08:58:17+00:00"
   },
   "message": "[Inhalt entfernt]",
   "envelope": {
@@ -19,7 +19,7 @@
     "event": "lead_created",
     "appName": "Yoga.by.Lana",
     "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
-    "occurredAt": "2026-10-22T06:42:15+00:00"
+    "occurredAt": "2026-10-22T08:58:17+00:00"
   },
   "fullName": "Erika Muster"
 }

@@ -1,27 +1,27 @@
-# Empfangen 2026-10-22 06:43:31.351634+00 · über den Knopf „Testen“ in Flenski (Beispieldaten)
+# Empfangen 2026-10-22 09:01:35.107353+00 · über den Knopf „Testen“ in Flenski (Beispieldaten)
 accept: */*
 accept-encoding: gzip
-baggage: sentry-trace_id=e2b6073caf02413eb8d3a694ccccc1ff,sentry-transaction=POST%20app_automation_webhook_test,sentry-public_key=a22c1a50df0e3b196da7afe8f9490432,sentry-release=1.0.0%2Bno-version-set,sentry-environment=prod,sentry-sampled=false,sentry-sample_rand=0.503237,sb-request-id=01a16259-be5d-7665-8b8d-8e1b975aa2b1
+baggage: sentry-trace_id=4696f6fad8344e929fc5996f33844e31,sentry-transaction=POST%20app_automation_webhook_test,sentry-public_key=a22c1a50df0e3b196da7afe8f9490432,sentry-release=1.0.0%2Bno-version-set,sentry-environment=prod,sentry-sampled=false,sentry-sample_rand=0.087333,sb-request-id=01a162d8-236c-746c-b65f-7a8ce3ce9520
 cdn-loop: cloudflare; loops=1
 cf-connecting-ip: 116.202.39.98
 cf-ew-via: 15
-cf-ray: a4e6873709d665ab-FRA
+cf-ray: a4e751728f9bd27e-FRA
 cf-visitor: {"scheme":"https"}
 cf-worker: supabase.co
 content-length: 2985
 content-type: application/json
 host: edge-runtime.supabase.com
-sb-request-id: 01a16259-be5d-7665-8b8d-8e1b975aa2b1
-sentry-trace: e2b6073caf02413eb8d3a694ccccc1ff-110e9ce8c5c74cd2-0
-traceparent: 00-6ad9b09200000000e8a5c492666145d9-c3c4952fd7e7cfa3-01
-tracestate: dd=p:c3c4952fd7e7cfa3;t.dm:-1
+sb-request-id: 01a162d8-236c-746c-b65f-7a8ce3ce9520
+sentry-trace: 4696f6fad8344e929fc5996f33844e31-f803605852e842ac-0
+traceparent: 00-6ad9d0ee00000000d21e8b650f88e5cd-8c4c4ba0002832a2-01
+tracestate: dd=p:8c4c4ba0002832a2;t.dm:-1
 user-agent: Symfony HttpClient (Curl)
-x-amzn-trace-id: Root=1-6ad9b093-485204405da55e344a3a5297
-x-datadog-parent-id: 14106563965549531043
+x-amzn-trace-id: Root=1-6ad9d0ee-2930131245388a467b5f62c5
+x-datadog-parent-id: 10109538414109405858
 x-datadog-sampling-priority: 1
-x-datadog-tags: _dd.p.tid=6ad9b09200000000,_dd.p.dm=-1
-x-datadog-trace-id: 16764021321018459609
-x-flenski-signature: sha256=44835b99f67fc5f2097b35335e2825e032f4362dcfd2d6b8f2b5e910f6e5676d
-x-forwarded-for: 116.202.39.98,116.202.39.98, 99.83.99.150
+x-datadog-tags: _dd.p.tid=6ad9d0ee00000000,_dd.p.dm=-1
+x-datadog-trace-id: 15140692263434773965
+x-flenski-signature: sha256=76b7d544c7bd41fa378f957a3982fa333265032aab6ae833d92365687dca4f2e
+x-forwarded-for: 116.202.39.98,116.202.39.98, 99.83.99.145
 x-forwarded-port: 443
 x-forwarded-proto: https

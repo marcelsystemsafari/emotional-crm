@@ -1,6 +1,6 @@
 {
   "plan": {
-    "id": "c3f7730b-093f-4964-a950-3d958dc24edc",
+    "id": "2f6a7234-dbe1-4394-a2cf-a2608e65fdc1",
     "name": "Sample plan"
   },
   "member": {
@@ -133,8 +133,8 @@
     "event": "member_plan_assigned",
     "appName": "Yoga.by.Lana",
     "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
-    "occurredAt": "2026-10-22T06:42:27+00:00"
+    "occurredAt": "2026-10-22T08:59:07+00:00"
   },
-  "expireAt": "2027-10-22T06:42:27+00:00",
+  "expireAt": "2027-10-22T08:59:07+00:00",
   "assignedBy": null
 }

@@ -1,16 +1,16 @@
 {
   "order": {
-    "id": "7d169905-4871-4a67-9ce1-7d852d94a3ae",
+    "id": "d475aead-8e82-4030-86bb-263d6545d3fd",
     "amount": 49,
     "invoice": "SAMPLE-INVOICE-1",
     "orderId": "SAMPLE-ORDER-1",
     "currency": "EUR",
-    "createdAt": "2026-10-22T06:43:11+00:00",
+    "createdAt": "2026-10-22T09:00:38+00:00",
     "paySystemType": "ds24"
   },
   "plans": [
     {
-      "id": "b2e113e5-7ab6-4364-96df-b7c9ed61dff1",
+      "id": "fca7a150-622c-4e40-8319-717caaea6208",
       "name": "Sample plan"
     }
   ],
@@ -143,11 +143,11 @@
     "event": "order_completed",
     "appName": "Yoga.by.Lana",
     "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
-    "occurredAt": "2026-10-22T06:43:11+00:00"
+    "occurredAt": "2026-10-22T09:00:38+00:00"
   },
   "subscription": {
-    "id": "d7932a8d-ac31-40c8-b685-eaafb1c12d76",
-    "expireAt": "2026-11-22T06:43:11+00:00",
+    "id": "38d706fa-87af-4763-b687-7dde38d4ab48",
+    "expireAt": "2026-11-22T09:00:38+00:00",
     "productName": "Sample product",
     "isSubscription": true,
     "billingInterval": "monthly"

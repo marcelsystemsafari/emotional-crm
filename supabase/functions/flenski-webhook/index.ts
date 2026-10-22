@@ -1,6 +1,7 @@
 // Empfänger für Flenski-Automationen ("Webhook senden").
-// Phase 0: speichert jede Anfrage unverändert in webhook_events, prüft die Flenski-Signatur und antwortet sofort mit 200.
-// Verarbeitung (Kundinnen, Pläne, Aktivität) kommt in Phase 3, auf Basis der hier gesammelten echten Payloads.
+// Speichert jede Anfrage unverändert in webhook_events, prüft die Flenski-Signatur, verarbeitet gültige
+// Nachrichten sofort (process_webhook_event, Entscheidung 0005) und antwortet mit 200.
+// Was welche Nachricht bewirkt: docs/phase3-plan.md, Schritt 1.
 //
 // URL je Automation:
 //   https://<projekt>.supabase.co/functions/v1/flenski-webhook?tenant=<slug>&trigger=<triggername>
@@ -103,7 +104,7 @@ Deno.serve(async (req) => {
 
   const trigger = url.searchParams.get("trigger");
 
-  const { error } = await supabase.from("webhook_events").upsert(
+  const { data: saved, error } = await supabase.from("webhook_events").upsert(
     {
       tenant_id: tenant.id,
       trigger,
@@ -115,12 +116,23 @@ Deno.serve(async (req) => {
       dedupe_key: await sha256Hex(rawBody),
     },
     { onConflict: "tenant_id,dedupe_key", ignoreDuplicates: true },
-  );
+  ).select("id");
 
   // Konnte nicht gespeichert werden: Fehler melden, damit nichts stillschweigend verloren geht
   if (error) {
     console.error("Speichern fehlgeschlagen", error);
     return reply(500, { ok: false, error: "Speichern fehlgeschlagen" });
+  }
+
+  // Gespeichert – jetzt verarbeiten (Regeln in der Datenbank, process_webhook_event).
+  // Doppelt zugestellte Nachrichten liefern keine Zeile zurück und werden nicht nochmal verarbeitet.
+  // Ein Fehler hier ändert nichts an der Antwort: Die Nachricht liegt sicher im Speicher und
+  // kann mit process_pending_webhooks() nachverarbeitet werden.
+  const id = saved?.[0]?.id;
+  if (id) {
+    const { data: result, error: processError } = await supabase.rpc("process_webhook_event", { p_id: id });
+    if (processError) console.error("Verarbeitung fehlgeschlagen", processError);
+    else if (result !== "ok") console.log("Verarbeitung:", result);
   }
 
   return reply(200, { ok: true });

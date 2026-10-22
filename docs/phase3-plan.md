@@ -1,6 +1,6 @@
 # Plan Phase 3 (neu) – Automatisch aus der App + neue Oberfläche
 
-Stand: 22.10.2026 · Status: **Entwurf, wartet auf Marcels Go**
+Stand: 22.10.2026 · Status: **in Arbeit** – Schritt 1 fertig (22.10.2026)
 Grundlage: Entscheidung 0005, echte Payloads in `inbox/webhooks/`, Modul Aktivität (`08-aktivitaet.md`).
 
 ## Ziel in einem Satz
@@ -21,6 +21,10 @@ Verarbeitet werden nur Nachrichten mit gültiger Signatur. Testnachrichten bleib
 | Mitglied gelöscht | Person archivieren |
 
 Dazu: Beitrags-/Kommentartexte werden nach der Prüfung aus dem Rohspeicher entfernt (offener Punkt Datenschutz, 06).
+
+**Stand Schritt 1 (22.10.2026):** Verarbeitung als SQL-Funktion `process_webhook_event` (+ `process_pending_webhooks`, `setup_product`), Tabelle `customer_notices`, Edge Function verarbeitet sofort. 34 Tests mit den echten Beispiel-Payloads (`scripts/build-webhook-tests.mjs`), insgesamt 146 grün. Mitschnitt nachverarbeitet: Martina Böttcher (Artikel gelesen) und ein neues Mitglied stehen automatisch im CRM. Nicht verarbeitet: eine echte Nachricht vom 22.10. 10:53 der alten, gelöschten Automation (Signatur nicht prüfbar).
+
+Festgelegt beim Bau: Team-/Admin-Profile werden keine Kundinnen. „Event beginnt bald“ gilt als Anmeldung. Neue Pläne werden als „noch einzurichten“ angelegt (zählen Teilnahmen, buchen erst nach `setup_product` ab, dann rückwirkend).
 
 ## Schritt 2 – Erstabgleich und Nachverarbeitung
 - Bestehende Mitglieder, Pläne und Events aus Lanas App einmalig übernehmen (über Marcels Flenski-Verbindung).

@@ -1,6 +1,6 @@
 {
   "order": {
-    "id": "2137c82e-58a9-4616-9a21-2fa3c1cba8ae",
+    "id": "f41d94d5-82da-4f47-ac1b-04a02ec90910",
     "amount": 49,
     "orderId": "SAMPLE-ORDER-1",
     "currency": "EUR",
@@ -135,11 +135,11 @@
     "event": "payment_failed",
     "appName": "Yoga.by.Lana",
     "projectId": "ebe2c601-c1dc-45dc-ab3e-5bd085487bcc",
-    "occurredAt": "2026-10-22T06:43:30+00:00"
+    "occurredAt": "2026-10-22T09:01:34+00:00"
   },
   "subscription": {
-    "id": "63c4f3ee-129a-4434-88ec-c0cc2a32c44c",
-    "expireAt": "2026-11-22T06:43:30+00:00",
+    "id": "2f3b5f57-7009-441a-b69c-e3407ff937b7",
+    "expireAt": "2026-11-22T09:01:34+00:00",
     "productName": "Sample product"
   },
   "attemptNumber": 2,
