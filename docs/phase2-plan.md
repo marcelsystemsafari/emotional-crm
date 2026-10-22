@@ -1,6 +1,6 @@
 # Plan Phase 2 – Oberfläche
 
-Stand: 22.10.2026 · Status: **Entwurf, wartet auf Marcels Entscheidungen und Go**
+Stand: 22.10.2026 · Status: **Entscheidungen getroffen, wartet auf Go**
 Grundlage: `05-phasen.md` (Phase 2), Entscheidung 0001 (läuft im Flenski-Embed-Widget), CLAUDE.md Regel 6 und 7.
 
 ## In einem Satz
@@ -68,5 +68,9 @@ Kundin wählen oder neu anlegen → **Produkt** (große Kacheln) → **Zahlweg**
 5. Verkauf
 6. Produkte, Feinschliff, Test am iPhone in Flenski
 
-## Entscheidungen (von Marcel)
-Wird nach der Rückfrage ausgefüllt.
+## Entscheidungen (von Marcel, 22.10.2026)
+| Frage | Entscheidung | Folge im Bau |
+|---|---|---|
+| Farbschema | **Hell, passend zu Flenski** | weiße Karten, dunkle Schrift, Akzent #38725b, Warnung orange; kein Dunkelmodus im Widget |
+| Stunden anlegen | **Vorschlag aus der Vorwoche** + kurzes Formular | Funktion `create_session_like_last_week` |
+| Rechte Staff | **Verkaufen + einchecken**, Korrektur und Löschen nur owner | `correct()` wird auf owner beschränkt (+ Test) |
