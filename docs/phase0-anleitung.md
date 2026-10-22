@@ -67,6 +67,8 @@ Den Schlüssel nie in den Chat. Wenn alle 16 drin sind, Claude Code Bescheid geb
 
 ## Teil 2 – Eigener Mailversand in Supabase (für den Login per Code)
 
+✅ Erledigt am 22.10.2026: SMTP über ALL-INKL (`info@systemsafari.de`, Port 587). Claude Code hat die deutsche Mail mit 6-stelligem Code eingestellt (gültig 10 Minuten).
+
 Im kostenlosen Supabase-Tarif steht in der Login-Mail nur ein Link und **kein Code**. Der Link öffnet sich aber im normalen Browser statt in der Flenski-App. Deshalb soll Supabase die Mails über dein eigenes Postfach verschicken. Das ist sowieso nötig, denn Supabase selbst verschickt nur 2 Mails pro Stunde und nur an dich.
 
 1. Supabase → Projekt **emotional-crm** → links **Authentication** → **Emails** (bzw. „SMTP Settings“).
