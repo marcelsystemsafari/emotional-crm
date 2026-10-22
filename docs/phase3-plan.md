@@ -1,6 +1,6 @@
 # Plan Phase 3 (neu) – Automatisch aus der App + neue Oberfläche
 
-Stand: 22.10.2026 · Status: **in Arbeit** – Schritt 1 fertig (22.10.2026)
+Stand: 22.10.2026 · Status: **in Arbeit** – Schritt 1 und 2 fertig (22.10.2026)
 Grundlage: Entscheidung 0005, echte Payloads in `inbox/webhooks/`, Modul Aktivität (`08-aktivitaet.md`).
 
 ## Ziel in einem Satz
@@ -29,6 +29,10 @@ Festgelegt beim Bau: Team-/Admin-Profile werden keine Kundinnen. „Event beginn
 ## Schritt 2 – Erstabgleich und Nachverarbeitung
 - Bestehende Mitglieder, Pläne und Events aus Lanas App einmalig übernehmen (über Marcels Flenski-Verbindung).
 - Den bisherigen Mitschnitt (seit 22.10.) nachträglich verarbeiten – z. B. Martinas „Artikel gelesen“.
+
+**Stand Schritt 2 (22.10.2026):** Erstabgleich Lana über `import_flenski_snapshot`: 2 Personen (Martina Böttcher, Sarah Oberste), 3 Pläne als Produkte „noch einzurichten“, 5 Kursserien = 44 Termine (Jan.–März 2027), 1 Anmeldung. Nicht übernommen: Swetlana (Team) und Maria Musterfrau (Tag „Yogalehrerin“, `ausschluss_tags`).
+
+**Wichtige Erkenntnis:** Flenskis „Am Event teilgenommen“ kommt schon bei der **Anmeldung** (Lanas Serien beginnen erst im Januar 2027 und haben bereits Teilnehmende). Deshalb: Anmeldung = „angemeldet“; nach Terminbeginn macht `finalize_past_sessions()` (alle 15 Minuten) daraus „da“ + Abbuchung. Offen: Meldet Flenski Abmeldungen? Falls nicht, würde eine abgemeldete Person trotzdem abgebucht (06).
 
 ## Schritt 3 – Aktivitätsstatus
 - Ansicht `v_customer_engagement`: **Neu · Dabei · Kühlt ab · Eingeschlafen** aus App-Aktivität **und** Kursbesuchen (08).

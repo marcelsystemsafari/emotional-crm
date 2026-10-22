@@ -23,6 +23,9 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 - [ ] **Aktivität:** Als Admin ein Mitglied → Profil ansehen → Aktivität öffnen, F12 → Reiter „Netzwerk" → Seite neu laden und Screenshot der geladenen Anfrage (nur Name und Adresse) in `inbox/screenshots/` legen. Ergebnis entscheidet, ob es eine Historie gibt oder ob sie erst mit dem Mitschnitt beginnt.
 - [x] **Aktivität:** Automationen für die Aktivitäts-Trigger (angelegt 22.10.2026) (Liste in `08-aktivitaet.md`, Abschnitt 6) anlegen und auf den Empfänger zeigen lassen, so früh wie möglich.
 
+- [ ] **Abmeldung von Events:** Gibt es in Flenski einen Trigger, wenn sich jemand von einem Event wieder abmeldet? Ohne ihn bucht das CRM nach Terminbeginn auch abgemeldete Personen ab (Phase 3, Schritt 2). In die Support-Anfrage aufnehmen.
+- [ ] **Dauerhafter Abgleich:** Erstabgleich lief über Marcels Flenski-Verbindung. Für neue Mandantinnen und regelmäßigen Abgleich braucht der Server einen Flenski-API-Schlüssel.
+
 ## C. Von Lana (erste Mandantin)
 
 - [ ] Liste externer Kundinnen (Excel/CSV: Name, E-Mail oder Telefon, aktuelles Produkt, Restguthaben, Ablauf)

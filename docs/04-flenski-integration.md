@@ -82,7 +82,7 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 **Weiter offen:**
 - **Signatur (geklärt 22.10.2026):** HMAC-SHA256 über den Rohbody, `sha256=<hex>`, **ein Schlüssel pro Automation**, nur einmal sichtbar. „Testen“ nutzt einen Einmalschlüssel. Umsetzung: Entscheidung 0004. Mit echter Nachricht bestätigt (22.10.2026).
 - **Beobachtung:** „Artikel gelesen“ kam pro Mitglied und Artikel nur beim ersten Öffnen. Erneutes Öffnen, ein erneuter Download des „Demo download“ und ein Sperrbildschirm-Klick lösten keine Nachricht aus. Ob das an „nur einmal pro Mitglied“ oder an der Auswahl in der Automation liegt, ist noch offen.
-- „Am Event teilgenommen“ hat `source: signup`. Ob das „angemeldet“ oder „anwesend“ heißt, bleibt offen, bis ein echtes Ereignis vorliegt. Bis dahin gilt weiter: nur `registered`.
+- **„Am Event teilgenommen“ = Anmeldung** (geklärt 22.10.2026: `source: signup`, und Lanas Serien ab Januar 2027 haben bereits Teilnehmende). Umsetzung: `registered`, nach Terminbeginn automatisch `present` + Abbuchung (`finalize_past_sessions`, alle 15 Min.).
 - Beispieldaten ersetzen keine echten Ereignisse: Plan-IDs, Beträge und `source` müssen an echten Vorgängen bestätigt werden.
 - **Datenschutz:** Beitrags- und Kommentartexte sowie `targetAuthor` kommen mit. Regel 10 (CLAUDE.md) verbietet, Inhalte in `activity_events` zu übernehmen. Im Rohspeicher `webhook_events` liegen sie aber derzeit vollständig. Entscheidung offen (06, Abschnitt A).
 
