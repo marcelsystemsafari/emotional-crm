@@ -1,5 +1,7 @@
 // Automatischer Abgleich mit Flenski (Entscheidung 0006).
-// Wird alle 5 Minuten von pg_cron angestoßen (Job "ecrm-flenski-abgleich"), Schutz über den Header x-sync-secret.
+// pg_cron prüft alle 5 Minuten in der Datenbank, ob eine Mandantin fällig ist (flenski_faellige_mandanten:
+// Kurs beginnt bald / hat gerade begonnen, oder letzter Abgleich über eine Stunde her), und ruft nur dann hier an.
+// Schutz über den Header x-sync-secret.
 // Holt für jede Mandantin mit Flenski-Schlüssel alle Termine der App und übergibt sie an
 // sync_flenski_events: Termine anlegen, Anmeldungen angleichen, Termine 5 Minuten nach Beginn abschließen.
 //
@@ -67,10 +69,19 @@ Deno.serve(async (req) => {
     return reply(401, { ok: false, error: "Nicht erlaubt" });
   }
 
+  // Nur Mandantinnen, bei denen gerade ein Kurs ansteht oder der letzte Abgleich über eine Stunde her ist
+  const { data: faellig, error: faelligError } = await supabase.rpc("flenski_faellige_mandanten");
+  if (faelligError) {
+    console.error("Fällige Mandanten nicht lesbar", faelligError);
+    return reply(500, { ok: false });
+  }
+  const ids = (faellig || []).map((r: unknown) => (typeof r === "string" ? r : Object.values(r as object)[0]));
+  if (!ids.length) return reply(200, { ok: true, result: {} });
+
   const { data: tenants, error } = await supabase
     .from("tenants")
     .select("id, slug, settings, status, tenant_secrets(flenski_api_key)")
-    .in("status", ["trial", "active"]);
+    .in("id", ids);
   if (error) {
     console.error("Mandanten nicht lesbar", error);
     return reply(500, { ok: false });

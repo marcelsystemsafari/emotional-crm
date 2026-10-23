@@ -66,20 +66,32 @@
             <div class="ecrm-hero-date" x-text="todayLong()"></div>
             <div class="ecrm-serif ecrm-hero-hello" x-text="greeting()"></div>
             <div class="ecrm-hero-line" x-text="heroLine()"></div>
-            <div class="ecrm-hero-stats">
-              <button @click="openList('')"><b x-text="people.length"></b><span>Menschen</span></button>
-              <button @click="go('kurse')"><b x-text="upcomingRegistrations()"></b><span>Anmeldungen</span></button>
-              <button @click="openList('')"><b x-text="purchases7()"></b><span>Käufe/Woche</span></button>
+            <div class="ecrm-hero-facts">
+              <button @click="go('kurse')"><b x-text="upcomingRegistrations()"></b> <span x-text="upcomingRegistrations() === 1 ? 'Anmeldung für deine Kurse' : 'Anmeldungen für deine Kurse'"></span></button>
+              <button @click="openList('')"><b x-text="purchases7()"></b> <span x-text="purchases7() === 1 ? 'Kauf in 7 Tagen' : 'Käufe in 7 Tagen'"></span></button>
             </div>
           </div>
 
-          <div class="ecrm-states">
-            <button class="ecrm-state ecrm-st-dabei" @click="openList('dabei')"><span>Dabei</span><b x-text="count('dabei')"></b></button>
-            <button class="ecrm-state ecrm-st-kuehlt_ab" @click="openList('kuehlt_ab')"><span>Werden still</span><b x-text="count('kuehlt_ab')"></b></button>
-            <button class="ecrm-state ecrm-st-neu" @click="openList('neu')"><span>Neu</span><b x-text="count('neu')"></b></button>
+          <div class="ecrm-card ecrm-section ecrm-mix">
+            <div class="ecrm-section-head ecrm-mix-head">
+              <div class="ecrm-h" x-text="'Deine ' + people.length + (people.length === 1 ? ' Mensch' : ' Menschen')"></div>
+              <button class="ecrm-link ecrm-link-s" @click="openList('')">Alle ansehen ›</button>
+            </div>
+            <div class="ecrm-mixbar" x-show="people.length">
+              <template x-for="m in mix" :key="m.status">
+                <i :class="'ecrm-st-' + m.status" :style="'flex-grow:' + count(m.status)" x-show="count(m.status)"></i>
+              </template>
+            </div>
+            <div class="ecrm-mix-rows">
+            <template x-for="m in mix" :key="m.status">
+              <button class="ecrm-mix-row" @click="openList(m.status)">
+                <span class="ecrm-mix-dot" :class="'ecrm-st-' + m.status"></span>
+                <span class="ecrm-grow"><b x-text="m.label"></b><span class="ecrm-text-s" x-text="m.hint"></span></span>
+                <span class="ecrm-mix-num" x-text="count(m.status)"></span>
+              </button>
+            </template>
+            </div>
           </div>
-          <p class="ecrm-legend"><span class="ecrm-i">i</span> <b>Dabei</b> = in den letzten 14 Tagen in der App oder im Kurs aktiv. <b>Werden still</b> = seit 15 bis 30 Tagen nichts. <b>Neu</b> = seit höchstens 14 Tagen in deiner App.
-            <template x-if="count('eingeschlafen')"><span x-text="' ' + count('eingeschlafen') + ' länger weg (über 30 Tage).'"></span></template></p>
 
           <template x-if="isOwner && setupNeeded().length">
             <button class="ecrm-banner" @click="go('angebote')">
@@ -157,7 +169,7 @@
         <section class="ecrm-narrow" x-show="tab === 'menschen' && !personId && !form">
           <div class="ecrm-page-head">
             <div class="ecrm-serif ecrm-page-title">Menschen</div>
-            <div class="ecrm-text-s">Alle aus deiner App – oben, wer still wird, dann die Neuen, dann wer dabei ist.</div>
+            <div class="ecrm-text-s">Alle aus deiner App – oben, wer still wird, dann die Neuen, dann die Aktiven.</div>
           </div>
           <input class="ecrm-input" type="search" placeholder="Name suchen" x-model="search">
           <div class="ecrm-chips">
@@ -541,6 +553,27 @@
 #ecrm-root .ecrm-hero-date { font-size: 12px; color: #a8d4bf; letter-spacing: .03em; }
 #ecrm-root .ecrm-hero-hello { font-size: 32px; line-height: 1.15; color: #fff; margin: 6px 0 8px; }
 #ecrm-root .ecrm-hero-line { font-size: 14px; color: #cfe8dc; max-width: 460px; }
+#ecrm-root .ecrm-hero-facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .14); }
+#ecrm-root .ecrm-hero-facts button { font: inherit; font-size: 13px; background: none; border: 0; padding: 0; color: #cfe8dc; cursor: pointer; text-align: left; }
+#ecrm-root .ecrm-hero-facts b { color: #fff; font-size: 15px; font-weight: 600; }
+#ecrm-root .ecrm-mix-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+#ecrm-root .ecrm-mixbar { display: flex; gap: 3px; height: 10px; border-radius: 6px; overflow: hidden; margin: 2px 0 6px; background: #efe9df; }
+#ecrm-root .ecrm-mixbar i { display: block; min-width: 6px; flex-basis: 0; }
+#ecrm-root .ecrm-mixbar i.ecrm-st-dabei, #ecrm-root .ecrm-mix-dot.ecrm-st-dabei { background: #97C459; }
+#ecrm-root .ecrm-mixbar i.ecrm-st-neu, #ecrm-root .ecrm-mix-dot.ecrm-st-neu { background: #5DCAA5; }
+#ecrm-root .ecrm-mixbar i.ecrm-st-kuehlt_ab, #ecrm-root .ecrm-mix-dot.ecrm-st-kuehlt_ab { background: #EF9F27; }
+#ecrm-root .ecrm-mixbar i.ecrm-st-eingeschlafen, #ecrm-root .ecrm-mix-dot.ecrm-st-eingeschlafen { background: #B4B2A9; }
+#ecrm-root .ecrm-mix-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 0; border: 0; border-top: 1px solid var(--line); background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+#ecrm-root .ecrm-mix-rows .ecrm-mix-row:first-child { border-top-color: transparent; }
+#ecrm-root .ecrm-mix-rows { padding-bottom: 6px; }
+@media (min-width: 900px) {
+  #ecrm-root .ecrm-mix-rows { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 18px; padding: 4px 0 12px; }
+  #ecrm-root .ecrm-mix-rows .ecrm-mix-row { border-top-color: transparent; align-items: flex-start; }
+  #ecrm-root .ecrm-mix-dot { margin-top: 5px; }
+}
+#ecrm-root .ecrm-mix-row b { display: block; font-size: 15px; font-weight: 600; }
+#ecrm-root .ecrm-mix-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+#ecrm-root .ecrm-mix-num { font-size: 22px; font-weight: 600; min-width: 28px; text-align: right; }
 #ecrm-root .ecrm-hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
 #ecrm-root .ecrm-hero-stats button { text-align: left; font: inherit; border: 0; border-radius: 16px; padding: 12px 14px; background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; }
 #ecrm-root .ecrm-hero-stats b { display: block; font-size: 24px; font-weight: 600; line-height: 1.1; }
@@ -781,7 +814,7 @@
     });
   }
 
-  var STATUS_SHORT = { neu: 'neu', dabei: 'dabei', kuehlt_ab: 'wird still', eingeschlafen: 'länger weg' };
+  var STATUS_SHORT = { neu: 'neu', dabei: 'aktiv', kuehlt_ab: 'wird still', eingeschlafen: 'länger weg' };
   var APP = { course_enrolled: 'hat sich zum Kurs angemeldet', course_completed: 'hat einen Kurs abgeschlossen', post_created: 'hat etwas gepostet in',
     comment_created: 'hat kommentiert', question_asked: 'hat eine Frage gestellt', file_downloaded: 'hat heruntergeladen',
     article_read: 'hat gelesen', lockscreen_cta: 'interessiert sich für', other: 'war aktiv' };
@@ -841,8 +874,12 @@
       login: { email: '', code: '', codeSent: false },
       people: [], overview: {}, care: [], careLimit: 5, feed: [], lastByPerson: {}, products: [], categories: [], sessions: [],
       search: '', filter: '',
+      mix: [{ status: 'dabei', label: 'Aktiv', hint: 'In den letzten 14 Tagen in der App oder im Kurs' },
+            { status: 'neu', label: 'Neu', hint: 'Seit höchstens 14 Tagen in deiner App' },
+            { status: 'kuehlt_ab', label: 'Werden still', hint: 'Seit 15 bis 30 Tagen nichts gemacht' },
+            { status: 'eingeschlafen', label: 'Länger weg', hint: 'Über 30 Tage nichts gemacht' }],
       statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Werden still' }, { value: 'neu', label: 'Neu' },
-                      { value: 'dabei', label: 'Dabei' }, { value: 'eingeschlafen', label: 'Länger weg' }],
+                      { value: 'dabei', label: 'Aktiv' }, { value: 'eingeschlafen', label: 'Länger weg' }],
       personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
       showPast: false, course: null, roster: [], setup: {},
 
@@ -1053,7 +1090,7 @@
       statusShort(s) { return STATUS_SHORT[s] || s; },
       statusLong(e) {
         if (e.status === 'neu') return 'Neu in deiner App';
-        if (e.status === 'dabei') return 'Dabei';
+        if (e.status === 'dabei') return 'Aktiv';
         if (e.status === 'kuehlt_ab') return 'Wird still · seit ' + e.tage_still + ' Tagen nichts';
         return 'Länger weg' + (e.tage_still != null ? ' · seit ' + e.tage_still + ' Tagen' : '');
       },

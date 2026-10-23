@@ -100,6 +100,19 @@ select is(pg_temp.st('50000000-0000-0000-0000-000000000009', 'c0000000-0000-0000
 select is((select abgleich_info ->> 'fehlt' from public.sessions where id = '50000000-0000-0000-0000-000000000009'), 'true',
   'Nach 24 Stunden ohne Stand: Termin als "Abgleich fehlt" markiert');
 
+-- ===== Nur bei Bedarf bei Flenski fragen =====
+select is((select last_sync_at is not null from public.tenant_secrets where tenant_id = '00000000-0000-0000-0000-00000000000a'), true, 'Abgleich merkt sich den Zeitpunkt');
+update public.sessions set abgeglichen_at = coalesce(abgeglichen_at, now()) where tenant_id = '00000000-0000-0000-0000-00000000000a';
+select is((select count(*)::int from public.flenski_faellige_mandanten() x where x = '00000000-0000-0000-0000-00000000000a'), 0, 'Gerade abgeglichen, kein Kurs in Sicht: nicht fällig');
+insert into public.sessions (tenant_id, title, starts_at, flenski_event_id) values
+  ('00000000-0000-0000-0000-00000000000a', 'Bald', now() + interval '15 minutes', 'e0000000-0000-0000-0000-000000000077');
+select is((select count(*)::int from public.flenski_faellige_mandanten() x where x = '00000000-0000-0000-0000-00000000000a'), 1, 'Kurs beginnt in 15 Minuten: fällig');
+update public.sessions set starts_at = now() + interval '90 minutes' where flenski_event_id = 'e0000000-0000-0000-0000-000000000077';
+select is((select count(*)::int from public.flenski_faellige_mandanten() x where x = '00000000-0000-0000-0000-00000000000a'), 0, 'Kurs erst in 90 Minuten: noch nicht fällig');
+update public.tenant_secrets set last_sync_at = now() - interval '61 minutes' where tenant_id = '00000000-0000-0000-0000-00000000000a';
+select is((select count(*)::int from public.flenski_faellige_mandanten() x where x = '00000000-0000-0000-0000-00000000000a'), 1, 'Letzter Abgleich über eine Stunde her: fällig');
+select ok(not exists (select 1 from public.flenski_faellige_mandanten() x where x = '00000000-0000-0000-0000-00000000000b'), 'Mandantin ohne Schlüssel ist nie fällig');
+
 -- ===== Sicherheit =====
 set local role authenticated;
 select throws_ok($$select * from public.tenant_secrets$$, '42501', null, 'Flenski-Schlüssel sind für Nutzerinnen unsichtbar');
