@@ -42,3 +42,11 @@ Alles, was Make heute für die Karten tut, macht das CRM – sichtbar für Nina 
 3. **Alte QR-Codes:** (a) weiter gültig über eine kleine Weiterleitung in Make (ca. 3 Operationen pro Scan) oder (b) allen 8 Kundinnen einmalig einen neuen Code schicken (danach 0 Make-Operationen).
 4. **Gültigkeit der 8er-Karte:** Läuft sie ab (z. B. 6 Monate) oder unbegrenzt?
 5. **Stichtag:** Wann, und weiß Nina Bescheid?
+
+## Entscheidungen (Marcel, 23.10.2026)
+- **8er-Karte** wird an zwei Stellen gezählt: im Studio per QR-Scan und bei **Online-Events** (Flenski-Typ „virtuell“) über die Flenski-Anmeldung. Alle anderen Angebote laufen nur über den Plan (ohne Zählen); endet ein Abo, entzieht Flenski den Plan selbst.
+- **Neue Regel je Mandantin:** Abzug über die Flenski-Anmeldung nur bei Online-Events, Präsenzstunden nur per QR-Scan (sonst doppelter Abzug). Für Lana bleibt: alle Termine über die Anmeldung.
+- **Einchecken nur durch Nina** (angemeldet im CRM). Kundinnen können sich nicht selbst einchecken.
+- **8er-Karte unbegrenzt gültig.**
+- **Vorrang:** Mitgliedschaft vor 8er-Karte – wer Mitglied ist, verbraucht bei Online-Events keinen Besuch.
+- Offen: Umgang mit den alten QR-Codes, Stichtag.
