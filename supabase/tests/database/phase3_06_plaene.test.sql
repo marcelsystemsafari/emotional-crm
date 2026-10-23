@@ -42,10 +42,10 @@ select public.sync_flenski_plans('00000000-0000-0000-0000-00000000000a',
 select ok((select flenski_removed_at is null from public.products where flenski_plan_id = 'b0000000-0000-0000-0000-000000000001'),
   'Wieder aufgetauchter Plan ist wieder sichtbar');
 select ok(not public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000a'),
-  'Gerade abgeglichen: Sofort-Abgleich gesperrt (höchstens alle 2 Minuten)');
-update public.tenant_secrets set plans_synced_at = now() - interval '3 minutes' where tenant_id = '00000000-0000-0000-0000-00000000000a';
+  'Gerade abgeglichen: Sofort-Abgleich kurz gesperrt (20 Sekunden)');
+update public.tenant_secrets set plans_synced_at = now() - interval '30 seconds' where tenant_id = '00000000-0000-0000-0000-00000000000a';
 select ok(public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000a'),
-  'Inhaberin darf nach 2 Minuten wieder abgleichen');
+  'Inhaberin darf nach 20 Sekunden wieder abgleichen');
 select ok(not public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000b'),
   'Fremde Person darf nicht');
 select is((select name from public.products where flenski_plan_id = 'b0000000-0000-0000-0000-000000000002'), 'Abo Premium',

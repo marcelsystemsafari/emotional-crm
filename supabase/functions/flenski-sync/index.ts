@@ -134,11 +134,15 @@ async function plaeneJetzt(req: Request, tenantId: string) {
   if (!auth?.user) return reply(401, { ok: false, error: "Bitte anmelden" });
   const { data: erlaubt, error } = await supabase.rpc("flenski_plaene_jetzt_erlaubt", { p_tenant: tenantId, p_user: auth.user.id });
   if (error) return reply(500, { ok: false });
-  if (!erlaubt) return reply(200, { ok: true, uebersprungen: true });
+  if (!erlaubt) {
+    const { data: s } = await supabase.from("tenant_secrets").select("plans_synced_at, make_webhook_url").eq("tenant_id", tenantId).maybeSingle();
+    if (!s?.make_webhook_url) return reply(200, { ok: false, error: "Für diese App ist kein Abgleich eingerichtet." });
+    return reply(200, { ok: true, uebersprungen: true, stand: s.plans_synced_at });
+  }
   const { data: t } = await supabase.from("tenants")
     .select("id, slug, settings, tenant_secrets(flenski_api_key, make_webhook_url)").eq("id", tenantId).single();
   try {
-    return reply(200, { ok: true, ...(await holePlaene(t)) });
+    return reply(200, { ok: true, ...(await holePlaene(t)), stand: new Date().toISOString() });
   } catch (e) {
     console.error("Sofort-Abgleich Pläne fehlgeschlagen", e instanceof Error ? e.message : e);
     return reply(200, { ok: false, error: "Die App war gerade nicht erreichbar." });

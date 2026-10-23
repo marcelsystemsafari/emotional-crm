@@ -73,7 +73,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Kurse</span></button>
           <button :class="tab === 'angebote' && 'ecrm-on'" @click="go('angebote')">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2M4 12h16"/></svg><span>Angebote</span>
-            <i class="ecrm-badge" x-show="setupNeeded().length" x-text="setupNeeded().length"></i></button>
+            <i class="ecrm-badge" x-show="setupNeeded().length" x-text="setupNeeded().length" title="Angebote noch nicht verbunden"></i></button>
         </nav>
 
         <!-- ================= ÜBERSICHT ================= -->
@@ -426,6 +426,23 @@
             <div class="ecrm-text-s">Die Pläne aus deiner App. Damit das CRM Besuche zählen kann, sag einmal, was in jedem Angebot steckt.</div>
           </div>
 
+          <div class="ecrm-newplans">
+            <template x-if="makeAktiv()">
+              <div class="ecrm-plansync" :class="plansSync === 'fehler' && 'ecrm-plansync-fehler'">
+                <span class="ecrm-sync-dot" :class="plansSync === 'laeuft' && 'ecrm-sync-dot-an'"></span>
+                <span class="ecrm-grow">
+                  <b x-text="plansSyncTitel()"></b>
+                  <span class="ecrm-text-s" x-text="plansSyncText()"></span>
+                </span>
+                <button class="ecrm-btn ecrm-btn-soft" @click="refreshPlans(true)" :disabled="plansSync === 'laeuft'">Jetzt abgleichen</button>
+              </div>
+            </template>
+            <template x-if="!makeAktiv()">
+              <p class="ecrm-text-s">Ein neuer Plan aus deiner App erscheint hier, sobald ihn jemand kauft oder zugewiesen bekommt.</p>
+            </template>
+          </div>
+
+
           <template x-for="p in setupNeeded()" :key="p.id">
             <div class="ecrm-card ecrm-section ecrm-offer">
               <div class="ecrm-name ecrm-name-l" x-text="p.name"></div>
@@ -473,16 +490,6 @@
               </template>
             </div>
           </template>
-
-          <div class="ecrm-newplans">
-            <template x-if="makeAktiv()">
-              <p class="ecrm-text-s"><span class="ecrm-sync-dot" :class="plansSync === 'laeuft' && 'ecrm-sync-dot-an'"></span>
-                <span x-text="plansSyncText()"></span></p>
-            </template>
-            <template x-if="!makeAktiv()">
-              <p class="ecrm-text-s">Ein neuer Plan aus deiner App erscheint hier, sobald ihn jemand kauft oder zugewiesen bekommt.</p>
-            </template>
-          </div>
 
           <div class="ecrm-explain">
             <b>Wie hängt das mit Flenski zusammen?</b>
@@ -540,6 +547,11 @@
 @keyframes ecrm-schimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { #ecrm-root .ecrm-skel i { animation: none; } }
 #ecrm-root .ecrm-newplans { margin: 0 6px 14px; }
+#ecrm-root .ecrm-plansync { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #fff;
+  border: 1px solid var(--line); flex-wrap: wrap; }
+#ecrm-root .ecrm-plansync b { display: block; font-size: 14px; font-weight: 600; }
+#ecrm-root .ecrm-plansync-fehler { background: #fcf5e7; border-color: #efdcb8; }
+#ecrm-root .ecrm-plansync-fehler .ecrm-sync-dot { background: #EF9F27; }
 #ecrm-root .ecrm-sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #97C459; margin-right: 6px; vertical-align: 1px; }
 #ecrm-root .ecrm-sync-dot-an { background: #EF9F27; animation: ecrm-puls 1s ease-in-out infinite; }
 @keyframes ecrm-puls { 50% { opacity: .3; } }
@@ -591,8 +603,9 @@
   border: 0; border-radius: 18px; background: transparent; color: var(--muted); cursor: pointer; }
 #ecrm-root .ecrm-nav svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 #ecrm-root .ecrm-nav button.ecrm-on { background: var(--a); color: #fff; font-weight: 600; }
-#ecrm-root .ecrm-badge { position: absolute; top: 5px; right: 8px; min-width: 17px; height: 17px; border-radius: 9px; background: #d9822b; color: #fff; font-size: 11px;
-  font-style: normal; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
+#ecrm-root .ecrm-badge { min-width: 18px; height: 18px; border-radius: 9px; background: var(--a-soft); color: var(--a-d); font-size: 11px;
+  font-style: normal; font-weight: 700; display: inline-grid; place-items: center; padding: 0 5px; line-height: 1; }
+#ecrm-root .ecrm-nav button.ecrm-on .ecrm-badge { background: rgba(255, 255, 255, .22); color: #fff; }
 /* Übersicht */
 #ecrm-root .ecrm-hero { border-radius: 26px; padding: 24px 22px 20px; margin-bottom: 14px; color: #e3f2ea;
   background: linear-gradient(140deg, #2f6852 0%, #1d4636 70%, #173a2d 100%); box-shadow: 0 16px 34px -20px rgba(23, 58, 45, .75); }
@@ -789,6 +802,7 @@
   #ecrm-root { padding: 12px; }
   #ecrm-root .ecrm-inline { padding-left: 0; }
   #ecrm-root .ecrm-nav button { font-size: 11px; flex-direction: column; gap: 2px; min-height: 54px; }
+  #ecrm-root .ecrm-nav .ecrm-badge { position: absolute; top: 4px; right: 6px; min-width: 16px; height: 16px; font-size: 10px; }
   #ecrm-root .ecrm-section { padding: 0 16px 4px; }
   #ecrm-root .ecrm-hero { padding: 20px 18px 16px; }
   #ecrm-root .ecrm-hero-hello { font-size: 27px; }
@@ -927,7 +941,7 @@
       statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Werden still' }, { value: 'neu', label: 'Neu' },
                       { value: 'dabei', label: 'Aktiv' }, { value: 'eingeschlafen', label: 'Länger weg' }],
       personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
-      showPast: false, course: null, roster: [], setup: {}, ready: false, plansSync: '', plansSyncAt: null,
+      showPast: false, course: null, roster: [], setup: {}, ready: false, plansSync: '', plansStand: null, plansMsg: '',
 
       async init() {
         boot.style.display = 'none';
@@ -999,7 +1013,7 @@
         this.tab = t; this.personId = null; this.detail = null; this.form = null; this.course = null; this.toTop();
         if (t === 'heute' || t === 'menschen') this.loadPeople();
         if (t === 'kurse' || t === 'heute') this.loadCourses();
-        if (t === 'angebote') { this.loadProducts(); this.refreshPlans(); }
+        if (t === 'angebote') { this.loadProducts(); this.loadPlansStand(); this.refreshPlans(false); }
       },
       openList(status) { this.filter = status; this.go('menschen'); },
 
@@ -1063,25 +1077,52 @@
       // ---------- Übersicht ----------
       todayLong() { return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
       makeAktiv() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.make_aktiv); },
-      // Beim Öffnen von "Angebote": Planliste direkt aus der App holen (über flenski-sync, höchstens alle 2 Minuten)
-      async refreshPlans() {
+      // Planliste direkt aus der App holen: automatisch beim Öffnen von "Angebote" und per Knopf "Jetzt abgleichen"
+      async refreshPlans(vonHand) {
         if (!this.makeAktiv() || this.plansSync === 'laeuft') return;
-        this.plansSync = 'laeuft';
+        this.plansSync = 'laeuft'; this.plansMsg = '';
         try {
           var r = await this.sb.functions.invoke('flenski-sync', { body: { aktion: 'plaene', tenant: this.tenant.id } });
           var d = r.data || {};
-          this.plansSync = d.ok === false || r.error ? 'fehler' : 'ok';
-          this.plansSyncAt = new Date().toISOString();
-          if (d.neu) this.notify(d.neu === 1 ? 'Ein neuer Plan aus deiner App – bitte einmal verbinden.' : d.neu + ' neue Pläne aus deiner App – bitte einmal verbinden.');
+          if (r.error) {
+            var st = r.error.context && r.error.context.status;
+            this.plansSync = 'fehler';
+            this.plansMsg = st === 401 ? 'Deine Anmeldung ist abgelaufen. Bitte melde dich neu an.' : 'Der Abgleich hat nicht geklappt. Bitte versuch es gleich nochmal.';
+          } else if (d.ok === false) {
+            this.plansSync = 'fehler';
+            this.plansMsg = d.error || 'Die App war gerade nicht erreichbar.';
+          } else {
+            this.plansSync = 'ok';
+            if (d.stand) this.plansStand = d.stand;
+            if (d.uebersprungen) this.plansMsg = vonHand ? 'Gerade erst abgeglichen – alles aktuell.' : '';
+            else if (d.neu || d.entfernt) {
+              var teile = [];
+              if (d.neu) teile.push(d.neu === 1 ? '1 neuer Plan' : d.neu + ' neue Pläne');
+              if (d.entfernt) teile.push(d.entfernt === 1 ? '1 gelöschter Plan ausgeblendet' : d.entfernt + ' gelöschte Pläne ausgeblendet');
+              this.plansMsg = teile.join(', ') + '.';
+            } else this.plansMsg = 'Keine Änderungen.';
+          }
         } catch (e) {
           this.plansSync = 'fehler';
+          this.plansMsg = 'Der Abgleich hat nicht geklappt. Bitte versuch es gleich nochmal.';
         }
         await this.loadProducts();
       },
-      plansSyncText() {
+      async loadPlansStand() {
+        if (!this.makeAktiv()) return;
+        var r = await this.sb.rpc('plans_stand', { p_tenant: this.tenant.id });
+        if (!r.error && r.data) this.plansStand = r.data;
+      },
+      plansSyncTitel() {
         if (this.plansSync === 'laeuft') return 'Abgleich mit deiner App läuft …';
-        if (this.plansSync === 'fehler') return 'Die App war gerade nicht erreichbar. Neue oder gelöschte Pläne werden beim nächsten Öffnen übernommen.';
-        return 'Mit deiner App abgeglichen – neue Pläne erscheinen hier, gelöschte verschwinden.';
+        if (this.plansSync === 'fehler') return 'Abgleich nicht möglich';
+        if (!this.plansStand) return 'Noch nicht mit deiner App abgeglichen';
+        return 'Stand aus deiner App: ' + this.ago(this.plansStand) + ', ' + this.time(this.plansStand);
+      },
+      plansSyncText() {
+        if (this.plansSync === 'laeuft') return 'Neue Pläne erscheinen hier gleich, gelöschte verschwinden.';
+        if (this.plansMsg) return this.plansMsg;
+        return 'Gerade einen Plan in der App angelegt oder gelöscht? Tippe auf „Jetzt abgleichen“.';
       },
       planAuto() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.plan_entzug_automatisch); },
       logoUrl() { return (this.tenant && this.tenant.settings && this.tenant.settings.logo_url) || ''; },
