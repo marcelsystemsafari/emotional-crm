@@ -49,4 +49,6 @@ Alles, was Make heute für die Karten tut, macht das CRM – sichtbar für Nina 
 - **Einchecken nur durch Nina** (angemeldet im CRM). Kundinnen können sich nicht selbst einchecken.
 - **8er-Karte unbegrenzt gültig.**
 - **Vorrang:** Mitgliedschaft vor 8er-Karte – wer Mitglied ist, verbraucht bei Online-Events keinen Besuch.
-- Offen: Umgang mit den alten QR-Codes, Stichtag.
+- **Laufendes System nicht stören (Marcel):** Zwei Schritte statt Stichtag.
+  - **Schritt 1:** Nina bekommt das CRM ohne eigene 8er-Kartenzählung. Die 8er-Karte bleibt komplett in Make (QR-Codes, Szenarien, Datenspeicher unverändert); im CRM steht sie als „wird in Make gezählt“, das CRM zieht dafür nichts ab. Alles andere (Menschen, Aktivität, Kurse, Mitgliedschaften) läuft im CRM.
+  - **Schritt 2 (später, nach OK):** CRM übernimmt die 8er-Karten. Die **vorhandenen QR-Codes bleiben gültig** – das Scan-Szenario in Make zählt nicht mehr selbst, sondern leitet an das CRM weiter. Reststände 1:1 mit denselben Kartencodes. Online-Event-Abzug dann ebenfalls im CRM.
