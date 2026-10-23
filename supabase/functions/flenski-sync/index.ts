@@ -63,37 +63,65 @@ async function fetchEvents(appId: string, apiKey: string) {
   return events;
 }
 
-// Plan einer Person in der App entziehen bzw. wieder zuweisen (Pfade ermittelt 23.10.2026, Felder wie im
-// Make-Modul revokePlansProfile: E-Mail der Person und Plan-IDs). Gibt null bei Erfolg, sonst eine kurze Fehlerbeschreibung.
-async function revokePlan(appId: string, apiKey: string, email: string, planId: string) {
-  return await planCall(`${FLENSKI_API}/apps/${appId}/profiles/plans/revoke`, apiKey, email, planId);
-}
-async function assignPlan(appId: string, apiKey: string, email: string, planId: string) {
-  return await planCall(`${FLENSKI_API}/apps/${appId}/profiles/plans`, apiKey, email, planId);
-}
-async function planCall(url: string, apiKey: string, email: string, planId: string) {
+// Was der Flenski-API-Schlüssel nicht darf (Plan entziehen/zuweisen, vollständige Teilnehmerliste), erledigt das
+// Make-Szenario "ECRM: Flenski-Aktionen" mit Marcels Flenski-Verbindung. Aufruf nur bei Bedarf, je etwa 3 Make-Operationen.
+// Supabase-Secret MAKE_WEBHOOK_URL. Antwort von Make: {"ok":true, ...}; alles andere gilt als Fehler.
+// deno-lint-ignore no-explicit-any
+async function make(daten: Record<string, unknown>): Promise<any> {
+  const url = Deno.env.get("MAKE_WEBHOOK_URL");
+  if (!url) throw new Error("MAKE_WEBHOOK_URL fehlt");
   const res = await fetch(url, {
     method: "POST",
-    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ email, planIds: [planId] }),
-    signal: AbortSignal.timeout(20000),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(daten),
+    signal: AbortSignal.timeout(40000),
   });
-  if (res.ok) return null;
-  return `Flenski ${res.status}: ${(await res.text()).slice(0, 200)}`;
+  const text = await res.text();
+  let antwort;
+  try { antwort = JSON.parse(text); } catch { throw new Error(`Make antwortet ${res.status}: ${text.slice(0, 120)}`); }
+  if (!antwort?.ok) throw new Error(`Make meldet Fehler: ${text.slice(0, 200)}`);
+  return antwort;
+}
+
+// deno-lint-ignore no-explicit-any
+async function planAktion(aktion: "revoke" | "assign", t: any, email: string, planId: string) {
+  try {
+    await make({ aktion, projectId: t.settings?.flenski_project_id, appId: t.settings?.flenski_app_id, email, planId });
+    return null;
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
+}
+
+// Vollständige Teilnehmerliste für fällige Termine, deren Namensliste Flenski gekürzt hat
+async function fehlendeTeilnehmer(tenantId: string) {
+  const { data: offen, error } = await supabase.rpc("flenski_teilnehmer_benoetigt", { p_tenant: tenantId });
+  if (error) throw error;
+  let geholt = 0;
+  for (const o of offen || []) {
+    try {
+      const antwort = await make({ aktion: "attendees", eventId: o.event_id });
+      // deno-lint-ignore no-explicit-any
+      const ids = (antwort.body?.data || []).map((p: any) => p.id).filter(Boolean);
+      const { error: e2 } = await supabase.rpc("flenski_teilnehmer_setzen", { p_session: o.session_id, p_profiles: ids });
+      if (e2) throw e2;
+      geholt++;
+    } catch (e) {
+      // ohne vollständige Liste gleicht das CRM vorsichtig ab ("Teilnahme unklar" statt raten)
+      console.error("Teilnehmerliste über Make fehlgeschlagen", e instanceof Error ? e.message : e);
+    }
+  }
+  return geholt;
 }
 
 // Offene Entzüge einer Mandantin abarbeiten (nur wenn sie es eingeschaltet hat, prüft die Datenbank)
-async function revokeOpenPlans(tenantId: string, appId: string, apiKey: string) {
-  const { data: offen, error } = await supabase.rpc("flenski_offene_entzuege", { p_tenant: tenantId });
+// deno-lint-ignore no-explicit-any
+async function revokeOpenPlans(t: any) {
+  const { data: offen, error } = await supabase.rpc("flenski_offene_entzuege", { p_tenant: t.id });
   if (error) throw error;
   let entzogen = 0;
   for (const o of offen || []) {
-    let fehler: string | null;
-    try {
-      fehler = await revokePlan(appId, apiKey, o.email, o.plan_id);
-    } catch (e) {
-      fehler = e instanceof Error ? e.message : String(e);
-    }
+    const fehler = await planAktion("revoke", t, o.email, o.plan_id);
     await supabase.rpc("flenski_entzug_ergebnis", { p_notice: o.notice_id, p_ok: !fehler, p_info: fehler });
     if (!fehler) entzogen++;
     else console.error(`Plan-Entzug fehlgeschlagen (${o.produkt})`, fehler);
@@ -102,17 +130,13 @@ async function revokeOpenPlans(tenantId: string, appId: string, apiKey: string) 
 }
 
 // Karte wieder aufgefüllt: Plan zurückgeben
-async function restorePlans(tenantId: string, appId: string, apiKey: string) {
-  const { data: offen, error } = await supabase.rpc("flenski_offene_rueckgaben", { p_tenant: tenantId });
+// deno-lint-ignore no-explicit-any
+async function restorePlans(t: any) {
+  const { data: offen, error } = await supabase.rpc("flenski_offene_rueckgaben", { p_tenant: t.id });
   if (error) throw error;
   let zurueck = 0;
   for (const o of offen || []) {
-    let fehler: string | null;
-    try {
-      fehler = await assignPlan(appId, apiKey, o.email, o.plan_id);
-    } catch (e) {
-      fehler = e instanceof Error ? e.message : String(e);
-    }
+    const fehler = await planAktion("assign", t, o.email, o.plan_id);
     await supabase.rpc("flenski_rueckgabe_ergebnis", { p_notice: o.notice_id, p_ok: !fehler, p_info: fehler });
     if (!fehler) zurueck++;
     else console.error(`Plan-Rückgabe fehlgeschlagen (${o.produkt})`, fehler);
@@ -152,11 +176,12 @@ Deno.serve(async (req) => {
     if (!appId || !apiKey) continue;
     try {
       const events = await fetchEvents(appId, apiKey);
+      const listen = await fehlendeTeilnehmer(t.id);
       const { data, error: rpcError } = await supabase.rpc("sync_flenski_events", { p_tenant: t.id, p_events: events });
       if (rpcError) throw rpcError;
-      const entzogen = await revokeOpenPlans(t.id, appId, apiKey);
-      const zurueck = await restorePlans(t.id, appId, apiKey);
-      result[t.slug] = { ...data, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
+      const entzogen = await revokeOpenPlans(t);
+      const zurueck = await restorePlans(t);
+      result[t.slug] = { ...data, listen_ueber_make: listen, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
     } catch (e) {
       // Fehler bei einer Mandantin hält die anderen nicht auf; ohne frischen Stand wird nichts abgebucht
       console.error(`Abgleich ${t.slug} fehlgeschlagen`, e instanceof Error ? e.message : e);

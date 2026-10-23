@@ -63,5 +63,5 @@ Abhaken, sobald erledigt. Ergebnisse in `inbox/` ablegen.
 ## Seit 23.10.2026 (automatischer Abgleich)
 - [x] Flenski-API-Schlüssel für den Server: vorhanden, Abgleich läuft alle 5 Minuten (`flenski-sync`).
 - [ ] **Flenski-Support fragen:** Ist `lastAttended` in der Termin-Liste auf eine Anzahl begrenzt? Gibt es die vollständige Teilnehmerliste (`/events/{id}/attendees`) auch mit API-Schlüssel? Bis dahin: bei gekürzter Liste meldet das CRM „Teilnahme unklar“ statt zu raten.
-- [ ] Plan per API entziehen (Make-Modul `revokePlansProfile` zeigt, dass es geht) – Pfad mit dem Schlüssel noch ermitteln.
-- [ ] **Plan entziehen/zuweisen per Schnittstelle:** Mit dem API-Schlüssel 401. Klären: Gibt es Schlüssel mit Schreibrechten (Einstellung beim Anlegen?) oder wie meldet sich die Make-App „Flenski“ an? Bis dahin bleibt `plan_entzug_automatisch` aus; Lana bekommt den Hinweis „Plan entziehen“.
+- [x] Plan per API entziehen – über Make (Entscheidung 0007). (Make-Modul `revokePlansProfile` zeigt, dass es geht) – Pfad mit dem Schlüssel noch ermitteln.
+- [x] **Plan entziehen/zuweisen per Schnittstelle:** gelöst über Make (Entscheidung 0007). Früherer Stand: Mit dem API-Schlüssel 401. Klären: Gibt es Schlüssel mit Schreibrechten (Einstellung beim Anlegen?) oder wie meldet sich die Make-App „Flenski“ an? Bis dahin bleibt `plan_entzug_automatisch` aus; Lana bekommt den Hinweis „Plan entziehen“.

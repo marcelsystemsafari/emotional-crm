@@ -84,6 +84,21 @@ select is((select count(*) from public.customer_notices where kind = 'teilnahme_
 select public.set_attendance((select id from t2), 'c0000000-0000-0000-0000-000000000001', 'war_da');
 select is(pg_temp.st((select id from t2), 'c0000000-0000-0000-0000-000000000001'), 'present', '"War da" bucht ab');
 
+-- ===== Vollständige Liste über Make, wenn Flenski kürzt =====
+select public.sync_flenski_events('00000000-0000-0000-0000-00000000000a', jsonb_build_array(
+  pg_temp.ev('e0000000-0000-0000-0000-000000000003', now() + interval '1 hour', 3, array['f0000000-0000-0000-0000-000000000003'])));
+create temp table t3 as select id from public.sessions where flenski_event_id = 'e0000000-0000-0000-0000-000000000003';
+select is((select count(*)::int from public.flenski_teilnehmer_benoetigt('00000000-0000-0000-0000-00000000000a')), 0,
+  'Vor Kursbeginn: noch keine Liste nötig');
+update public.sessions set starts_at = now() - interval '6 minutes', flenski_seen_at = now() - interval '8 minutes' where id = (select id from t3);
+select is((select event_id from public.flenski_teilnehmer_benoetigt('00000000-0000-0000-0000-00000000000a')), 'e0000000-0000-0000-0000-000000000003'::uuid,
+  'Gekürzte Liste bei Abschluss: vollständige Liste wird geholt');
+select public.flenski_teilnehmer_setzen((select id from t3),
+  array['f0000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000004', 'f0000000-0000-0000-0000-000000000099']::uuid[]);
+select public.sync_flenski_events('00000000-0000-0000-0000-00000000000a', '[]');
+select is(pg_temp.st((select id from t3), 'c0000000-0000-0000-0000-000000000004'), 'present', 'Vollständige Liste: auch nicht sichtbare Person war da');
+select is((select abgleich_info ->> 'unklar' from public.sessions where id = (select id from t3)), '0', 'Vollständige Liste: nichts unklar');
+
 -- ===== Kulanz =====
 select public.set_attendance((select id from t1), 'c0000000-0000-0000-0000-000000000001', 'kulanz');
 select is(pg_temp.saldo('c0000000-0000-0000-0000-000000000001'), 9::bigint, 'Kulanz gibt den Besuch zurück (10 − 2 + 1)');

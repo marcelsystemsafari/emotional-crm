@@ -33,6 +33,7 @@ Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 - **Fachlogik als SQL-Funktionen** in Supabase (`checkin`, `sell`, `correct`, `cancel_attendance` …), getestet mit Datenbank-Tests.
 - **Git lokal:** Nach jedem abgeschlossenen Arbeitsschritt einen Commit mit verständlicher deutscher Nachricht anlegen, damit Marcel jederzeit zurück kann. Marcel bedient Git nicht selbst.
 - Kein Next.js, kein Vercel, kein eigener Server.
+- Ausnahme Make (Entscheidung 0007): nur als Brücke für Flenski-Aktionen, die der API-Schlüssel nicht darf, und nur bei Bedarf angestoßen.
 
 ## Harte Regeln
 
@@ -69,7 +70,7 @@ Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfigu
 
 ## Aktueller Stand
 
-**Neuausrichtung 22.10.2026 (Entscheidung 0005):** Flenski ist die Quelle, das CRM zeigt die Menschen. Plan `docs/phase3-plan.md`: Schritte 1–4 gebaut am 22.10.2026 (Webhook-Verarbeitung, Erstabgleich, Aktivitätsstatus, neue Oberfläche). Oberfläche v2 am 22.10.2026 (Übersicht · Menschen · Kurse · Angebote, Glanzoptik, Profilfotos, Knopf zum Flenski-Profil, keine manuelle Zahlung, Kurse nur echte Flenski-Termine). Automatischer Teilnehmer-Abgleich mit Flenski seit 23.10.2026 (Entscheidung 0006, Edge Function `flenski-sync`, fragt Flenski nur rund um Kurstermine und sonst stündlich). Wartet auf Test in Flenski und Abnahme.
+**Neuausrichtung 22.10.2026 (Entscheidung 0005):** Flenski ist die Quelle, das CRM zeigt die Menschen. Plan `docs/phase3-plan.md`: Schritte 1–4 gebaut am 22.10.2026 (Webhook-Verarbeitung, Erstabgleich, Aktivitätsstatus, neue Oberfläche). Oberfläche v2 am 22.10.2026 (Übersicht · Menschen · Kurse · Angebote, Glanzoptik, Profilfotos, Knopf zum Flenski-Profil, keine manuelle Zahlung, Kurse nur echte Flenski-Termine). Automatischer Teilnehmer-Abgleich mit Flenski seit 23.10.2026 (Entscheidung 0006, Edge Function `flenski-sync`, fragt Flenski nur rund um Kurstermine und sonst stündlich). Plan-Entzug/-Rückgabe und vollständige Teilnehmerliste über das Make-Szenario „ECRM: Flenski-Aktionen“, nur bei Bedarf (Entscheidung 0007); für Lana eingeschaltet. Wartet auf Test in Flenski und Abnahme.
 
 **Phase 0 abgenommen am 22.10.2026. Phase 1 abgenommen am 22.10.2026. Phase 2 (Oberfläche) gebaut und lokal getestet am 22.10.2026, wartet auf Test in Flenski und Abnahme: `docs/phase2-plan.md`, Datei `ui/crm.html`, lokal ansehen mit `node scripts/serve-ui.mjs`.** (`docs/phase1-plan.md`): alle Tabellen, RLS, Fachfunktionen (`sell`, `checkin`, `undo_checkin`, `cancel_attendance`, `correct`, `expire_entitlements`, `customer_signals`, `anonymize_customer`), nächtliche Jobs (pg_cron), Demo-Mandantin `yoga-by-lana-demo` (`supabase/seed.sql`), Registrierung geschlossen – Einladung per `node scripts/invite-user.mjs`. Fertig: Tabellen `tenants` + `webhook_events`, Edge Function `flenski-webhook` (speichert roh, dedupliziert), erweiterte `ui/phase0-test.html`. Erledigt: 17 Automationen mit Signaturprüfung (Entscheidung 0004), eigener Mailversand + deutsche Code-Mail. Einbettung entschieden: direkt im Flenski-Embed-Widget (Entscheidung 0001). iPhone getestet. Für Phase 1 merken: offene Registrierung (`disable_signup`) schließen, Nutzer nur per Einladung. Datenbank-Tests: `node scripts/test-db.mjs` (Ersatz für `supabase test db`, weil Docker fehlt). Offene Entscheidungen: `docs/06-offene-punkte.md`, Abschnitt A.
 
