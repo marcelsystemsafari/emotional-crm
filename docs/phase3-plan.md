@@ -77,3 +77,4 @@ Plan-Rückgabe bei Wiederauffüllen (+1) gebaut (`flenski_offene_rueckgaben`, ke
 
 ## Neue Pläne und Ladeanimation (23.10.2026)
 Neue Flenski-Pläne erscheinen automatisch unter „Angebote“ als „noch nicht verbunden“: Make-Aktion „plans“ (Projekt-Planliste, gefiltert auf die App), einmal am Tag und sofort auf Knopfdruck (`request_plan_sync` → `flenski_plaene_faellig` → `sync_flenski_plans`). Tests `phase3_06_plaene` (12). Oberfläche: Skelett-Ladeanimation statt leerer Fläche; Rechte und Daten werden gleichzeitig geladen.
+Nachtrag 23.10.2026: Kein Flenski-Trigger für „Plan angelegt/gelöscht“. Stattdessen Sofort-Abgleich beim Öffnen von „Angebote“ (Browser → `flenski-sync` mit Login der Lehrerin, `flenski_plaene_jetzt_erlaubt`, höchstens alle 2 Minuten, ca. 3 Make-Operationen). In Flenski gelöschte Pläne werden markiert (`products.flenski_removed_at`) und unter „Angebote“ ausgeblendet; Karten und Buchungen bleiben.

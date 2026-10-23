@@ -476,11 +476,8 @@
 
           <div class="ecrm-newplans">
             <template x-if="makeAktiv()">
-              <div>
-                <p class="ecrm-text-s">Neue Pläne aus deiner App erscheinen hier automatisch, einmal am Tag. Gerade erst einen angelegt?</p>
-                <button class="ecrm-btn" @click="requestPlans()" :disabled="plansRequested"
-                        x-text="plansRequested ? 'Wird geholt – erscheint in wenigen Minuten' : 'Neue Pläne aus der App holen'"></button>
-              </div>
+              <p class="ecrm-text-s"><span class="ecrm-sync-dot" :class="plansSync === 'laeuft' && 'ecrm-sync-dot-an'"></span>
+                <span x-text="plansSyncText()"></span></p>
             </template>
             <template x-if="!makeAktiv()">
               <p class="ecrm-text-s">Ein neuer Plan aus deiner App erscheint hier, sobald ihn jemand kauft oder zugewiesen bekommt.</p>
@@ -543,7 +540,9 @@
 @keyframes ecrm-schimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { #ecrm-root .ecrm-skel i { animation: none; } }
 #ecrm-root .ecrm-newplans { margin: 0 6px 14px; }
-#ecrm-root .ecrm-newplans .ecrm-btn { margin-top: 8px; }
+#ecrm-root .ecrm-sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #97C459; margin-right: 6px; vertical-align: 1px; }
+#ecrm-root .ecrm-sync-dot-an { background: #EF9F27; animation: ecrm-puls 1s ease-in-out infinite; }
+@keyframes ecrm-puls { 50% { opacity: .3; } }
 #ecrm-root .ecrm-serif { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; }
 #ecrm-root .ecrm-card { display: block; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin: 0 0 14px;
   box-shadow: 0 1px 2px rgba(40, 30, 10, .04), 0 10px 26px -18px rgba(40, 30, 10, .18); text-align: left; font: inherit; color: inherit; }
@@ -928,7 +927,7 @@
       statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Werden still' }, { value: 'neu', label: 'Neu' },
                       { value: 'dabei', label: 'Aktiv' }, { value: 'eingeschlafen', label: 'Länger weg' }],
       personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
-      showPast: false, course: null, roster: [], setup: {}, ready: false, plansRequested: false,
+      showPast: false, course: null, roster: [], setup: {}, ready: false, plansSync: '', plansSyncAt: null,
 
       async init() {
         boot.style.display = 'none';
@@ -1000,7 +999,7 @@
         this.tab = t; this.personId = null; this.detail = null; this.form = null; this.course = null; this.toTop();
         if (t === 'heute' || t === 'menschen') this.loadPeople();
         if (t === 'kurse' || t === 'heute') this.loadCourses();
-        if (t === 'angebote') this.loadProducts();
+        if (t === 'angebote') { this.loadProducts(); this.refreshPlans(); }
       },
       openList(status) { this.filter = status; this.go('menschen'); },
 
@@ -1064,24 +1063,25 @@
       // ---------- Übersicht ----------
       todayLong() { return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
       makeAktiv() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.make_aktiv); },
-      async requestPlans() {
-        await this.run(async () => {
-          await this.rpc('request_plan_sync', { p_tenant: this.tenant.id });
-          this.plansRequested = true;
-          this.notify('Wird geholt. Neue Pläne erscheinen in wenigen Minuten hier.');
-        });
-        if (!this.plansRequested) return;
-        var self = this, vorher = this.products.length, runden = 0;
-        var nachsehen = function () {
-          setTimeout(async function () {
-            await self.loadProducts();
-            runden++;
-            if (self.products.length > vorher) { self.plansRequested = false; self.notify('Neue Pläne gefunden – jetzt einmal verbinden.'); }
-            else if (runden >= 18) { self.plansRequested = false; self.notify('Keine neuen Pläne gefunden.'); }
-            else nachsehen();
-          }, 20000);
-        };
-        nachsehen();
+      // Beim Öffnen von "Angebote": Planliste direkt aus der App holen (über flenski-sync, höchstens alle 2 Minuten)
+      async refreshPlans() {
+        if (!this.makeAktiv() || this.plansSync === 'laeuft') return;
+        this.plansSync = 'laeuft';
+        try {
+          var r = await this.sb.functions.invoke('flenski-sync', { body: { aktion: 'plaene', tenant: this.tenant.id } });
+          var d = r.data || {};
+          this.plansSync = d.ok === false || r.error ? 'fehler' : 'ok';
+          this.plansSyncAt = new Date().toISOString();
+          if (d.neu) this.notify(d.neu === 1 ? 'Ein neuer Plan aus deiner App – bitte einmal verbinden.' : d.neu + ' neue Pläne aus deiner App – bitte einmal verbinden.');
+        } catch (e) {
+          this.plansSync = 'fehler';
+        }
+        await this.loadProducts();
+      },
+      plansSyncText() {
+        if (this.plansSync === 'laeuft') return 'Abgleich mit deiner App läuft …';
+        if (this.plansSync === 'fehler') return 'Die App war gerade nicht erreichbar. Neue oder gelöschte Pläne werden beim nächsten Öffnen übernommen.';
+        return 'Mit deiner App abgeglichen – neue Pläne erscheinen hier, gelöschte verschwinden.';
       },
       planAuto() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.plan_entzug_automatisch); },
       logoUrl() { return (this.tenant && this.tenant.settings && this.tenant.settings.logo_url) || ''; },
@@ -1102,8 +1102,8 @@
       nextSessions() { var now = new Date(); return this.sessions.filter(function (s) { return new Date(s.starts_at) >= now; }).slice(0, 3); },
       fillPct(s) { return s.capacity ? Math.min(100, Math.round((s.n || 0) / s.capacity * 100)) : ((s.n || 0) ? 30 : 0); },
       count(status) { return this.people.filter(function (p) { return p.status === status; }).length; },
-      setupNeeded() { return this.products.filter(function (p) { return p.needs_setup; }); },
-      connected() { return this.products.filter(function (p) { return !p.needs_setup && p.flenski_plan_id; }); },
+      setupNeeded() { return this.products.filter(function (p) { return p.needs_setup && !p.flenski_removed_at; }); },
+      connected() { return this.products.filter(function (p) { return !p.needs_setup && p.flenski_plan_id && !p.flenski_removed_at; }); },
       person(id) { return this.people.find(function (p) { return p.customer_id === id; }) || {}; },
       personStatus(id) { return this.person(id).status || 'eingeschlafen'; },
       profileUrl(id) {

@@ -24,14 +24,30 @@ select is((select count(*)::int from public.flenski_faellige_mandanten() x where
   'Planliste fällig macht die Mandantin fällig');
 
 select is(public.sync_flenski_plans('00000000-0000-0000-0000-00000000000a',
-  '[{"id": "b0000000-0000-0000-0000-000000000001", "name": "Mitgliedschaft"}, {"id": "b0000000-0000-0000-0000-000000000002", "name": "Abo 2"}]'), 2,
+  '[{"id": "b0000000-0000-0000-0000-000000000001", "name": "Mitgliedschaft"}, {"id": "b0000000-0000-0000-0000-000000000002", "name": "Abo 2"}]') ->> 'neu', '2',
   'Zwei neue Pläne erkannt');
 select is((select count(*)::int from public.products where tenant_id = '00000000-0000-0000-0000-00000000000a' and needs_setup), 2,
   'Neue Pläne stehen als "noch nicht verbunden" bereit');
 select ok(not public.flenski_plaene_faellig('00000000-0000-0000-0000-00000000000a'), 'Gerade geholt: nicht fällig');
 
 select is(public.sync_flenski_plans('00000000-0000-0000-0000-00000000000a',
-  '[{"id": "b0000000-0000-0000-0000-000000000002", "name": "Abo Premium"}]'), 0, 'Bekannter Plan ist nicht neu');
+  '[{"id": "b0000000-0000-0000-0000-000000000002", "name": "Abo Premium"}]'),
+  '{"neu": 0, "entfernt": 1}'::jsonb, 'Bekannter Plan ist nicht neu, fehlender Plan gilt als gelöscht');
+select ok((select flenski_removed_at is not null from public.products where flenski_plan_id = 'b0000000-0000-0000-0000-000000000001'),
+  'In Flenski gelöschter Plan wird markiert (Produkt bleibt)');
+select is(public.sync_flenski_plans('00000000-0000-0000-0000-00000000000a', '[]') ->> 'entfernt', '0',
+  'Leere Liste entfernt nichts (Schutz bei Fehlern)');
+select public.sync_flenski_plans('00000000-0000-0000-0000-00000000000a',
+  '[{"id": "b0000000-0000-0000-0000-000000000001", "name": "Mitgliedschaft"}, {"id": "b0000000-0000-0000-0000-000000000002", "name": "Abo Premium"}]');
+select ok((select flenski_removed_at is null from public.products where flenski_plan_id = 'b0000000-0000-0000-0000-000000000001'),
+  'Wieder aufgetauchter Plan ist wieder sichtbar');
+select ok(not public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000a'),
+  'Gerade abgeglichen: Sofort-Abgleich gesperrt (höchstens alle 2 Minuten)');
+update public.tenant_secrets set plans_synced_at = now() - interval '3 minutes' where tenant_id = '00000000-0000-0000-0000-00000000000a';
+select ok(public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000a'),
+  'Inhaberin darf nach 2 Minuten wieder abgleichen');
+select ok(not public.flenski_plaene_jetzt_erlaubt('00000000-0000-0000-0000-00000000000a', '10000000-0000-0000-0000-00000000000b'),
+  'Fremde Person darf nicht');
 select is((select name from public.products where flenski_plan_id = 'b0000000-0000-0000-0000-000000000002'), 'Abo Premium',
   'Umbenannter Plan bekommt den neuen Namen');
 

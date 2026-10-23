@@ -18,8 +18,15 @@ const supabase = createClient(
   { auth: { persistSession: false } },
 );
 
+// Der Reiter "Angebote" ruft diese Funktion direkt aus dem Browser auf (Sofort-Abgleich der Pläne)
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function reply(status: number, body: Record<string, unknown>) {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...CORS } });
 }
 
 function sameText(a: string, b: string) {
@@ -101,6 +108,12 @@ async function syncPlans(t: any) {
   const { data: faellig, error } = await supabase.rpc("flenski_plaene_faellig", { p_tenant: t.id });
   if (error) throw error;
   if (!faellig) return 0;
+  return await holePlaene(t);
+}
+
+// Planliste über Make holen und übernehmen → {neu, entfernt}
+// deno-lint-ignore no-explicit-any
+async function holePlaene(t: any) {
   const appId = t.settings?.flenski_app_id;
   const antwort = await make(t, { aktion: "plans", appId });
   // Make liefert die Pläne des ganzen Flenski-Projekts – nur die dieser App übernehmen
@@ -109,9 +122,27 @@ async function syncPlans(t: any) {
     .filter((p: any) => p.status !== "archived" && (p.apps || []).some((a: any) => a.id === appId))
     // deno-lint-ignore no-explicit-any
     .map((p: any) => ({ id: p.id, name: p.name }));
-  const { data: neu, error: e2 } = await supabase.rpc("sync_flenski_plans", { p_tenant: t.id, p_plans: plaene });
+  const { data: ergebnis, error: e2 } = await supabase.rpc("sync_flenski_plans", { p_tenant: t.id, p_plans: plaene });
   if (e2) throw e2;
-  return neu;
+  return ergebnis;
+}
+
+// Sofort-Abgleich aus der Oberfläche: angemeldete Person der Mandantin, höchstens alle 2 Minuten
+async function plaeneJetzt(req: Request, tenantId: string) {
+  const jwt = (req.headers.get("authorization") || "").replace(/^Bearers+/i, "");
+  const { data: auth } = await supabase.auth.getUser(jwt);
+  if (!auth?.user) return reply(401, { ok: false, error: "Bitte anmelden" });
+  const { data: erlaubt, error } = await supabase.rpc("flenski_plaene_jetzt_erlaubt", { p_tenant: tenantId, p_user: auth.user.id });
+  if (error) return reply(500, { ok: false });
+  if (!erlaubt) return reply(200, { ok: true, uebersprungen: true });
+  const { data: t } = await supabase.from("tenants")
+    .select("id, slug, settings, tenant_secrets(flenski_api_key, make_webhook_url)").eq("id", tenantId).single();
+  try {
+    return reply(200, { ok: true, ...(await holePlaene(t)) });
+  } catch (e) {
+    console.error("Sofort-Abgleich Pläne fehlgeschlagen", e instanceof Error ? e.message : e);
+    return reply(200, { ok: false, error: "Die App war gerade nicht erreichbar." });
+  }
 }
 
 // Vollständige Teilnehmerliste für fällige Termine, deren Namensliste Flenski gekürzt hat
@@ -170,8 +201,14 @@ async function restorePlans(t: any) {
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   const secret = Deno.env.get("SYNC_SECRET") || "";
-  if (!secret || !sameText(req.headers.get("x-sync-secret") || "", secret)) {
+  const vomTakt = !!secret && sameText(req.headers.get("x-sync-secret") || "", secret);
+  if (!vomTakt) {
+    const body = await req.json().catch(() => ({}));
+    if (body?.aktion === "plaene" && typeof body.tenant === "string") return await plaeneJetzt(req, body.tenant);
+  }
+  if (!vomTakt) {
     return reply(401, { ok: false, error: "Nicht erlaubt" });
   }
 

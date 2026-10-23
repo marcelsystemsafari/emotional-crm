@@ -21,7 +21,7 @@ Stand 23.10.2026. Ziel: so wenig Handarbeit wie möglich. Was Marcel (oder Claud
 
 ## Ohne Make
 Alles läuft, nur drei Dinge sind Handarbeit bzw. langsamer:
-- Neue Pläne erscheinen unter „Angebote“ erst, wenn sie jemand kauft oder zugewiesen bekommt (mit Make: einmal am Tag automatisch oder per Knopf „Neue Pläne aus der App holen“).
+- Neue Pläne erscheinen unter „Angebote“ erst, wenn sie jemand kauft oder zugewiesen bekommt (mit Make: beim Öffnen von „Angebote“ sofort abgeglichen, gelöschte Pläne verschwinden).
 - Leere/abgelaufene Karte → Hinweis „Plan entziehen“ in „Heute für dich“, ein Klick im Profil.
 - Große Kurse, bei denen Flenski die Namensliste kürzt → „Teilnahme unklar – kurz bestätigen“.
 
