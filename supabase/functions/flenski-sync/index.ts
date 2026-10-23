@@ -65,11 +65,12 @@ async function fetchEvents(appId: string, apiKey: string) {
 
 // Was der Flenski-API-Schlüssel nicht darf (Plan entziehen/zuweisen, vollständige Teilnehmerliste), erledigt das
 // Make-Szenario "ECRM: Flenski-Aktionen" mit Marcels Flenski-Verbindung. Aufruf nur bei Bedarf, je etwa 3 Make-Operationen.
-// Supabase-Secret MAKE_WEBHOOK_URL. Antwort von Make: {"ok":true, ...}; alles andere gilt als Fehler.
+// Jede Lehrerin hat ihre eigene Make-Adresse (tenant_secrets.make_webhook_url, ihr eigenes Szenario mit ihrer
+// Flenski-Verbindung). Antwort von Make: {"ok":true, ...}; alles andere gilt als Fehler.
 // deno-lint-ignore no-explicit-any
-async function make(daten: Record<string, unknown>): Promise<any> {
-  const url = Deno.env.get("MAKE_WEBHOOK_URL");
-  if (!url) throw new Error("MAKE_WEBHOOK_URL fehlt");
+async function make(t: any, daten: Record<string, unknown>): Promise<any> {
+  const url = t.tenant_secrets?.make_webhook_url;
+  if (!url) throw new Error("keine Make-Adresse hinterlegt");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -86,7 +87,7 @@ async function make(daten: Record<string, unknown>): Promise<any> {
 // deno-lint-ignore no-explicit-any
 async function planAktion(aktion: "revoke" | "assign", t: any, email: string, planId: string) {
   try {
-    await make({ aktion, projectId: t.settings?.flenski_project_id, appId: t.settings?.flenski_app_id, email, planId });
+    await make(t, { aktion, projectId: t.settings?.flenski_project_id, appId: t.settings?.flenski_app_id, email, planId });
     return null;
   } catch (e) {
     return e instanceof Error ? e.message : String(e);
@@ -94,13 +95,15 @@ async function planAktion(aktion: "revoke" | "assign", t: any, email: string, pl
 }
 
 // Vollständige Teilnehmerliste für fällige Termine, deren Namensliste Flenski gekürzt hat
-async function fehlendeTeilnehmer(tenantId: string) {
-  const { data: offen, error } = await supabase.rpc("flenski_teilnehmer_benoetigt", { p_tenant: tenantId });
+// deno-lint-ignore no-explicit-any
+async function fehlendeTeilnehmer(t: any) {
+  if (!t.tenant_secrets?.make_webhook_url) return 0;
+  const { data: offen, error } = await supabase.rpc("flenski_teilnehmer_benoetigt", { p_tenant: t.id });
   if (error) throw error;
   let geholt = 0;
   for (const o of offen || []) {
     try {
-      const antwort = await make({ aktion: "attendees", eventId: o.event_id });
+      const antwort = await make(t, { aktion: "attendees", appId: t.settings?.flenski_app_id, eventId: o.event_id });
       // deno-lint-ignore no-explicit-any
       const ids = (antwort.body?.data || []).map((p: any) => p.id).filter(Boolean);
       const { error: e2 } = await supabase.rpc("flenski_teilnehmer_setzen", { p_session: o.session_id, p_profiles: ids });
@@ -117,6 +120,7 @@ async function fehlendeTeilnehmer(tenantId: string) {
 // Offene Entzüge einer Mandantin abarbeiten (nur wenn sie es eingeschaltet hat, prüft die Datenbank)
 // deno-lint-ignore no-explicit-any
 async function revokeOpenPlans(t: any) {
+  if (!t.tenant_secrets?.make_webhook_url) return 0;
   const { data: offen, error } = await supabase.rpc("flenski_offene_entzuege", { p_tenant: t.id });
   if (error) throw error;
   let entzogen = 0;
@@ -132,6 +136,7 @@ async function revokeOpenPlans(t: any) {
 // Karte wieder aufgefüllt: Plan zurückgeben
 // deno-lint-ignore no-explicit-any
 async function restorePlans(t: any) {
+  if (!t.tenant_secrets?.make_webhook_url) return 0;
   const { data: offen, error } = await supabase.rpc("flenski_offene_rueckgaben", { p_tenant: t.id });
   if (error) throw error;
   let zurueck = 0;
@@ -161,7 +166,7 @@ Deno.serve(async (req) => {
 
   const { data: tenants, error } = await supabase
     .from("tenants")
-    .select("id, slug, settings, status, tenant_secrets(flenski_api_key)")
+    .select("id, slug, settings, status, tenant_secrets(flenski_api_key, make_webhook_url)")
     .in("id", ids);
   if (error) {
     console.error("Mandanten nicht lesbar", error);
@@ -176,7 +181,7 @@ Deno.serve(async (req) => {
     if (!appId || !apiKey) continue;
     try {
       const events = await fetchEvents(appId, apiKey);
-      const listen = await fehlendeTeilnehmer(t.id);
+      const listen = await fehlendeTeilnehmer(t);
       const { data, error: rpcError } = await supabase.rpc("sync_flenski_events", { p_tenant: t.id, p_events: events });
       if (rpcError) throw rpcError;
       const entzogen = await revokeOpenPlans(t);

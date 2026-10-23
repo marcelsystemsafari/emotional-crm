@@ -64,7 +64,7 @@ supabase test db                         # Datenbank-Tests
 ```
 Auf Marcels Rechner heißt `supabase` konkret `./.tools/supabase.exe`, mit `SUPABASE_ACCESS_TOKEN` und `SUPABASE_DB_PASSWORD` aus `.env.local` als Umgebungsvariablen (kein `supabase login`, siehe Entscheidung 0003). Diese Werte nie ausgeben.
 
-Weitere Skripte (`scripts/`): `sql.mjs` (SQL ausführen), `test-db.mjs` (Datenbank-Tests), `invite-user.mjs` (Person einladen), `upload-webhook-secrets.mjs` (Flenski-Schlüssel), `export-webhooks.mjs` (Beispiel-Payloads anonymisiert), `setup-flenski-sync.mjs` (Flenski-Schlüssel einer Mandantin hinterlegen, Abgleich einschalten).
+Weitere Skripte (`scripts/`): `sql.mjs` (SQL ausführen), `test-db.mjs` (Datenbank-Tests), `invite-user.mjs` (Person einladen), `upload-webhook-secrets.mjs` (Flenski-Schlüssel), `export-webhooks.mjs` (Beispiel-Payloads anonymisiert), `setup-flenski-sync.mjs` (Flenski-Schlüssel einer Mandantin hinterlegen, Abgleich einschalten), `setup-make.mjs` (Make-Adresse einer Mandantin hinterlegen). Ablauf für neue Lehrerinnen: `docs/einrichtung-neue-lehrerin.md`.
 
 Die Oberfläche lokal testen: `ui/crm.html` im Browser öffnen (mit Test-Konfiguration).
 

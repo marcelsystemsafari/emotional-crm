@@ -19,3 +19,6 @@ Der Flenski-API-Schlüssel darf nur lesen (Termine, Mitglieder). Plan entziehen/
 - Für weitere Lehrerinnen: Ihre App muss im Flenski-Projekt der Make-Verbindung liegen; Projekt-ID je Mandantin in `settings.flenski_project_id`.
 - Getestet am 23.10.2026 mit Marcels Testkonto (Sarah Oberste): Entzug und Rückgabe über die ganze Kette, keine Doppelkarte.
 - Sobald Flenski Schlüssel mit Schreibrechten anbietet, kann Make wieder entfallen (nur `make()` in `flenski-sync` ersetzen).
+
+## Nachtrag 23.10.2026: eine Make-Kopie je Lehrerin
+Marcel übergibt Apps später in das Flenski-Konto der Lehrerin. Seine eigene Make-Verbindung sieht die App dann nicht mehr. Weil Make für die Automationen der Lehrerin ohnehin mit ihrem Flenski-Login angebunden wird, bekommt jede Lehrerin eine **eigene Kopie** des Szenarios mit ihrer Verbindung. Die Kopie arbeitet nur für ihre App (Filter auf die App-ID). Das CRM speichert die Make-Adresse **je Mandantin** (`tenant_secrets.make_webhook_url`, eintragen mit `scripts/setup-make.mjs`, nie in Git). Ablauf: `docs/einrichtung-neue-lehrerin.md`.
