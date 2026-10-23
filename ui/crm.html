@@ -459,7 +459,7 @@
 
           <div class="ecrm-explain">
             <b>Wie hängt das mit Flenski zusammen?</b>
-            <p>Der Plan in Flenski regelt, ob jemand Zugang hat. Das CRM zählt, wie viele Besuche auf einer Karte noch übrig sind. Kauft jemand in der App, legt das CRM die Karte automatisch an. Ist sie leer, siehst du die Person unter „Heute für dich“. Den Plan in Flenski entziehst du selbst oder bietest eine neue Karte an – automatisch kann das CRM das nicht, weil Flenski dafür (noch) keine Schnittstelle anbietet.</p>
+            <p>Der Plan in Flenski regelt, ob jemand Zugang hat. Das CRM zählt, wie viele Besuche auf einer Karte noch übrig sind. Kauft jemand in der App, legt das CRM die Karte automatisch an. Ist eine Karte leer oder abgelaufen, <span x-text="planAuto() ? 'nimmt das CRM den Plan in der App automatisch weg (spätestens nach einer Stunde). Kauft die Person eine neue Karte, bekommt sie ihn mit dem Kauf zurück.' : 'siehst du die Person unter „Heute für dich“ und entziehst den Plan im Profil der App.'"></span></p>
           </div>
 
           <div class="ecrm-card ecrm-section">
@@ -1013,6 +1013,7 @@
 
       // ---------- Übersicht ----------
       todayLong() { return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
+      planAuto() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.plan_entzug_automatisch); },
       logoUrl() { return (this.tenant && this.tenant.settings && this.tenant.settings.logo_url) || ''; },
       ownerName() { return (this.tenant.settings && this.tenant.settings.signatur) || ''; },
       greeting() {
@@ -1133,12 +1134,16 @@
           this.sb.from('v_customer_engagement').select('*').eq('customer_id', id).maybeSingle(),
           this.sb.from('v_entitlement_balance').select('*').eq('customer_id', id).order('status').order('starts_at', { ascending: false }),
           this.sb.rpc('activity_feed', { p_tenant: tid, p_customer: id, p_limit: 100 }),
-          this.sb.from('customer_notices').select('*').eq('customer_id', id).is('resolved_at', null).order('created_at', { ascending: false })
+          this.sb.from('customer_notices').select('*').eq('customer_id', id).is('resolved_at', null).order('created_at', { ascending: false }),
+          this.sb.from('entitlements').select('id,flenski_plan_revoked_at').eq('customer_id', id)
         ]);
         if (res[0].error) return this.notify(message(res[0].error), true);
         var c = res[0].data;
         var eng = res[1].data || { status: 'eingeschlafen', first_name: c.first_name, last_name: c.last_name, events_8w: [0, 0, 0, 0, 0, 0, 0, 0], besuche_gesamt: 0, score_30d: 0 };
-        this.detail = { c: c, eng: eng, ents: res[2].data || [], feed: res[3].data || [], notices: res[4].data || [] };
+        var entzogen = {};
+        (res[5].data || []).forEach(function (x) { entzogen[x.id] = x.flenski_plan_revoked_at; });
+        var ents = (res[2].data || []).map(function (e) { e.plan_entzogen_am = entzogen[e.entitlement_id] || null; return e; });
+        this.detail = { c: c, eng: eng, ents: ents, feed: res[3].data || [], notices: res[4].data || [] };
       },
       entOpen(e) { var p = this.products.find(function (x) { return x.id === e.product_id; }); return !!(p && p.needs_setup); },
       balanceShort() {
@@ -1165,6 +1170,7 @@
         if (e.unlimited) parts.push('ohne Zählen');
         if (e.expires_at) parts.push('gültig bis ' + this.dateShort(e.expires_at));
         parts.push('gekauft am ' + this.dateShort(e.starts_at));
+        if (e.plan_entzogen_am) parts.push('Plan in der App entzogen am ' + this.dateShort(e.plan_entzogen_am));
         return parts.join(' · ');
       },
       noticeText(n) {

@@ -116,3 +116,5 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 - **Nicht** erreichbar mit dem Schlüssel: `/events/{id}/attendees` (401, braucht eingeloggte Person; Make nutzte dafür seine eigene Flenski-Verbindung).
 - Je Termin liefert die Liste `attendedCount` (Anzahl Angemeldete) und `lastAttended` (Namen der zuletzt Angemeldeten, nur Profil-ID genutzt). Ob `lastAttended` bei großen Kursen gekürzt ist, ist unbekannt – der Abgleich behandelt das vorsichtig (Entscheidung 0006, Migration `20261023100000_flenski_abgleich`).
 - Teilnehmende sind auch Team-Mitglieder und Profile mit Ausschluss-Tag; sie zählen in `attendedCount` mit, werden im CRM aber nicht als Kundin geführt.
+
+- **Plan entziehen / zuweisen** (Pfade ermittelt 23.10.2026, nur per GET abgetastet → 405 "nur POST"): `POST /apps/{appId}/profiles/plans/revoke` bzw. `POST /apps/{appId}/profiles/plans`. Felder vermutlich wie im Make-Modul `revokePlansProfile`: `{ "email": "...", "planIds": ["..."] }` – **noch mit einem echten Test zu bestätigen** (Marcels Testkonto).
