@@ -13,14 +13,15 @@ Stand 23.10.2026. Ziel: so wenig Handarbeit wie möglich. Was Marcel (oder Claud
    → Termine, Anmeldungen und Teilnehmer-Abgleich laufen ab jetzt automatisch.
 5. **Make** (nur wenn die Lehrerin automatischen Plan-Entzug möchte; Make ist ohnehin für ihre Automationen eingerichtet):
    - In Make eine **Flenski-Verbindung mit ihrem Flenski-Login** anlegen (Marcel, mit ihr zusammen). Module mindestens: „Revoke a Plan for a Profile“ und „Make an API Call“.
-   - **Szenario kopieren** (Claude): Vorlage „🧘 ECRM: Flenski-Aktionen – Yoga by Lana“ duplizieren, ihre Verbindung eintragen, in den drei Filtern ihre App-ID statt Lanas eintragen, neuen Webhook anlegen, aktivieren.
+   - **Szenario kopieren** (Claude): Vorlage „🧘 ECRM: Flenski-Aktionen – Yoga by Lana“ duplizieren, ihre Verbindung eintragen, in den vier Filtern ihre App-ID statt Lanas eintragen, im Weg „Pläne“ ihre Projekt-ID in der Adresse, neuen Webhook anlegen, aktivieren.
    - Im CRM hinterlegen (Claude): `node scripts/setup-make.mjs <kürzel> <flenski-projekt-id> <make-webhook-url> an`
      (`aus` statt `an`: nur vollständige Teilnehmerliste, Pläne entzieht sie selbst.)
 6. **Oberfläche einbauen** (Marcel): Custom Page „CRM“ (nur Team sichtbar), Embed-Widget, Code aus `ui/crm.html` mit ihrer Zeile `window.CRM_CONFIG = { tenant: "<kürzel>" }`.
 7. **Angebote verbinden** (Lehrerin, im Reiter „Angebote“): pro Plan einmal wählen, was drin steckt.
 
 ## Ohne Make
-Alles läuft, nur zwei Dinge sind Handarbeit für die Lehrerin:
+Alles läuft, nur drei Dinge sind Handarbeit bzw. langsamer:
+- Neue Pläne erscheinen unter „Angebote“ erst, wenn sie jemand kauft oder zugewiesen bekommt (mit Make: einmal am Tag automatisch oder per Knopf „Neue Pläne aus der App holen“).
 - Leere/abgelaufene Karte → Hinweis „Plan entziehen“ in „Heute für dich“, ein Klick im Profil.
 - Große Kurse, bei denen Flenski die Namensliste kürzt → „Teilnahme unklar – kurz bestätigen“.
 

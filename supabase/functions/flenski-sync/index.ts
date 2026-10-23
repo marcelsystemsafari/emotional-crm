@@ -94,6 +94,26 @@ async function planAktion(aktion: "revoke" | "assign", t: any, email: string, pl
   }
 }
 
+// Pläne der App holen (einmal am Tag oder auf Anforderung unter "Angebote"): neue erscheinen als "nicht verbunden"
+// deno-lint-ignore no-explicit-any
+async function syncPlans(t: any) {
+  if (!t.tenant_secrets?.make_webhook_url) return 0;
+  const { data: faellig, error } = await supabase.rpc("flenski_plaene_faellig", { p_tenant: t.id });
+  if (error) throw error;
+  if (!faellig) return 0;
+  const appId = t.settings?.flenski_app_id;
+  const antwort = await make(t, { aktion: "plans", appId });
+  // Make liefert die Pläne des ganzen Flenski-Projekts – nur die dieser App übernehmen
+  const plaene = (antwort.body?.data || [])
+    // deno-lint-ignore no-explicit-any
+    .filter((p: any) => p.status !== "archived" && (p.apps || []).some((a: any) => a.id === appId))
+    // deno-lint-ignore no-explicit-any
+    .map((p: any) => ({ id: p.id, name: p.name }));
+  const { data: neu, error: e2 } = await supabase.rpc("sync_flenski_plans", { p_tenant: t.id, p_plans: plaene });
+  if (e2) throw e2;
+  return neu;
+}
+
 // Vollständige Teilnehmerliste für fällige Termine, deren Namensliste Flenski gekürzt hat
 // deno-lint-ignore no-explicit-any
 async function fehlendeTeilnehmer(t: any) {
@@ -184,9 +204,15 @@ Deno.serve(async (req) => {
       const listen = await fehlendeTeilnehmer(t);
       const { data, error: rpcError } = await supabase.rpc("sync_flenski_events", { p_tenant: t.id, p_events: events });
       if (rpcError) throw rpcError;
+      let neuePlaene: unknown = 0;
+      try {
+        neuePlaene = await syncPlans(t);
+      } catch (e) {
+        neuePlaene = "Fehler: " + (e instanceof Error ? e.message : String(e));
+      }
       const entzogen = await revokeOpenPlans(t);
       const zurueck = await restorePlans(t);
-      result[t.slug] = { ...data, listen_ueber_make: listen, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
+      result[t.slug] = { ...data, neue_plaene: neuePlaene, listen_ueber_make: listen, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
     } catch (e) {
       // Fehler bei einer Mandantin hält die anderen nicht auf; ohne frischen Stand wird nichts abgebucht
       console.error(`Abgleich ${t.slug} fehlgeschlagen`, e instanceof Error ? e.message : e);

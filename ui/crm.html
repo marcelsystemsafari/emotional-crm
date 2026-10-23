@@ -9,9 +9,26 @@
 <script>window.CRM_CONFIG = { tenant: "yoga-by-lana" };</script>
 
 <div id="ecrm-root" lang="de">
-  <div class="ecrm-boot" id="ecrm-boot">Deine Menschen werden geladen …</div>
+  <div class="ecrm-boot" id="ecrm-boot">
+    <div class="ecrm-skel" aria-label="Wird geladen">
+      <div class="ecrm-skel-nav"><i></i><i></i><i></i><i></i></div>
+      <div class="ecrm-skel-hero"><i style="width:28%"></i><i class="ecrm-skel-big" style="width:52%"></i><i style="width:68%"></i></div>
+      <div class="ecrm-skel-card"><i style="width:34%"></i><i class="ecrm-skel-bar"></i><i style="width:78%"></i><i style="width:62%"></i></div>
+      <div class="ecrm-skel-card"><i style="width:40%"></i><i style="width:85%"></i><i style="width:70%"></i></div>
+      <p class="ecrm-skel-text">Deine Menschen werden geladen …</p>
+    </div>
+  </div>
 
   <div class="ecrm-app" x-data="ecrm" x-cloak>
+    <div x-show="view === 'boot' || (view === 'app' && !ready)">
+    <div class="ecrm-skel" aria-label="Wird geladen">
+      <div class="ecrm-skel-nav"><i></i><i></i><i></i><i></i></div>
+      <div class="ecrm-skel-hero"><i style="width:28%"></i><i class="ecrm-skel-big" style="width:52%"></i><i style="width:68%"></i></div>
+      <div class="ecrm-skel-card"><i style="width:34%"></i><i class="ecrm-skel-bar"></i><i style="width:78%"></i><i style="width:62%"></i></div>
+      <div class="ecrm-skel-card"><i style="width:40%"></i><i style="width:85%"></i><i style="width:70%"></i></div>
+      <p class="ecrm-skel-text">Deine Menschen werden geladen …</p>
+    </div>
+    </div>
     <!-- ===== Anmeldung ===== -->
     <template x-if="view === 'login'">
       <div class="ecrm-card ecrm-login">
@@ -46,7 +63,7 @@
 
     <!-- ===== App ===== -->
     <template x-if="view === 'app'">
-      <div>
+      <div x-show="ready">
         <nav class="ecrm-nav">
           <button :class="tab === 'heute' && 'ecrm-on'" @click="go('heute')">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Übersicht</span></button>
@@ -457,6 +474,19 @@
             </div>
           </template>
 
+          <div class="ecrm-newplans">
+            <template x-if="makeAktiv()">
+              <div>
+                <p class="ecrm-text-s">Neue Pläne aus deiner App erscheinen hier automatisch, einmal am Tag. Gerade erst einen angelegt?</p>
+                <button class="ecrm-btn" @click="requestPlans()" :disabled="plansRequested"
+                        x-text="plansRequested ? 'Wird geholt – erscheint in wenigen Minuten' : 'Neue Pläne aus der App holen'"></button>
+              </div>
+            </template>
+            <template x-if="!makeAktiv()">
+              <p class="ecrm-text-s">Ein neuer Plan aus deiner App erscheint hier, sobald ihn jemand kauft oder zugewiesen bekommt.</p>
+            </template>
+          </div>
+
           <div class="ecrm-explain">
             <b>Wie hängt das mit Flenski zusammen?</b>
             <p>Der Plan in Flenski regelt, ob jemand Zugang hat. Das CRM zählt, wie viele Besuche auf einer Karte noch übrig sind. Kauft jemand in der App, legt das CRM die Karte automatisch an. Ist eine Karte leer oder abgelaufen, <span x-text="planAuto() ? 'nimmt das CRM den Plan in der App automatisch weg (spätestens nach einer Stunde). Kauft die Person eine neue Karte, bekommt sie ihn mit dem Kauf zurück.' : 'siehst du die Person unter „Heute für dich“ und entziehst den Plan im Profil der App.'"></span></p>
@@ -496,7 +526,24 @@
 #ecrm-root .ecrm-hero-stats span, #ecrm-root .ecrm-state span, #ecrm-root .ecrm-kpis span { display: block; line-height: 1.25; hyphens: auto; }
 #ecrm-root .ecrm-narrow { max-width: 820px; margin: 0 auto; }
 #ecrm-root [x-cloak] { display: none !important; }
-#ecrm-root .ecrm-boot { padding: 40px 16px; text-align: center; color: var(--muted); }
+#ecrm-root .ecrm-boot { padding: 0; }
+#ecrm-root .ecrm-skel { display: flex; flex-direction: column; gap: 14px; }
+#ecrm-root .ecrm-skel i { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #ece5d9 0%, #f7f2ea 50%, #ece5d9 100%);
+  background-size: 200% 100%; animation: ecrm-schimmer 1.4s ease-in-out infinite; }
+#ecrm-root .ecrm-skel-nav { display: flex; gap: 6px; padding: 6px; border-radius: 24px; background: #fff; border: 1px solid var(--line); }
+#ecrm-root .ecrm-skel-nav i { flex: 1; height: 46px; border-radius: 18px; }
+#ecrm-root .ecrm-skel-hero { display: flex; flex-direction: column; gap: 12px; padding: 24px 22px; border-radius: 26px;
+  background: linear-gradient(140deg, #3a7a60 0%, #24553f 55%, #173a2d 100%); }
+#ecrm-root .ecrm-skel-hero i { background: linear-gradient(90deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.26) 50%, rgba(255,255,255,.12) 100%);
+  background-size: 200% 100%; }
+#ecrm-root .ecrm-skel-hero .ecrm-skel-big { height: 30px; border-radius: 10px; }
+#ecrm-root .ecrm-skel-card { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 22px; background: #fff; border: 1px solid var(--line); }
+#ecrm-root .ecrm-skel-card .ecrm-skel-bar { height: 10px; width: 100%; }
+#ecrm-root .ecrm-skel-text { text-align: center; color: var(--muted); font-size: 13px; margin: 2px 0 6px; }
+@keyframes ecrm-schimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { #ecrm-root .ecrm-skel i { animation: none; } }
+#ecrm-root .ecrm-newplans { margin: 0 6px 14px; }
+#ecrm-root .ecrm-newplans .ecrm-btn { margin-top: 8px; }
 #ecrm-root .ecrm-serif { font-family: var(--serif); font-weight: 500; letter-spacing: -.01em; }
 #ecrm-root .ecrm-card { display: block; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin: 0 0 14px;
   box-shadow: 0 1px 2px rgba(40, 30, 10, .04), 0 10px 26px -18px rgba(40, 30, 10, .18); text-align: left; font: inherit; color: inherit; }
@@ -881,7 +928,7 @@
       statusFilters: [{ value: '', label: 'Alle' }, { value: 'kuehlt_ab', label: 'Werden still' }, { value: 'neu', label: 'Neu' },
                       { value: 'dabei', label: 'Aktiv' }, { value: 'eingeschlafen', label: 'Länger weg' }],
       personId: null, detail: null, form: null, correctFor: null, correction: { delta: 1, comment: '' },
-      showPast: false, course: null, roster: [], setup: {},
+      showPast: false, course: null, roster: [], setup: {}, ready: false, plansRequested: false,
 
       async init() {
         boot.style.display = 'none';
@@ -920,14 +967,17 @@
         if (t.error || !t.data) { this.view = 'nozugang'; return; }
         this.tenant = t.data;
         applyBackground(this.tenant.settings);
-        var admin = await this.sb.from('platform_admins').select('user_id').maybeSingle();
-        var member = await this.sb.from('tenant_members').select('role').eq('tenant_id', this.tenant.id).eq('user_id', this.userId).maybeSingle();
-        this.isOwner = !!(admin.data || (member.data && member.data.role === 'owner'));
         this.view = 'app';
         this.loading = true;
-        await Promise.all([this.loadPeople(), this.loadCategories(), this.loadCourses()]);
+        var res = await Promise.all([
+          this.sb.from('platform_admins').select('user_id').maybeSingle(),
+          this.sb.from('tenant_members').select('role').eq('tenant_id', this.tenant.id).eq('user_id', this.userId).maybeSingle(),
+          this.loadPeople(), this.loadCategories(), this.loadCourses()
+        ]);
+        this.isOwner = !!(res[0].data || (res[1].data && res[1].data.role === 'owner'));
         await this.loadProducts();
         this.loading = false;
+        this.ready = true;
       },
       async logout() { await this.sb.auth.signOut(); this.view = 'login'; this.login = { email: '', code: '', codeSent: false }; },
 
@@ -1013,6 +1063,26 @@
 
       // ---------- Übersicht ----------
       todayLong() { return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
+      makeAktiv() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.make_aktiv); },
+      async requestPlans() {
+        await this.run(async () => {
+          await this.rpc('request_plan_sync', { p_tenant: this.tenant.id });
+          this.plansRequested = true;
+          this.notify('Wird geholt. Neue Pläne erscheinen in wenigen Minuten hier.');
+        });
+        if (!this.plansRequested) return;
+        var self = this, vorher = this.products.length, runden = 0;
+        var nachsehen = function () {
+          setTimeout(async function () {
+            await self.loadProducts();
+            runden++;
+            if (self.products.length > vorher) { self.plansRequested = false; self.notify('Neue Pläne gefunden – jetzt einmal verbinden.'); }
+            else if (runden >= 18) { self.plansRequested = false; self.notify('Keine neuen Pläne gefunden.'); }
+            else nachsehen();
+          }, 20000);
+        };
+        nachsehen();
+      },
       planAuto() { return !!(this.tenant && this.tenant.settings && this.tenant.settings.plan_entzug_automatisch); },
       logoUrl() { return (this.tenant && this.tenant.settings && this.tenant.settings.logo_url) || ''; },
       ownerName() { return (this.tenant.settings && this.tenant.settings.signatur) || ''; },

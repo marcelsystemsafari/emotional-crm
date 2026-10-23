@@ -37,6 +37,6 @@ if (!r.length) {
   console.error("Mandantin nicht gefunden oder Flenski-Abgleich noch nicht eingerichtet (zuerst setup-flenski-sync.mjs).");
   process.exit(1);
 }
-await sql(`update public.tenants set settings = settings || jsonb_build_object('flenski_project_id', '${projectId}',
+await sql(`update public.tenants set settings = settings || jsonb_build_object('flenski_project_id', '${projectId}', 'make_aktiv', true,
   'plan_entzug_automatisch', ${modus === "aus" ? "false" : "true"}) where slug = '${s}';`);
 console.log(`Make für ${s} hinterlegt, automatischer Plan-Entzug: ${modus === "aus" ? "aus" : "an"}.`);

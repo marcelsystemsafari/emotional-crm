@@ -74,3 +74,6 @@ Edge Function `flenski-sync` (alle 5 Min. per pg_cron + pg_net) → `sync_flensk
 ## Automatischer Plan-Entzug (23.10.2026)
 Leere/abgelaufene Karte mit Flenski-Plan → Hinweis „plan_entziehen“ → beim nächsten fälligen Abgleich entzieht `flenski-sync` den Plan (`flenski_offene_entzuege`, `flenski_entzug_ergebnis`). Nicht bei neuer aktiver Karte desselben Angebots; Rückmeldung „Plan entzogen“ danach still erledigt; entzieht die Lehrerin selbst, erledigt sich ihr Hinweis. 3 Fehlversuche → bleibt als Hinweis. Schalter je Mandantin: `settings.plan_entzug_automatisch` (Lana: aus bis zum echten Test). Tests: `phase3_05_plan_entzug` (15).
 Plan-Rückgabe bei Wiederauffüllen (+1) gebaut (`flenski_offene_rueckgaben`, keine Doppelkarte durch die Rückmeldung „Plan zugewiesen“). Echter Test 23.10.2026: Flenski lehnt Entzug mit dem API-Schlüssel ab (401) – Funktion bleibt aus, bis ein Zugang mit Schreibrechten da ist.
+
+## Neue Pläne und Ladeanimation (23.10.2026)
+Neue Flenski-Pläne erscheinen automatisch unter „Angebote“ als „noch nicht verbunden“: Make-Aktion „plans“ (Projekt-Planliste, gefiltert auf die App), einmal am Tag und sofort auf Knopfdruck (`request_plan_sync` → `flenski_plaene_faellig` → `sync_flenski_plans`). Tests `phase3_06_plaene` (12). Oberfläche: Skelett-Ladeanimation statt leerer Fläche; Rechte und Daten werden gleichzeitig geladen.
