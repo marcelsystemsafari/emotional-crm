@@ -1,17 +1,15 @@
-// Überträgt die Flenski-Schlüssel (FLENSKI_SECRET_<TRIGGER>=...) aus .env.local in webhook_trigger_secrets.
+// Überträgt die Flenski-Schlüssel (FLENSKI_SECRET_<TRIGGER>=...) aus .env.<kürzel>.local in webhook_trigger_secrets.
 // Der Trigger ergibt sich aus dem Namen: FLENSKI_SECRET_ARTIKEL_GELESEN → artikel-gelesen (wie ?trigger= in der URL).
 // Gibt nur Triggernamen aus, nie Schlüssel. Leere Zeilen werden übersprungen, vorhandene Schlüssel ersetzt.
-// Aufruf (im Projektordner): node scripts/upload-webhook-secrets.mjs [mandanten-slug]   (Standard: yoga-by-lana)
-import { readFileSync } from "node:fs";
+// Aufruf (im Projektordner): node scripts/upload-webhook-secrets.mjs <kürzel>
+import { adminEnv, lehrerinEnv } from "./env.mjs";
 
-const root = new URL("../", import.meta.url);
-const env = Object.fromEntries(
-  readFileSync(new URL(".env.local", root), "utf8")
-    .split(/\r?\n/)
-    .filter((l) => /^[A-Z_]+=/.test(l))
-    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim()]),
-);
-const tenant = process.argv[2] ?? "yoga-by-lana";
+const tenant = process.argv[2];
+if (!tenant) {
+  console.error("Aufruf: node scripts/upload-webhook-secrets.mjs <kürzel>   (z. B. yoga-by-lana)");
+  process.exit(1);
+}
+const env = { ...adminEnv(), ...lehrerinEnv(tenant) };
 
 const secrets = Object.entries(env)
   .filter(([k, v]) => k.startsWith("FLENSKI_SECRET_") && v)
@@ -19,7 +17,7 @@ const secrets = Object.entries(env)
 
 for (const [trigger, secret] of secrets) {
   if (!/^[A-Za-z0-9_-]+$/.test(secret)) {
-    console.error(`Schlüssel für ${trigger} enthält unerwartete Zeichen – bitte in .env.local prüfen.`);
+    console.error(`Schlüssel für ${trigger} enthält unerwartete Zeichen – bitte in .env.${tenant}.local prüfen.`);
     process.exit(1);
   }
 }

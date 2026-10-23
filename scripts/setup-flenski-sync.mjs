@@ -1,27 +1,22 @@
 // Richtet den automatischen Flenski-Abgleich für eine Mandantin ein (Entscheidung 0006).
 // Aufruf: node scripts/setup-flenski-sync.mjs <slug> <flenski-app-id>
-//   - prüft den Schlüssel FLENSKI_API_KEY aus .env.local direkt bei Flenski,
+//   - prüft den Schlüssel FLENSKI_API_KEY aus .env.<kürzel>.local direkt bei Flenski,
 //   - speichert ihn in tenant_secrets und die App-ID in tenants.settings,
 //   - legt das Geheimnis für den 5-Minuten-Takt an (Supabase-Secret SYNC_SECRET + Vault ecrm_sync_secret, ecrm_project_url).
 // Gibt keinen Schlüssel aus. Mehrfach ausführbar.
-import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { adminEnv, lehrerinEnv } from "./env.mjs";
 
-const env = Object.fromEntries(
-  readFileSync(new URL("../.env.local", import.meta.url), "utf8")
-    .split(/\r?\n/)
-    .filter((l) => /^[A-Z_]+=/.test(l))
-    .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "")]),
-);
+const env = adminEnv();
 const [slug, appId] = process.argv.slice(2);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 if (!slug || !UUID.test(appId || "")) {
   console.error("Aufruf: node scripts/setup-flenski-sync.mjs <slug> <flenski-app-id>");
   process.exit(1);
 }
-const apiKey = env.FLENSKI_API_KEY;
+const apiKey = lehrerinEnv(slug).FLENSKI_API_KEY;
 if (!apiKey || /['$\\]/.test(apiKey)) {
-  console.error("FLENSKI_API_KEY fehlt in .env.local oder enthält unerlaubte Zeichen.");
+  console.error("FLENSKI_API_KEY fehlt in .env." + slug + ".local oder enthält unerlaubte Zeichen.");
   process.exit(1);
 }
 

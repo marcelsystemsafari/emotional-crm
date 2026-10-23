@@ -7,8 +7,8 @@ Stand 23.10.2026. Ziel: so wenig Handarbeit wie möglich. Was Marcel (oder Claud
 2. **Lehrerin einladen** (Claude): `node scripts/invite-user.mjs` mit ihrer E-Mail, Rolle Inhaberin.
 
 ## Am Einrichtungstag (gemeinsam, ca. 30–45 Minuten)
-3. **Flenski-Automationen** in ihrer App anlegen (Marcel), wie bei Lana (`docs/phase0-anleitung.md`). Webhook-Adresse jeweils mit `?tenant=<kürzel>&trigger=<trigger>`. Die Schlüssel der Automationen in `.env.local` speichern, Claude lädt sie hoch.
-4. **Flenski-API-Schlüssel** der App erzeugen und als `FLENSKI_API_KEY` in `.env.local` eintragen (Marcel). Dann (Claude):
+3. **Flenski-Automationen** in ihrer App anlegen (Marcel), wie bei Lana (`docs/phase0-anleitung.md`). Webhook-Adresse jeweils mit `?tenant=<kürzel>&trigger=<trigger>`. Die Schlüssel der Automationen in ihre eigene Datei `.env.<kürzel>.local` eintragen (Vorlage `.env.lehrerin.example` kopieren), Claude lädt sie hoch: `node scripts/upload-webhook-secrets.mjs <kürzel>`.
+4. **Flenski-API-Schlüssel** der App erzeugen und als `FLENSKI_API_KEY` in `.env.<kürzel>.local` eintragen (Marcel). Dann (Claude):
    `node scripts/setup-flenski-sync.mjs <kürzel> <flenski-app-id>`
    → Termine, Anmeldungen und Teilnehmer-Abgleich laufen ab jetzt automatisch.
 5. **Make** (nur wenn die Lehrerin automatischen Plan-Entzug möchte; Make ist ohnehin für ihre Automationen eingerichtet):

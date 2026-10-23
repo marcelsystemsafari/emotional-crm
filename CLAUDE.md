@@ -39,7 +39,7 @@ Wenn Code und Doku sich widersprechen: anhalten und fragen, nicht raten.
 
 1. **Guthaben = Summe von `ledger_entries`.** Nie einen Zählerstand speichern oder überschreiben. Buchungen sind append-only, Korrekturen nur als Gegenbuchung mit Kommentar.
 2. **Jede Tabelle hat `tenant_id` und RLS.** Für jede neue Tabelle gibt es einen Test, der beweist, dass Mandant A Mandant B nicht sieht.
-3. **Kein Secret im Browser.** In `ui/crm.html` stehen nur Supabase-URL und anon key. Service-Role-Key, Webhook-Secrets und Flenski-Zugänge nur als Supabase-Secrets bzw. in `.env.local`. `.env*` nie committen; `.env.example` pflegen.
+3. **Kein Secret im Browser.** In `ui/crm.html` stehen nur Supabase-URL und anon key. Service-Role-Key, Webhook-Secrets und Flenski-Zugänge nur als Supabase-Secrets bzw. in Marcels lokalen Schlüsseldateien: `.env.local` (Supabase-Zugang) und je Lehrerin `.env.<kürzel>.local` (Flenski-API-Schlüssel, Automations-Schlüssel; Vorlage `.env.lehrerin.example`). `.env*` nie committen; `.env.example` pflegen.
 4. **Webhooks: erst roh speichern, dann verarbeiten.** Immer sofort `200` antworten. Verarbeitung idempotent.
 5. **Keine Annahmen über Flenski-Payloads.** Prüfschemas für Payloads nur aus echten Beispielen in `inbox/webhooks/` ableiten. Fehlt ein Beispiel: Schema als `TODO` markieren und Marcel fragen.
 6. **Fachlogik nur in SQL-Funktionen**, nie doppelt in der Oberfläche. Oberfläche und Webhook rufen dieselben Funktionen auf. Jede Regel (Guthaben, FEFO-Abbuchung, Storno, Ablauf, Signale) hat einen Datenbank-Test.
