@@ -1087,7 +1087,7 @@
           if (r.error) {
             var st = r.error.context && r.error.context.status;
             this.plansSync = 'fehler';
-            this.plansMsg = st === 401 ? 'Deine Anmeldung ist abgelaufen. Bitte melde dich neu an.' : 'Der Abgleich hat nicht geklappt. Bitte versuch es gleich nochmal.';
+            this.plansMsg = st === 401 ? 'Bitte lade die Seite einmal neu und tippe dann nochmal auf „Jetzt abgleichen“.' : 'Der Abgleich hat gerade nicht geklappt. Bitte versuch es gleich nochmal.';
           } else if (d.ok === false) {
             this.plansSync = 'fehler';
             this.plansMsg = d.error || 'Die App war gerade nicht erreichbar.';

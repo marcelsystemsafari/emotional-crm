@@ -127,11 +127,14 @@ async function holePlaene(t: any) {
   return ergebnis;
 }
 
-// Sofort-Abgleich aus der Oberfläche: angemeldete Person der Mandantin, höchstens alle 2 Minuten
+// Sofort-Abgleich aus der Oberfläche: angemeldete Person der Mandantin, höchstens alle 20 Sekunden
 async function plaeneJetzt(req: Request, tenantId: string) {
-  const jwt = (req.headers.get("authorization") || "").replace(/^Bearers+/i, "");
+  const jwt = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   const { data: auth } = await supabase.auth.getUser(jwt);
-  if (!auth?.user) return reply(401, { ok: false, error: "Bitte anmelden" });
+  if (!auth?.user) {
+    console.error("Sofort-Abgleich: Login nicht erkannt");
+    return reply(401, { ok: false, error: "Bitte anmelden" });
+  }
   const { data: erlaubt, error } = await supabase.rpc("flenski_plaene_jetzt_erlaubt", { p_tenant: tenantId, p_user: auth.user.id });
   if (error) return reply(500, { ok: false });
   if (!erlaubt) {
