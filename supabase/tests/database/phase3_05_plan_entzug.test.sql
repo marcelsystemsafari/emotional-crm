@@ -72,6 +72,31 @@ insert into public.customer_notices (tenant_id, customer_id, kind, detail) value
   ('00000000-0000-0000-0000-00000000000a', 'c0000000-0000-0000-0000-000000000001', 'plan_entzogen', '{"plan": "4er Paket"}');
 select is(pg_temp.offen('plan_entzogen', 'c0000000-0000-0000-0000-000000000001'), 0, 'Rückmeldung nach eigenem Entzug: kein doppelter Hinweis');
 
+-- ===== Zurückgeben: Karte wird wieder aufgefüllt (+1 statt 0) =====
+select public.correct('e0000000-0000-0000-0000-000000000001', 1, 'Kulanz');
+select is(pg_temp.offen('plan_zurueckgeben', 'c0000000-0000-0000-0000-000000000001'), 1, '+1 nach Entzug: Plan soll zurück');
+select is((select count(*)::int from public.flenski_offene_rueckgaben('00000000-0000-0000-0000-00000000000a')), 1, 'Rückgabe steht an');
+select ok(not exists (select 1 from public.care_list('00000000-0000-0000-0000-00000000000a') x
+                      where x.customer_id = 'c0000000-0000-0000-0000-000000000001' and x.gruende::text like '%plan_zurueckgeben%'),
+  'Läuft automatisch: nicht in "Heute für dich"');
+select public.flenski_rueckgabe_ergebnis(n.id, true, null) from public.customer_notices n
+where n.kind = 'plan_zurueckgeben' and n.customer_id = 'c0000000-0000-0000-0000-000000000001' and n.resolved_at is null;
+select ok((select flenski_plan_revoked_at is null and flenski_plan_restored_at is not null from public.entitlements
+           where id = 'e0000000-0000-0000-0000-000000000001'), 'Rückgabe gemerkt: Plan wieder da');
+-- Flenski meldet danach "Plan zugewiesen": keine neue Karte
+create temp table vorher as select count(*) as n from public.entitlements where customer_id = 'c0000000-0000-0000-0000-000000000001';
+select is(public._app_entitlement('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', now(), 'flenski_plan', null, null),
+  'e0000000-0000-0000-0000-000000000001'::uuid, 'Rückmeldung "Plan zugewiesen" nach Rückgabe: dieselbe Karte');
+select is((select count(*) from public.entitlements where customer_id = 'c0000000-0000-0000-0000-000000000001'), (select n from vorher),
+  'Keine zweite Karte durch die Rückgabe');
+-- Echter Kauf in der App legt weiterhin eine neue Karte an
+select isnt(public._app_entitlement('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', now(), 'flenski_order', 4000, 'ORDER-1'),
+  'e0000000-0000-0000-0000-000000000001'::uuid, 'Kauf in der App: neue Karte wie bisher');
+-- Wieder leer: Entzug erneut fällig
+select public.correct('e0000000-0000-0000-0000-000000000001', -1, 'Besuch');
+select is(pg_temp.offen('plan_entziehen', 'c0000000-0000-0000-0000-000000000001'), 0,
+  'Wieder leer, aber neue Karte vorhanden: kein Entzug');
+
 set local role authenticated;
 select throws_ok($$select * from public.flenski_offene_entzuege('00000000-0000-0000-0000-00000000000a')$$, '42501', null,
   'Nutzerinnen sehen die Entzugsliste nicht');

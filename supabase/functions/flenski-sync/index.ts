@@ -63,10 +63,16 @@ async function fetchEvents(appId: string, apiKey: string) {
   return events;
 }
 
-// Plan einer Person in der App entziehen (Pfad ermittelt 23.10.2026, Felder wie im Make-Modul revokePlansProfile:
-// E-Mail der Person und Plan-IDs). Gibt null bei Erfolg, sonst eine kurze Fehlerbeschreibung.
+// Plan einer Person in der App entziehen bzw. wieder zuweisen (Pfade ermittelt 23.10.2026, Felder wie im
+// Make-Modul revokePlansProfile: E-Mail der Person und Plan-IDs). Gibt null bei Erfolg, sonst eine kurze Fehlerbeschreibung.
 async function revokePlan(appId: string, apiKey: string, email: string, planId: string) {
-  const res = await fetch(`${FLENSKI_API}/apps/${appId}/profiles/plans/revoke`, {
+  return await planCall(`${FLENSKI_API}/apps/${appId}/profiles/plans/revoke`, apiKey, email, planId);
+}
+async function assignPlan(appId: string, apiKey: string, email: string, planId: string) {
+  return await planCall(`${FLENSKI_API}/apps/${appId}/profiles/plans`, apiKey, email, planId);
+}
+async function planCall(url: string, apiKey: string, email: string, planId: string) {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "X-API-KEY": apiKey, "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ email, planIds: [planId] }),
@@ -93,6 +99,25 @@ async function revokeOpenPlans(tenantId: string, appId: string, apiKey: string) 
     else console.error(`Plan-Entzug fehlgeschlagen (${o.produkt})`, fehler);
   }
   return entzogen;
+}
+
+// Karte wieder aufgefüllt: Plan zurückgeben
+async function restorePlans(tenantId: string, appId: string, apiKey: string) {
+  const { data: offen, error } = await supabase.rpc("flenski_offene_rueckgaben", { p_tenant: tenantId });
+  if (error) throw error;
+  let zurueck = 0;
+  for (const o of offen || []) {
+    let fehler: string | null;
+    try {
+      fehler = await assignPlan(appId, apiKey, o.email, o.plan_id);
+    } catch (e) {
+      fehler = e instanceof Error ? e.message : String(e);
+    }
+    await supabase.rpc("flenski_rueckgabe_ergebnis", { p_notice: o.notice_id, p_ok: !fehler, p_info: fehler });
+    if (!fehler) zurueck++;
+    else console.error(`Plan-Rückgabe fehlgeschlagen (${o.produkt})`, fehler);
+  }
+  return zurueck;
 }
 
 Deno.serve(async (req) => {
@@ -130,7 +155,8 @@ Deno.serve(async (req) => {
       const { data, error: rpcError } = await supabase.rpc("sync_flenski_events", { p_tenant: t.id, p_events: events });
       if (rpcError) throw rpcError;
       const entzogen = await revokeOpenPlans(t.id, appId, apiKey);
-      result[t.slug] = { ...data, plaene_entzogen: entzogen };
+      const zurueck = await restorePlans(t.id, appId, apiKey);
+      result[t.slug] = { ...data, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
     } catch (e) {
       // Fehler bei einer Mandantin hält die anderen nicht auf; ohne frischen Stand wird nichts abgebucht
       console.error(`Abgleich ${t.slug} fehlgeschlagen`, e instanceof Error ? e.message : e);
