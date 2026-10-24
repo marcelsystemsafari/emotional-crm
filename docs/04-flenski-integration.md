@@ -119,3 +119,10 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 
 - **Plan entziehen / zuweisen** (Pfade ermittelt 23.10.2026, nur per GET abgetastet → 405 "nur POST"): `POST /apps/{appId}/profiles/plans/revoke` bzw. `POST /apps/{appId}/profiles/plans`. Felder vermutlich wie im Make-Modul `revokePlansProfile`: `{ "email": "...", "planIds": ["..."] }` – **Test 23.10.2026 (Marcels Testkonto, freigegeben): 401 „Full authentication is required“.** Der API-Schlüssel darf Pläne nicht entziehen/zuweisen (wie bei `/events/{id}/attendees`). Make nutzte eine andere Flenski-Verbindung. Offen: Schlüssel mit Schreibrechten oder Freigabe durch Flenski.
 - **Lösung (23.10.2026, Entscheidung 0007):** Entzug, Zuweisung und vollständige Teilnehmerliste laufen über das Make-Szenario „ECRM: Flenski-Aktionen“. Zuweisen: `POST /apps/{appId}/profiles/plans` mit `{"email","planIds"}` funktioniert (Antwort `{"status":"ok"}`). Teilnehmerliste: `GET /events/{id}/attendees` → `data[].id` = Profil-ID.
+
+## Korrektur 24.10.2026: Der API-Schlüssel wurde nie erkannt
+- Lanas App ist auf „öffentlich“ gestellt. Termine und Mitglieder (öffentliche Felder) kommen dort **auch ohne Schlüssel** – der Abgleich für Lana lief bisher über diese öffentliche Ansicht, nicht über den Schlüssel.
+- Ninas App ist „nur mit Anmeldung“: Termine → 401, Mitglieder nur öffentliche Felder (Name, Foto, Tags; keine ID/E-Mail/Pläne).
+- Getestet (nur lesend) ohne Erfolg: `X-API-KEY`, `Authorization` (roh, Bearer, Token, ApiKey, Basic), `X-Api-Token`, `X-Access-Token`, `Api-Key`, Query-Parameter (`apiKey`, `api_key`, `token`, `access_token`), Tausch-Endpunkte `auth/*`. `Bearer <Schlüssel>` → 401 „The resource server rejected the request“.
+- Marcels Make-Verbindung „Flenski“ (nur mit diesem Schlüssel angelegt) kommt an alles. **Offen: Wie schickt die Make-App den Schlüssel mit?** → Flenski-Support fragen bzw. den Verbindungsdialog in Make ansehen.
+- Folge: Für Apps mit Anmeldung funktioniert der automatische Abgleich erst, wenn das geklärt ist. Plan-Entzug/-Zuweisung lief ohnehin über Make.
