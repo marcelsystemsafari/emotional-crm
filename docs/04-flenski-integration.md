@@ -126,3 +126,7 @@ Nicht in Lanas App verfügbar und deshalb nicht angelegt: „Beitrag in der Comm
 - Getestet (nur lesend) ohne Erfolg: `X-API-KEY`, `Authorization` (roh, Bearer, Token, ApiKey, Basic), `X-Api-Token`, `X-Access-Token`, `Api-Key`, Query-Parameter (`apiKey`, `api_key`, `token`, `access_token`), Tausch-Endpunkte `auth/*`. `Bearer <Schlüssel>` → 401 „The resource server rejected the request“.
 - Marcels Make-Verbindung „Flenski“ (nur mit diesem Schlüssel angelegt) kommt an alles. **Offen: Wie schickt die Make-App den Schlüssel mit?** → Flenski-Support fragen bzw. den Verbindungsdialog in Make ansehen.
 - Folge: Für Apps mit Anmeldung funktioniert der automatische Abgleich erst, wenn das geklärt ist. Plan-Entzug/-Zuweisung lief ohnehin über Make.
+
+## Lösung gefunden 24.10.2026: Flenski will einen Zugangscode (JWT), nicht den 36-stelligen Schlüssel
+- Einmaliger, von Marcel freigegebener Test (Prüfadresse, danach gelöscht; nur Form/Fingerabdruck, nie der Wert): Marcels Make-Schlüsselbund „Flenski QR Upload (korrekt)“ schickt `Authorization: Bearer <JWT>` (734 Zeichen, Felder aud/jti/iat/nbf/exp/sub/scopes), ausgestellt 14.07.2026, gültig bis **14.07.2027**. Der 36-stellige Profil-Schlüssel ist ein anderer Wert.
+- Folge: Mit so einem Zugangscode kann der Server genauso arbeiten wie Make (auch bei Apps mit Anmeldung). Woher der Code stammt (Flenski-Profil-Einstellungen?), klärt Marcel. Ablauf nach einem Jahr → rechtzeitig erneuern (Erinnerung einbauen).
