@@ -486,7 +486,7 @@
               <div class="ecrm-section-head"><div class="ecrm-h">Verbunden</div></div>
               <template x-for="p in connected()" :key="p.id">
                 <div class="ecrm-item"><span class="ecrm-grow"><span class="ecrm-name" x-text="p.name"></span><span class="ecrm-text-s" x-text="productText(p)"></span></span>
-                  <i class="ecrm-chip ecrm-st-dabei">verbunden</i></div>
+                  <i class="ecrm-chip" :class="p.extern_gezaehlt ? 'ecrm-st-eingeschlafen' : 'ecrm-st-dabei'" x-text="p.extern_gezaehlt ? 'extern' : 'verbunden'"></i></div>
               </template>
             </div>
           </template>
@@ -1274,6 +1274,8 @@
       entNumber(e) { return this.entOpen(e) ? '' : e.unlimited ? '✓' : e.balance; },
       entText(e) {
         if (this.entOpen(e)) return 'Gekauft am ' + this.dateShort(e.starts_at) + ' · Angebot noch nicht verbunden – unter „Angebote“ einmal einrichten';
+        var prod = this.products.find(function (x) { return x.id === e.product_id; });
+        if (prod && prod.extern_gezaehlt) return 'Seit ' + this.dateShort(e.starts_at) + ' · Restbesuche werden außerhalb des CRM gezählt (in Make)';
         var st = { used_up: 'aufgebraucht', expired: 'abgelaufen', cancelled: 'storniert' }[e.status];
         var parts = [];
         if (st) parts.push(st);
@@ -1431,6 +1433,7 @@
         });
       },
       productText(p) {
+        if (p.extern_gezaehlt) return 'Besuche werden außerhalb des CRM gezählt (in Make) – hier nur zur Übersicht';
         var t = p.type === 'credits' ? p.credits + ' Besuche' : p.type === 'single' ? 'Einzelstunde' : 'ohne Zählen';
         t += p.validity_days ? ' · ' + (p.validity_days % 30 === 0 ? p.validity_days / 30 + ' Monate' : p.validity_days + ' Tage') + ' gültig' : ' · unbegrenzt gültig';
         if (p.category) t += ' · nur ' + p.category;

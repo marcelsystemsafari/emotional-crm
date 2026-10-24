@@ -52,3 +52,9 @@ Alles, was Make heute für die Karten tut, macht das CRM – sichtbar für Nina 
 - **Laufendes System nicht stören (Marcel):** Zwei Schritte statt Stichtag.
   - **Schritt 1:** Nina bekommt das CRM ohne eigene 8er-Kartenzählung. Die 8er-Karte bleibt komplett in Make (QR-Codes, Szenarien, Datenspeicher unverändert); im CRM steht sie als „wird in Make gezählt“, das CRM zieht dafür nichts ab. Alles andere (Menschen, Aktivität, Kurse, Mitgliedschaften) läuft im CRM.
   - **Schritt 2 (später, nach OK):** CRM übernimmt die 8er-Karten. Die **vorhandenen QR-Codes bleiben gültig** – das Scan-Szenario in Make zählt nicht mehr selbst, sondern leitet an das CRM weiter. Reststände 1:1 mit denselben Kartencodes. Online-Event-Abzug dann ebenfalls im CRM.
+
+## Stand 24.10.2026
+- Nina im CRM angelegt (`yogini-nina`, Testphase, `settings.achter_karten_in_make`).
+- 17 Automationen in Ninas App angelegt (Marcel), Schlüssel hochgeladen; alle Adressen erreichen das CRM. Ninas bestehende Make-Automationen laufen unverändert.
+- **Absicherung:** `settings.extern_plaene` enthält „YN 8er Karte“ → Produkt `extern_gezaehlt`, nicht als Karte verbindbar, kein Abzug im CRM (Migration `20261024100000`, Tests `phase3_07_extern_gezaehlt`).
+- Offen: Ninas Flenski-API-Schlüssel (`FLENSKI_API_KEY` in `.env.yogini-nina.local`) → Abgleich + Erstabgleich; Logo/Hintergrund; CRM-Seite in Ninas App.
