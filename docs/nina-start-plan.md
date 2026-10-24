@@ -58,3 +58,4 @@ Alles, was Make heute für die Karten tut, macht das CRM – sichtbar für Nina 
 - 17 Automationen in Ninas App angelegt (Marcel), Schlüssel hochgeladen; alle Adressen erreichen das CRM. Ninas bestehende Make-Automationen laufen unverändert.
 - **Absicherung:** `settings.extern_plaene` enthält „YN 8er Karte“ → Produkt `extern_gezaehlt`, nicht als Karte verbindbar, kein Abzug im CRM (Migration `20261024100000`, Tests `phase3_07_extern_gezaehlt`).
 - Offen: Ninas Flenski-API-Schlüssel (`FLENSKI_API_KEY` in `.env.yogini-nina.local`) → Abgleich + Erstabgleich; Logo/Hintergrund; CRM-Seite in Ninas App.
+- 24.10.2026: Zugang per Zugangscode (Entscheidung 0008) eingerichtet, Abgleich läuft. Erstabgleich: 19 Menschen (3 Team/Admin ausgelassen), 7 Angebote (8er-Karte extern, 6 warten auf „verbinden“), 31 Karten, 23 kommende Termine, 0 Buchungen. Offen: Erneuerungscode (`FLENSKI_REFRESH`), Logo/Hintergrund, CRM-Seite in Ninas App.

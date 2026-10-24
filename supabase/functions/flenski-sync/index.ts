@@ -5,7 +5,10 @@
 // Holt für jede Mandantin mit Flenski-Schlüssel alle Termine der App und übergibt sie an
 // sync_flenski_events: Termine anlegen, Anmeldungen angleichen, Termine 5 Minuten nach Beginn abschließen.
 //
-// Flenski-Schnittstelle: https://app.flenski.io/api/v1, Header X-API-KEY, Pfad /apps/{appId}/events?page=&limit=
+// Flenski-Schnittstelle: https://app.flenski.io/api/v1, Pfad /apps/{appId}/events?page=&limit=
+// Anmeldung: "Authorization: Bearer <Zugangscode>" (tenant_secrets.flenski_auth). Der Code wird rechtzeitig vor dem
+// Ablauf mit dem Erneuerungscode (flenski_refresh) automatisch erneuert. Ohne Zugangscode: alter Weg X-API-KEY
+// (wirkt nur bei öffentlichen Apps).
 // (ermittelt am 23.10.2026, siehe docs/04-flenski-integration.md).
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -54,11 +57,58 @@ function slim(e: any) {
   };
 }
 
-async function fetchEvents(appId: string, apiKey: string) {
+// Kopfzeilen für Flenski je nach hinterlegtem Zugang
+// deno-lint-ignore no-explicit-any
+function flenskiHeaders(sec: any): Record<string, string> {
+  if (sec?.flenski_auth) return { Authorization: `Bearer ${sec.flenski_auth}`, Accept: "application/json" };
+  return { "X-API-KEY": sec?.flenski_api_key || "", Accept: "application/json" };
+}
+
+function ablaufAusCode(code: string): string | null {
+  try {
+    const p = JSON.parse(atob(code.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return p.exp ? new Date(p.exp * 1000).toISOString() : null;
+  } catch {
+    return null;
+  }
+}
+
+// Zugangscode erneuern, wenn er in weniger als 14 Tagen abläuft (oder abgelaufen ist)
+// deno-lint-ignore no-explicit-any
+async function zugangFrischHalten(tenantId: string, sec: any) {
+  if (!sec?.flenski_auth || !sec?.flenski_refresh) return "keine Erneuerung eingerichtet";
+  const ablauf = sec.flenski_auth_expires ? new Date(sec.flenski_auth_expires).getTime() : 0;
+  if (ablauf > Date.now() + 14 * 86400000) return "gültig";
+  const res = await fetch(`${FLENSKI_API}/auth/refresh-token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ refreshToken: sec.flenski_refresh }),
+    signal: AbortSignal.timeout(20000),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok || !body?.accessToken) {
+    const fehler = `Erneuerung fehlgeschlagen (${res.status})`;
+    await supabase.from("tenant_secrets").update({ flenski_auth_fehler: fehler }).eq("tenant_id", tenantId);
+    console.error(fehler);
+    return fehler;
+  }
+  const neu = {
+    flenski_auth: body.accessToken,
+    flenski_refresh: body.refreshToken || sec.flenski_refresh,
+    flenski_auth_expires: ablaufAusCode(body.accessToken),
+    flenski_auth_fehler: null,
+  };
+  await supabase.from("tenant_secrets").update(neu).eq("tenant_id", tenantId);
+  Object.assign(sec, neu);
+  return "erneuert";
+}
+
+// deno-lint-ignore no-explicit-any
+async function fetchEvents(appId: string, sec: any) {
   const events = [];
   for (let page = 1; page <= 20; page++) {
     const res = await fetch(`${FLENSKI_API}/apps/${appId}/events?page=${page}&limit=100`, {
-      headers: { "X-API-KEY": apiKey, Accept: "application/json" },
+      headers: flenskiHeaders(sec),
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) throw new Error(`Flenski antwortet ${res.status}`);
@@ -143,7 +193,7 @@ async function plaeneJetzt(req: Request, tenantId: string) {
     return reply(200, { ok: true, uebersprungen: true, stand: s.plans_synced_at });
   }
   const { data: t } = await supabase.from("tenants")
-    .select("id, slug, settings, tenant_secrets(flenski_api_key, make_webhook_url)").eq("id", tenantId).single();
+    .select("id, slug, settings, tenant_secrets(flenski_api_key, flenski_auth, make_webhook_url)").eq("id", tenantId).single();
   try {
     return reply(200, { ok: true, ...(await holePlaene(t)), stand: new Date().toISOString() });
   } catch (e) {
@@ -230,7 +280,7 @@ Deno.serve(async (req) => {
 
   const { data: tenants, error } = await supabase
     .from("tenants")
-    .select("id, slug, settings, status, tenant_secrets(flenski_api_key, make_webhook_url)")
+    .select("id, slug, settings, status, tenant_secrets(flenski_api_key, flenski_auth, flenski_refresh, flenski_auth_expires, make_webhook_url)")
     .in("id", ids);
   if (error) {
     console.error("Mandanten nicht lesbar", error);
@@ -241,10 +291,11 @@ Deno.serve(async (req) => {
   for (const t of tenants || []) {
     const appId = t.settings?.flenski_app_id;
     // deno-lint-ignore no-explicit-any
-    const apiKey = (t as any).tenant_secrets?.flenski_api_key;
-    if (!appId || !apiKey) continue;
+    const sec = (t as any).tenant_secrets;
+    if (!appId || !(sec?.flenski_auth || sec?.flenski_api_key)) continue;
     try {
-      const events = await fetchEvents(appId, apiKey);
+      const zugang = await zugangFrischHalten(t.id, sec);
+      const events = await fetchEvents(appId, sec);
       const listen = await fehlendeTeilnehmer(t);
       const { data, error: rpcError } = await supabase.rpc("sync_flenski_events", { p_tenant: t.id, p_events: events });
       if (rpcError) throw rpcError;
@@ -256,7 +307,7 @@ Deno.serve(async (req) => {
       }
       const entzogen = await revokeOpenPlans(t);
       const zurueck = await restorePlans(t);
-      result[t.slug] = { ...data, neue_plaene: neuePlaene, listen_ueber_make: listen, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
+      result[t.slug] = { ...data, zugang, neue_plaene: neuePlaene, listen_ueber_make: listen, plaene_entzogen: entzogen, plaene_zurueck: zurueck };
     } catch (e) {
       // Fehler bei einer Mandantin hält die anderen nicht auf; ohne frischen Stand wird nichts abgebucht
       console.error(`Abgleich ${t.slug} fehlgeschlagen`, e instanceof Error ? e.message : e);

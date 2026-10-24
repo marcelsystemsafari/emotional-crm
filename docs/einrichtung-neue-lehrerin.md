@@ -8,9 +8,10 @@ Stand 23.10.2026. Ziel: so wenig Handarbeit wie möglich. Was Marcel (oder Claud
 
 ## Am Einrichtungstag (gemeinsam, ca. 30–45 Minuten)
 3. **Flenski-Automationen** in ihrer App anlegen (Marcel), wie bei Lana (`docs/phase0-anleitung.md`). Webhook-Adresse jeweils mit `?tenant=<kürzel>&trigger=<trigger>`. Die Schlüssel der Automationen in ihre eigene Datei `.env.<kürzel>.local` eintragen (Vorlage `.env.lehrerin.example` kopieren), Claude lädt sie hoch: `node scripts/upload-webhook-secrets.mjs <kürzel>`.
-4. **Flenski-API-Schlüssel** der App erzeugen und als `FLENSKI_API_KEY` in `.env.<kürzel>.local` eintragen (Marcel). Dann (Claude):
+4. **Flenski-Zugang** (Entscheidung 0008, Marcel): in einem privaten Browserfenster bei Flenski einloggen, F12 → Netzwerk → `authorization: Bearer …` als `FLENSKI_AUTH` und Cookie `refreshToken` als `FLENSKI_REFRESH` in `.env.<kürzel>.local` eintragen, Fenster schließen (nicht abmelden). Dann (Claude):
    `node scripts/setup-flenski-sync.mjs <kürzel> <flenski-app-id>`
-   → Termine, Anmeldungen und Teilnehmer-Abgleich laufen ab jetzt automatisch.
+   → Termine, Anmeldungen und Teilnehmer-Abgleich laufen ab jetzt automatisch; der Zugang erneuert sich selbst.
+   Danach Erstabgleich (Claude): `node scripts/erstabgleich.mjs <kürzel>`.
 5. **Make** (nur wenn die Lehrerin automatischen Plan-Entzug möchte; Make ist ohnehin für ihre Automationen eingerichtet):
    - In Make eine **Flenski-Verbindung mit ihrem Flenski-Login** anlegen (Marcel, mit ihr zusammen). Module mindestens: „Revoke a Plan for a Profile“ und „Make an API Call“.
    - **Szenario kopieren** (Claude): Vorlage „🧘 ECRM: Flenski-Aktionen – Yoga by Lana“ duplizieren, ihre Verbindung eintragen, in den vier Filtern ihre App-ID statt Lanas eintragen, im Weg „Pläne“ ihre Projekt-ID in der Adresse, neuen Webhook anlegen, aktivieren.
